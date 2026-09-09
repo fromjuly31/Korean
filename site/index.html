@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="학생들과 함께 만드는 우리 반 우리말 사전">
+  <title>우리말 바로쓰기 | 참여형 국어 수업</title>
+  <style>
+    :root {
+      --primary: #315f5b;
+      --primary-dark: #244945;
+      --primary-soft: #e8f3ef;
+      --accent: #ee8065;
+      --accent-soft: #fff0ea;
+      --ink: #20302f;
+      --muted: #71807d;
+      --line: #e3e5df;
+      --surface: #fffefa;
+      --background: #f7f5ef;
+      --danger: #b8423f;
+      --success: #24715d;
+      --warning: #9b671d;
+      --shadow: 0 16px 42px rgba(48, 72, 68, .08);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--background); }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(246,190,150,.18), transparent 25%),
+        radial-gradient(circle at 91% 12%, rgba(163,207,191,.2), transparent 28%),
+        radial-gradient(circle at 82% 82%, rgba(202,187,230,.13), transparent 22%),
+        var(--background);
+      background-attachment: fixed;
+      font: 16px/1.65 Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+      word-break: keep-all; overflow-wrap: anywhere; overflow-x: hidden;
+    }
+    body.home-page {
+      background:
+        radial-gradient(circle at 86% 9%, rgba(178,205,191,.32), transparent 29%),
+        radial-gradient(circle at 4% 42%, rgba(238,188,107,.12), transparent 23%),
+        #f3f2ec;
+    }
+    #app { width: 100%; min-width: 0; }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: wait; opacity: .62; }
+    .hidden { display: none !important; }
+    .shell { width: min(1240px, calc(100% - 36px)); margin: 0 auto; padding: 30px 0 60px; }
+    .app-header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+    .header-actions { margin-left: auto; }
+    .brand-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; background: var(--primary); color: white; font-size: 25px; font-weight: 900; }
+    .app-header h1 { margin: 0; font-size: clamp(25px, 3vw, 32px); line-height: 1.25; letter-spacing: -.03em; }
+    .eyebrow { margin: 0 0 2px; color: var(--primary); font-size: 13px; font-weight: 800; letter-spacing: .08em; }
+    .admin-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 0 22px; padding: 7px; background: #e9ebf1; border-radius: 17px; }
+    .admin-nav.admin-nav-four { grid-template-columns: repeat(4, 1fr); }
+    .nav-btn { min-height: 52px; border: 0; border-radius: 12px; color: #50596b; background: transparent; font-weight: 800; font-size: 16px; }
+    .nav-btn.active { color: var(--primary); background: white; box-shadow: 0 3px 12px rgba(40, 50, 80, .08); }
+    .card { background: var(--surface); border: 1px solid rgba(215, 220, 230, .9); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .panel { padding: 24px; }
+    .hero { padding: 28px; margin-bottom: 20px; background: linear-gradient(135deg, #fff, #f0f4ff); }
+    .hero h2, .section-head h2 { margin: 0 0 7px; font-size: clamp(24px, 3vw, 30px); letter-spacing: -.03em; line-height: 1.3; }
+    .hero p, .section-head p { margin: 0; color: var(--muted); }
+    .section-head { display: flex; justify-content: space-between; gap: 18px; align-items: end; margin: 28px 0 14px; }
+    .section-head.compact { margin-top: 0; }
+    .actions { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 23px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 17px; border: 1px solid var(--line); border-radius: 12px; background: white; color: var(--ink); text-decoration: none; font-weight: 750; transition: transform .15s, box-shadow .15s, border-color .15s; }
+    .btn:hover { transform: translateY(-1px); border-color: #b9c0cd; box-shadow: 0 7px 18px rgba(30, 40, 70, .08); }
+    .btn-primary { border-color: var(--primary); background: var(--primary); color: white; }
+    .btn-primary:hover { border-color: var(--primary-dark); background: var(--primary-dark); }
+    .btn-danger { border-color: #f0c8ce; color: var(--danger); background: #fff8f9; }
+    .btn-soft { border-color: #d8e1ff; color: var(--primary); background: var(--primary-soft); }
+    .btn-lg { min-height: 54px; padding: 13px 21px; font-size: 17px; }
+    .btn-block { width: 100%; }
+    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .stat { padding: 18px; }
+    .stat span { display: block; color: var(--muted); font-size: 14px; font-weight: 700; }
+    .stat strong { display: block; margin-top: 5px; font-size: 27px; letter-spacing: -.04em; }
+    .charts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; }
+    .mini-chart { padding: 18px; }
+    .mini-chart h3 { margin: 0 0 14px; font-size: 16px; }
+    .bar-row { display: grid; grid-template-columns: minmax(60px, 1fr) 2fr auto; gap: 8px; align-items: center; margin: 10px 0; font-size: 13px; }
+    .bar-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-track { height: 8px; border-radius: 99px; background: #edf0f5; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: inherit; background: var(--primary); }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+    .search { flex: 1 1 260px; position: relative; }
+    .search input { padding-left: 43px; }
+    .search::before { content: "⌕"; position: absolute; left: 15px; top: 9px; color: var(--muted); font-size: 22px; }
+    .field, input[type="text"], input[type="email"], input[type="password"], input[type="search"], textarea, select {
+      width: 100%; min-height: 48px; border: 1px solid #cfd5df; border-radius: 12px; background: white; color: var(--ink); padding: 11px 13px; outline: 0;
+    }
+    textarea { min-height: 126px; resize: vertical; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(49, 87, 213, .13); }
+    label.field-label { display: block; margin: 16px 0 7px; font-weight: 800; }
+    .filter-group { display: flex; gap: 7px; flex-wrap: wrap; }
+    .filter-btn { min-height: 42px; border: 1px solid var(--line); border-radius: 99px; background: white; padding: 8px 15px; font-weight: 750; color: #4c5566; }
+    .filter-btn.active { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); }
+    .badge { display: inline-flex; align-items: center; min-height: 27px; padding: 3px 9px; border-radius: 99px; font-size: 13px; font-weight: 800; }
+    .badge-slang { color: #ad3544; background: #fff0f2; }
+    .badge-trend { color: #795000; background: #fff4d8; }
+    .badge-loan { color: #206359; background: #e9f8f4; }
+    .badge-approved { color: var(--success); background: #e8f7f1; }
+    .badge-pending { color: #6e7480; background: #eff1f4; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 900px; }
+    th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #eceef2; vertical-align: middle; }
+    th { color: #616a7c; background: #f8f9fb; font-size: 14px; }
+    tbody tr:hover { background: #fbfcff; }
+    td .inline-select { width: auto; min-width: 105px; min-height: 39px; padding: 6px 9px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .activity-card, .word-card, .dictionary-card { padding: 21px; }
+    .activity-card h3, .word-card h3, .dictionary-card h2 { margin: 7px 0 10px; font-size: 22px; line-height: 1.35; }
+    .meta-list { display: grid; gap: 9px; margin: 16px 0; }
+    .meta-list div { padding: 10px 12px; border-radius: 10px; background: #f7f8fa; }
+    .meta-list b { display: block; color: var(--muted); font-size: 13px; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .empty { padding: 40px 20px; text-align: center; color: var(--muted); border: 1px dashed #cfd4df; border-radius: var(--radius); background: rgba(255,255,255,.7); }
+    .student-shell { width: min(680px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 54px; font-size: 18px; }
+    .student-hero { padding: 25px; margin-bottom: 16px; }
+    .student-hero h1 { margin: 5px 0 10px; font-size: clamp(27px, 8vw, 34px); line-height: 1.25; letter-spacing: -.04em; }
+    .student-hero p { margin: 0; color: var(--muted); }
+    .student-card { padding: 22px; margin-bottom: 14px; }
+    .student-card h2 { margin: 0 0 10px; font-size: 23px; line-height: 1.35; }
+    .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .word-submit-row { display: grid; grid-template-columns: 140px minmax(0,1fr) auto; gap: 9px; align-items: stretch; }
+    .word-submit-row select { min-width: 0; }
+    .choice-btn { min-height: 56px; border: 2px solid #d7dbe3; border-radius: 13px; background: white; font-weight: 850; }
+    .choice-btn.active { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); box-shadow: inset 0 0 0 1px var(--primary); }
+    .star-row { display: flex; align-items: center; gap: 1px; margin: 9px 0 3px; }
+    .star { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: #c5cad3; font-size: 37px; line-height: 1; }
+    .star.on { color: #f2aa1b; }
+    .star:focus-visible { outline: 3px solid rgba(49,87,213,.35); border-radius: 9px; }
+    .rating-copy { color: var(--muted); font-size: 14px; }
+    .mine-label { display: inline-flex; color: var(--primary); background: var(--primary-soft); border-radius: 99px; padding: 3px 9px; font-size: 12px; font-weight: 850; }
+    .prompt { padding: 15px; margin: 14px 0; border-left: 4px solid var(--primary); border-radius: 4px 12px 12px 4px; background: var(--primary-soft); font-weight: 750; }
+    .modal-layer { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(20, 25, 36, .58); backdrop-filter: blur(4px); }
+    .modal-layer.qr-layer { background: rgba(20,25,36,.2); backdrop-filter: blur(1px); }
+    .modal { width: min(680px, 100%); max-height: calc(100vh - 40px); overflow: auto; border-radius: 20px; background: white; box-shadow: 0 25px 80px rgba(0,0,0,.25); }
+    .modal.wide { width: min(1040px, 100%); }
+    .modal.qr-modal { width: min(780px, calc(100vw - 40px)); }
+    .modal.qr-modal .modal-head { cursor: grab; user-select: none; }
+    .modal.qr-modal .modal-head:active { cursor: grabbing; }
+    .modal.is-draggable { position: fixed; margin: 0; }
+    .modal-head { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; gap: 15px; align-items: center; padding: 20px 22px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.96); }
+    .modal-head h2 { margin: 0; font-size: 23px; }
+    .icon-btn { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: white; font-size: 23px; }
+    .modal-body { padding: 22px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 9px; padding: 16px 22px 22px; }
+    .qr-box { display: grid; place-items: center; width: min(500px, 100%); min-height: 500px; margin: 0 auto 18px; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+    .qr-box img, .qr-box canvas { max-width: 100%; height: auto !important; }
+    .url-box { padding: 12px; border-radius: 10px; background: #f2f4f8; color: #4f5868; font-size: 13px; word-break: break-all; }
+    .drag-hint { margin: 0 0 13px; color: var(--muted); font-size: 12px; text-align: center; }
+    .qr-full .modal { width: min(94vw, 920px); }
+    .qr-full .qr-box { width: min(68vh, 720px); min-height: min(68vh, 720px); }
+    .confirm-copy { font-size: 18px; }
+    .toast-region { position: fixed; z-index: 90; right: 18px; bottom: 18px; display: grid; gap: 9px; width: min(360px, calc(100% - 36px)); }
+    .toast { padding: 14px 17px; border-radius: 12px; color: white; background: #303847; box-shadow: var(--shadow); animation: toast-in .2s ease-out; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    @keyframes toast-in { from { transform: translateY(9px); opacity: 0; } }
+    .loading-layer { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; background: rgba(245,246,249,.76); backdrop-filter: blur(2px); }
+    .loading-card { display: flex; gap: 13px; align-items: center; padding: 17px 21px; border-radius: 14px; background: white; box-shadow: var(--shadow); font-weight: 800; }
+    .spinner { width: 24px; height: 24px; border: 3px solid #dce3fa; border-top-color: var(--primary); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .login { width: min(480px, calc(100% - 30px)); margin: 10vh auto; padding: 30px; }
+    .login h1 { margin: 0 0 8px; font-size: 30px; }
+    .login p { color: var(--muted); }
+    .home-shell { width: min(1180px, calc(100% - 48px)); max-width: 100%; min-width: 0; margin: 0 auto; padding: 28px 0 34px; }
+    .home-topbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 54px; }
+    .home-identity { display: inline-flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; font-weight: 900; letter-spacing: -.035em; }
+    .metaphor-mark { position: relative; display: block; width: 38px; height: 38px; border-radius: 50%; background: #183f4a; box-shadow: inset 0 0 0 9px #dfe9e3; }
+    .metaphor-mark::before, .metaphor-mark::after { content: ""; position: absolute; border-radius: 50%; background: #e76c50; }
+    .metaphor-mark::before { width: 7px; height: 7px; right: 1px; top: 2px; }
+    .metaphor-mark::after { width: 4px; height: 4px; right: -7px; top: 0; background: #eebc6b; }
+    .home-meta { color: #7b817d; font-size: 12px; font-weight: 800; letter-spacing: .14em; }
+    .home-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(390px, .82fr); gap: clamp(46px, 7vw, 88px); align-items: center; min-height: 550px; padding: 54px 0 66px; }
+    .home-copy { min-width: 0; }
+    .home-copy .eyebrow { display: inline-flex; align-items: center; gap: 9px; color: #66726d; font-size: 12px; letter-spacing: .13em; }
+    .home-copy .eyebrow::before { content: ""; width: 22px; height: 1px; background: #e76c50; }
+    .home-hero h1 { max-width: 670px; margin: 20px 0 24px; color: #16282d; font-size: clamp(48px, 6.2vw, 76px); font-weight: 820; line-height: 1.08; letter-spacing: -.065em; }
+    .home-hero h1 em { color: #d9583f; font-family: Georgia, "Noto Serif KR", serif; font-weight: 500; }
+    .home-hero .home-lead { max-width: 580px; margin: 0; color: #586763; font-size: clamp(17px, 1.8vw, 20px); line-height: 1.8; }
+    .home-principles { display: flex; gap: 24px; margin-top: 32px; color: #243b40; font-size: 13px; font-weight: 800; }
+    .home-principles span { display: inline-flex; align-items: center; gap: 8px; }
+    .home-principles i { width: 6px; height: 6px; border-radius: 50%; background: #e76c50; box-shadow: 0 0 0 5px rgba(231,108,80,.1); }
+    .home-visual { position: relative; width: 100%; max-width: 500px; justify-self: end; aspect-ratio: 1 / .92; overflow: hidden; border-radius: 34px; background: #17383e; box-shadow: 0 30px 75px rgba(23,56,62,.18); isolation: isolate; }
+    .home-visual::before { content: ""; position: absolute; width: 330px; height: 330px; right: -100px; top: -110px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; box-shadow: 0 0 0 55px rgba(255,255,255,.018), 0 0 0 110px rgba(255,255,255,.012); }
+    .home-visual::after { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .35; background-image: radial-gradient(rgba(255,255,255,.24) .7px, transparent .7px); background-size: 17px 17px; -webkit-mask-image: linear-gradient(to bottom right, black, transparent 72%); mask-image: linear-gradient(to bottom right, black, transparent 72%); }
+    .flow-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .flow-line { fill: none; stroke: rgba(222,236,228,.62); stroke-width: 1.4; }
+    .flow-line.secondary { stroke: rgba(222,236,228,.18); stroke-width: 1; }
+    .flow-orbit { fill: none; stroke: rgba(238,188,107,.55); stroke-width: 1; stroke-dasharray: 4 7; }
+    .flow-seed { fill: #e76c50; }
+    .flow-seed.glow { filter: drop-shadow(0 0 16px rgba(231,108,80,.85)); }
+    .flow-stone { fill: #f1c27a; }
+    .visual-index { position: absolute; left: 28px; top: 27px; color: rgba(235,242,237,.62); font-size: 10px; font-weight: 800; letter-spacing: .18em; writing-mode: vertical-rl; }
+    .visual-caption { position: absolute; left: 30px; right: 30px; bottom: 27px; display: flex; justify-content: space-between; align-items: end; gap: 20px; color: #f1f4ef; }
+    .visual-caption strong { display: block; max-width: 255px; font-size: 20px; line-height: 1.45; letter-spacing: -.025em; }
+    .visual-caption span { color: rgba(241,244,239,.55); font-size: 11px; letter-spacing: .13em; }
+    .home-entry-area { padding: 34px 0 10px; border-top: 1px solid #d8d9d1; }
+    .entry-heading { display: flex; justify-content: space-between; align-items: end; gap: 30px; margin-bottom: 18px; }
+    .entry-heading p { margin: 0; color: #d9583f; font-size: 12px; font-weight: 900; letter-spacing: .12em; }
+    .entry-heading h2 { max-width: 480px; margin: 5px 0 0; font-size: clamp(26px, 3vw, 36px); line-height: 1.25; letter-spacing: -.045em; }
+    .entry-heading > span { max-width: 330px; color: #727b77; font-size: 14px; text-align: right; }
+    .home-entry-grid { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; border-radius: 28px; background: #e7e7df; }
+    .home-entry-card { position: relative; min-width: 0; padding: clamp(24px, 3.2vw, 34px); overflow: hidden; border: 0; border-radius: 19px; box-shadow: none; }
+    .home-entry-card:first-child { background: #fffefa; }
+    .home-entry-card:last-child { background: #f8f7f1; }
+    .entry-card-top { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .entry-number { color: #9da39f; font: 700 11px/1 Georgia, serif; letter-spacing: .12em; }
+    .entry-symbol { position: relative; display: block; width: 36px; height: 18px; border-top: 1px solid #a8b4af; }
+    .entry-symbol::before, .entry-symbol::after { content: ""; position: absolute; top: -4px; width: 7px; height: 7px; border-radius: 50%; }
+    .entry-symbol::before { left: 0; background: #e76c50; }
+    .entry-symbol::after { right: 0; background: #17383e; }
+    .home-entry-card h2 { margin: 18px 0 5px; font-size: 25px; letter-spacing: -.04em; }
+    .home-entry-card > p { min-height: 52px; margin: 0 0 17px; color: var(--muted); }
+    .home-entry-card .btn { border-radius: 11px; }
+    .home-entry-card:last-child .btn { border-color: #c8ccc7; background: transparent; }
+    .login-choice-grid { display: grid; width: 100%; min-width: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+    .role-card { position: relative; min-width: 0; padding: clamp(24px, 4vw, 36px); overflow: hidden; }
+    .role-kicker { display: inline-flex; padding: 5px 9px; border-radius: 6px; color: var(--primary); background: var(--primary-soft); font-size: 12px; font-weight: 900; letter-spacing: .08em; }
+    .role-card h2 { position: relative; margin: 12px 0 6px; font-size: 27px; letter-spacing: -.035em; }
+    .role-card > p { position: relative; margin: 0 0 20px; color: var(--muted); }
+    .class-code-input { text-align: center; text-transform: uppercase; letter-spacing: .18em; font-size: 22px; font-weight: 900; }
+    .class-code-input::placeholder { color: #bcc2bf; opacity: 1; letter-spacing: .03em; font-size: 15px; font-weight: 600; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .home-footer { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-top: 22px; padding: 0 4px; color: var(--muted); font-size: 13px; }
+    .text-link { color: var(--muted); text-decoration: none; border-bottom: 1px solid #bfc4bd; }
+    .teacher-choice { width: min(980px, calc(100% - 30px)); margin: 0 auto; padding: 42px 0 64px; }
+    .teacher-choice-head { margin-bottom: 20px; padding: 28px; }
+    .teacher-choice-head h1 { margin: 4px 0 7px; }
+    .class-summary { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; padding: 18px 22px; margin-bottom: 18px; background: #173f49; color: white; border-radius: var(--radius); }
+    .class-summary strong { font-size: 20px; }
+    .class-summary .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .class-code-badge { display: inline-flex; padding: 7px 12px; border-radius: 8px; background: #fff; color: var(--primary); font-size: 18px; font-weight: 950; letter-spacing: .15em; }
+    .stage-panel { padding: 22px; margin-bottom: 18px; }
+    .stage-panel h2 { margin: 0; }
+    .stage-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; margin-top: 15px; }
+    .stage-btn { min-height: 86px; padding: 12px 8px; border: 1px solid var(--line); border-radius: 13px; background: #fff; color: var(--ink); font-weight: 800; }
+    .stage-btn.active { border-color: var(--accent); background: var(--accent-soft); color: #8f2e25; box-shadow: inset 0 0 0 1px var(--accent); }
+    .waiting-panel { text-align: center; padding: 48px 25px; }
+    .waiting-glyph { display: grid; place-items: center; width: 92px; height: 92px; margin: 0 auto 18px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); font: 900 42px/1 Georgia, serif; }
+    .error-panel { width: min(680px, calc(100% - 30px)); margin: 12vh auto; padding: 28px; }
+    .dictionary-cover { text-align: center; padding: 36px 24px; margin-bottom: 18px; background: linear-gradient(140deg, #223b8b, var(--primary)); color: white; }
+    .dictionary-cover h1 { margin: 0; font-family: Georgia, "Noto Serif KR", serif; font-size: clamp(30px, 6vw, 46px); }
+    .dictionary-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .dictionary-card { break-inside: avoid; }
+    .dictionary-card h2 { font-family: Georgia, "Noto Serif KR", serif; font-size: 27px; }
+    .definition { display: grid; gap: 13px; margin-top: 17px; }
+    .definition div { border-top: 1px solid #eceef2; padding-top: 11px; }
+    .definition b { display: block; margin-bottom: 2px; color: var(--primary); font-size: 14px; }
+    .suggestions { display: flex; gap: 7px; flex-wrap: wrap; margin: 14px 0; }
+    .suggestion-chip { border: 1px solid #d8dff4; border-radius: 99px; background: #f5f7ff; color: #354c9d; padding: 7px 11px; font-weight: 750; }
+    .projector { font-size: 20px; }
+    .projector .result-example { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding: 20px; margin: 12px 0; border-radius: 14px; background: #f5f7fb; }
+    .modal:fullscreen { width: 100%; height: 100%; max-height: none; border-radius: 0; padding: 3vw; overflow: auto; }
+    .modal:fullscreen .modal-head, .modal:fullscreen .modal-foot, .modal:fullscreen .toolbar { display: none; }
+    .modal:fullscreen .modal-body { padding: 0; }
+    .modal:fullscreen .projector { font-size: clamp(22px, 2.4vw, 34px); }
+    .help { color: var(--muted); font-size: 14px; }
+    .count { color: var(--muted); font-weight: 700; }
+
+    /* 차시형 교사·학생 화면 */
+    .teacher-workspace { position: relative; }
+    .teacher-choice-head, .login { border-color: rgba(255,255,255,.92); background: linear-gradient(145deg,#fffefa,#f0f7f3); }
+    .student-shell .class-summary { color: var(--ink); border: 1px solid rgba(255,255,255,.9); background: rgba(255,254,250,.88); box-shadow: 0 10px 30px rgba(48,72,68,.07); backdrop-filter: blur(12px); }
+    .student-shell .class-summary .eyebrow { color: var(--accent) !important; }
+    .student-shell .class-code-badge { background: var(--primary-soft); color: var(--primary); }
+    .student-shell .class-summary .btn { min-height: 38px; background: #fff; }
+    .teacher-top {
+      display: flex; align-items: center; gap: 15px; padding: 17px 19px;
+      border: 1px solid rgba(255,255,255,.9); border-radius: 23px;
+      background: rgba(255,254,250,.9); box-shadow: 0 12px 34px rgba(48,72,68,.07);
+      backdrop-filter: blur(14px);
+    }
+    .teacher-top .mini-mark { display: grid; place-items: center; flex: 0 0 43px; width: 43px; height: 43px; border-radius: 15px; background: #315f5b; color: #fff; font-size: 18px; box-shadow: inset -7px -7px 0 rgba(0,0,0,.06); }
+    .teacher-top h1 { margin: 0; font-size: 20px; letter-spacing: -.035em; }
+    .teacher-top p { margin: 1px 0 0; color: var(--muted); font-size: 13px; }
+    .teacher-top-actions { display: flex; gap: 7px; margin-left: auto; }
+    .teacher-top-actions .btn { min-height: 39px; padding: 7px 12px; font-size: 13px; }
+    .code-button { border-color: #dce5e1; background: #f3f8f5; color: var(--primary); letter-spacing: .08em; }
+    .lesson-tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin: 17px 0; }
+    .lesson-tab { position: relative; min-height: 83px; padding: 15px 16px; overflow: hidden; border: 1px solid #e4e5df; border-radius: 19px; background: rgba(255,254,250,.74); color: #596663; text-align: left; transition: .18s ease; }
+    .lesson-tab::after { content: ""; position: absolute; width: 35px; height: 35px; right: -12px; bottom: -13px; border-radius: 50%; background: var(--lesson-color, #b9d8cb); opacity: .34; }
+    .lesson-tab b { display: block; margin-bottom: 5px; color: var(--lesson-color, var(--primary)); font-size: 11px; letter-spacing: .09em; }
+    .lesson-tab span { display: block; font-size: 14px; font-weight: 850; line-height: 1.35; }
+    .lesson-tab:hover { transform: translateY(-2px); border-color: #cdd8d3; background: #fff; }
+    .lesson-tab.active { border-color: var(--lesson-color, var(--primary)); background: #fff; box-shadow: 0 10px 28px rgba(48,72,68,.09); color: var(--ink); }
+    .lesson-tab:nth-child(1) { --lesson-color: #e6775d; }
+    .lesson-tab:nth-child(2) { --lesson-color: #4b837c; }
+    .lesson-tab:nth-child(3) { --lesson-color: #9a76bd; }
+    .lesson-tab:nth-child(4) { --lesson-color: #b78635; }
+    .lesson-hero { position: relative; display: flex; align-items: center; gap: 17px; min-height: 128px; padding: 25px 27px; overflow: hidden; border: 1px solid rgba(255,255,255,.88); border-radius: 27px; background: linear-gradient(135deg,#fffefa,#f1f7f3); box-shadow: var(--shadow); }
+    .lesson-hero::before, .lesson-hero::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
+    .lesson-hero::before { width: 120px; height: 120px; right: 8%; top: -78px; border: 18px solid rgba(238,128,101,.09); }
+    .lesson-hero::after { width: 8px; height: 8px; right: 5%; bottom: 23px; background: #ef927b; box-shadow: 18px -13px 0 #9ecdbb, 39px 5px 0 #d2b9e5; }
+    .lesson-number { display: grid; place-items: center; flex: 0 0 58px; width: 58px; height: 58px; border-radius: 19px 19px 19px 7px; background: var(--accent-soft); color: var(--accent); font: 800 15px/1 Georgia,serif; }
+    .lesson-copy { position: relative; z-index: 1; min-width: 0; }
+    .lesson-copy h2 { margin: 0 0 4px; font-size: clamp(22px,3vw,29px); letter-spacing: -.045em; }
+    .lesson-copy p { margin: 0; color: var(--muted); }
+    .lesson-actions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
+    .live-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 7px 12px; border-radius: 99px; background: #e8f5ef; color: #26705b; font-size: 13px; font-weight: 850; }
+    .live-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #39a37e; box-shadow: 0 0 0 5px rgba(57,163,126,.11); }
+    .lesson-body { margin-top: 14px; }
+    .simple-panel { padding: 8px; }
+    .simple-list { display: grid; gap: 7px; }
+    .simple-row { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; align-items: center; min-height: 67px; padding: 11px 12px 11px 17px; border: 1px solid #ebece6; border-radius: 16px; background: #fff; }
+    .simple-row:hover { border-color: #d6dfda; background: #fffefc; }
+    .simple-word { min-width: 0; font-size: 18px; font-weight: 850; letter-spacing: -.025em; }
+    .simple-word small { display: block; margin-top: 1px; color: var(--muted); font-size: 12px; font-weight: 650; }
+    .score-pill { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; min-height: 34px; padding: 6px 10px; border-radius: 99px; background: #fff7df; color: #9b6a14; font-size: 13px; font-weight: 900; }
+    .score-pill .score-star { color: #e5a62a; font-size: 16px; }
+    .select-toggle { min-height: 36px; padding: 6px 11px; border: 1px solid #ded7e8; border-radius: 11px; background: #faf7fd; color: #785a98; font-size: 12px; font-weight: 850; }
+    .select-toggle.selected { border-color: #a989c6; background: #eee5f5; }
+    .icon-danger { min-width: 35px; min-height: 35px; padding: 5px 8px; border-color: transparent; background: transparent; color: #b97065; font-size: 12px; }
+    .lesson-tools { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 18px 2px 10px; }
+    .lesson-tools h3 { margin: 0; font-size: 18px; }
+    .lesson-tools p { margin: 1px 0 0; color: var(--muted); font-size: 13px; }
+    .linked-words { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 18px; align-items: center; margin-top: 14px; padding: 16px 18px; }
+    .linked-words p { margin: 0 0 2px; }
+    .linked-word-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+    .linked-word-chips > span { padding: 6px 9px; border-radius: 99px; background: #f1f6f3; color: #315f5b; font-size: 13px; font-weight: 800; }
+    .linked-word-chips small { color: #9b6a14; }
+    .context-grid, .refine-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .context-card, .refine-card { padding: 21px; }
+    .context-card h3, .refine-card h3 { margin: 5px 0 10px; font-size: 23px; }
+    .context-prompt { padding: 14px 15px; border-radius: 14px; background: #eef6f2; color: #365a55; }
+    .context-word-list { display: grid; gap: 7px; margin: 12px 0; }
+    .context-word-result { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 9px 11px; border: 1px solid #e3e8e4; border-radius: 12px; background: #fff; color: var(--ink); text-align: left; }
+    .context-word-result span { font-weight: 850; }
+    .context-word-result small { color: var(--muted); }
+    .word-check-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; max-height: 310px; overflow: auto; padding: 4px; }
+    .word-check { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 9px; align-items: center; min-height: 48px; padding: 10px 12px; border: 1px solid #e2e5df; border-radius: 13px; background: #fafbf8; cursor: pointer; }
+    .word-check.selected { border-color: #75a69b; background: #edf7f2; box-shadow: inset 0 0 0 1px #75a69b; }
+    .word-check span { font-weight: 800; }
+    .word-check small { color: var(--muted); }
+    .selectable-card { transition: .18s ease; }
+    .selectable-card.selected { border-color: #b79acb; background: linear-gradient(145deg,#fff,#faf6fc); box-shadow: 0 12px 30px rgba(111,81,144,.1); }
+    .suggestion-list { display: grid; gap: 7px; margin: 13px 0 0; padding: 0; list-style: none; }
+    .suggestion-list li { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 11px 12px; border-radius: 12px; background: #faf8f4; }
+    .suggestion-list strong { display: block; color: #6f5190; }
+    .suggestion-copy { min-width: 0; }
+    .suggestion-copy > span { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
+    .student-shell { width: min(720px, calc(100% - 28px)); }
+    .student-hero { position: relative; overflow: hidden; border-color: #fff; background: linear-gradient(135deg,#fffefa,#edf6f2); }
+    .student-hero::after { content: "✦"; position: absolute; right: 22px; top: 15px; color: rgba(238,128,101,.38); font-size: 26px; }
+    .student-card { border-color: rgba(255,255,255,.95); }
+    .star-row { flex-wrap: wrap; }
+    .star { width: 40px; height: 40px; font-size: 32px; }
+    .rating-summary { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-top: 9px; }
+    .intent-copy { margin: 13px 0 7px; padding: 12px 14px; border-left: 3px solid #bca5cf; border-radius: 4px 13px 13px 4px; background: #faf7fc; color: #665c6c; line-height: 1.65; }
+    .intent-copy b { display: block; margin-bottom: 2px; color: #785a98; font-size: 12px; letter-spacing: .04em; }
+    .suggestion-rating-list { display: grid; gap: 12px; }
+    .suggestion-rating-card h2 { margin: 3px 0 0; color: #674c82; }
+    .context-student-groups { display: grid; gap: 14px; }
+    .context-student-group h2 { margin-bottom: 8px; }
+    .context-student-words { display: grid; gap: 8px; margin-top: 13px; }
+    .context-student-word { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 55px; padding: 11px 14px; border: 1px solid #dfe6e1; border-radius: 15px; background: #fff; color: var(--ink); text-align: left; }
+    .context-student-word > span { font-size: 18px; font-weight: 900; }
+    .context-student-word small { color: var(--muted); }
+    .context-student-word.done { border-color: #93bbaf; background: #f0f8f4; }
+    .dictionary-choice-list { display: grid; gap: 7px; margin: 14px 0; }
+    .dictionary-choice { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #e3dbea; border-radius: 12px; background: #faf7fc; color: #6f5190; text-align: left; }
+    .dictionary-choice span { color: #9b6a14; font-size: 12px; font-weight: 800; }
+    .dictionary-choice.selected { border-color: #9a76bd; background: #eee5f5; box-shadow: inset 0 0 0 1px #9a76bd; }
+    .pledge-heading { margin-top: 30px; }
+    .pledge-form { margin-bottom: 12px; background: linear-gradient(145deg,#fffefa,#f8f3fa); }
+    .pledge-list { display: grid; gap: 10px; margin-bottom: 20px; }
+    .pledge-comment { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 13px; align-items: start; padding: 17px 18px; }
+    .pledge-comment p { margin: 2px 0 0; line-height: 1.7; }
+    .pledge-comment .eyebrow { margin: 0 0 3px; color: #6f5190; }
+    .pledge-avatar { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 14px 14px 14px 5px; background: #eee6f4; color: #75568f; font: 800 12px/1 Georgia,serif; }
+    .dictionary-cover { position: relative; overflow: hidden; background: linear-gradient(140deg,#365f5a,#477970); }
+    .dictionary-cover::after { content: "가 · 나 · 다"; position: absolute; right: 24px; bottom: 11px; color: rgba(255,255,255,.15); font: 700 30px Georgia,serif; }
+
+    @media (max-width: 980px) {
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .charts-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .home-hero { grid-template-columns: minmax(0, 1fr) minmax(330px, .8fr); gap: 34px; }
+    }
+    @media (max-width: 650px) {
+      .shell { width: min(100% - 22px, 100%); padding-top: 14px; }
+      .app-header { margin-bottom: 13px; }
+      .brand-mark { width: 45px; height: 45px; }
+      .admin-nav { grid-template-columns: 1fr; gap: 4px; }
+      .admin-nav.admin-nav-four { grid-template-columns: 1fr; }
+      .nav-btn { min-height: 45px; }
+      .hero, .panel { padding: 19px; }
+      .hero-actions, .actions, .card-actions { flex-direction: column; align-items: stretch; }
+      .hero-actions .btn, .actions .btn, .card-actions .btn { width: 100%; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .charts-grid, .grid, .dictionary-list, .login-choice-grid, .form-row, .word-check-grid { grid-template-columns: 1fr; }
+      .word-submit-row { grid-template-columns: 1fr; }
+      .home-shell { width: calc(100% - 24px); padding-top: 14px; }
+      .home-topbar { min-height: 45px; }
+      .linked-words { grid-template-columns: 1fr; }
+      .home-meta { display: none; }
+      .home-hero, .role-card, .home-entry-card { width: 100%; max-width: 100%; }
+      .home-hero { grid-template-columns: minmax(0, 1fr); gap: 34px; min-height: auto; padding: 58px 6px 48px; }
+      .home-hero h1 { font-size: clamp(43px, 13vw, 62px); }
+      .home-hero .home-lead { max-width: 100%; word-break: keep-all; overflow-wrap: anywhere; }
+      .home-principles { gap: 16px; margin-top: 25px; font-size: 12px; }
+      .home-visual { max-width: none; border-radius: 25px; }
+      .visual-caption { left: 22px; right: 22px; bottom: 21px; }
+      .visual-caption strong { max-width: 220px; font-size: 17px; }
+      .home-entry-area { padding-top: 28px; }
+      .entry-heading { display: block; }
+      .entry-heading > span { display: block; margin-top: 10px; text-align: left; }
+      .home-entry-grid { grid-template-columns: minmax(0, 1fr); padding: 8px; border-radius: 22px; }
+      .home-entry-card { padding: 25px 21px; }
+      .home-entry-card > p { min-height: 0; }
+      .stage-grid { grid-template-columns: repeat(2, 1fr); }
+      .home-footer { align-items: flex-start; flex-direction: column; }
+      .teacher-top { align-items: flex-start; flex-wrap: wrap; }
+      .teacher-top-actions { width: 100%; margin-left: 0; }
+      .teacher-top-actions .btn { flex: 1; }
+      .lesson-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .lesson-tab { min-height: 72px; }
+      .lesson-hero { align-items: flex-start; flex-direction: column; padding: 22px; }
+      .lesson-actions { justify-content: flex-start; width: 100%; margin-left: 0; }
+      .lesson-actions .btn { flex: 1; }
+      .simple-row { grid-template-columns: minmax(0,1fr) auto; }
+      .simple-row .row-actions { grid-column: 1 / -1; }
+      .context-grid, .refine-grid { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; }
+      .choice-grid { grid-template-columns: 1fr; }
+      .student-shell { width: min(100% - 20px, 100%); padding-top: 10px; }
+      .student-card, .student-hero { padding: 19px; }
+      .modal-layer { padding: 8px; }
+      .modal { max-height: calc(100vh - 16px); border-radius: 16px; }
+      .modal-head, .modal-body { padding: 17px; }
+      .modal-foot { padding: 12px 17px 17px; flex-direction: column-reverse; }
+      .modal-foot .btn { width: 100%; }
+      .qr-box { min-height: 280px; }
+    }
+    @media print {
+      @page { size: A4; margin: 18mm 15mm; }
+      body { background: white; color: #111; font-size: 11pt; }
+      .no-print, .admin-nav, .app-header, .toolbar, button, .toast-region, .modal-layer, .loading-layer { display: none !important; }
+      .shell, .student-shell { width: 100%; margin: 0; padding: 0; }
+      .dictionary-cover { color: #111; background: none; border: 2px solid #222; box-shadow: none; }
+      .dictionary-list { display: block; }
+      .dictionary-card { margin: 0 0 10mm; box-shadow: none; border: 1px solid #aaa; break-inside: avoid; page-break-inside: avoid; }
+      .badge { border: 1px solid #777; color: #111; background: white; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app"></main>
+  <div id="modalRoot"></div>
+  <div id="loading" class="loading-layer hidden" role="status" aria-live="polite"><div class="loading-card"><span class="spinner"></span><span id="loadingText">불러오는 중...</span></div></div>
+  <div id="toasts" class="toast-region" aria-live="polite"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./config.js"></script>
+  <script src="./supabase-api.js"></script>
+  <script>
+    'use strict';
+    const query = new URLSearchParams(location.search);
+    const studentActivityViews = ['submit', 'rate', 'context', 'wordmaking', 'dictionary'];
+    const allowedViews = ['home', 'student', 'teacher', 'admin'];
+    const requestedView = query.get('view') || 'home';
+    const normalizedView = studentActivityViews.includes(requestedView) ? 'student' : requestedView;
+    const CONFIG = Object.freeze(Object.assign({}, window.APP_CONFIG || {}, {
+      view: allowedViews.includes(normalizedView) ? normalizedView : 'home',
+      taskId: String(query.get('taskId') || '').slice(0, 80),
+      wordId: String(query.get('wordId') || '').slice(0, 80),
+      classCode: String(query.get('code') || '').replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 12),
+      baseUrl: location.origin + location.pathname
+    }));
+    const CATEGORIES = ['비속어', '유행어', '외래어'];
+    const CLASS_STAGES = [
+      { id: 'waiting', label: '수업 대기' },
+      { id: 'submit', label: '1차시 · 우리 반 언어 수집하기' },
+      { id: 'rate', label: '1차시 · 우리 반 언어 수집하기' },
+      { id: 'context', label: '2차시 · 언어 사용 맥락 고려하기' },
+      { id: 'wordmaking', label: '3차시 · 우리말 순화하기' },
+      { id: 'dictionary', label: '4차시 · 우리 반 우리말 사전 만들기' }
+    ];
+    const state = {
+      anonId: getAnonId(),
+      adminToken: sessionStorage.getItem('koreanClassAdminToken') || '',
+      teacherToken: sessionStorage.getItem('koreanClassTeacherToken') || '',
+      teacherClasses: [],
+      activeClass: null,
+      classInfo: null,
+      stageTimer: null,
+      teacherTimer: null,
+      tab: 'words',
+      dashboard: null,
+      wordFilter: '전체', wordSearch: '',
+      makingFilter: '전체', makingSearch: '',
+      dictionaryFilter: '전체', dictionarySearch: '',
+      contextData: null,
+      contextLesson: null,
+      selectedContextTask: null,
+      contextShowRatings: false,
+      selectedMakingWord: null,
+      makingWords: [],
+      wordmakingWorkspace: [],
+      publishedDictionary: [],
+      classPledges: []
+    };
+
+    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        const layer = document.querySelector('.modal-layer');
+        if (layer) layer.classList.remove('qr-full');
+      }
+    });
+
+    async function boot() {
+      try {
+        if (CONFIG.view === 'home') return renderHomeView();
+        await AppApi.init(CONFIG.view);
+        if (CONFIG.view === 'student') return enterStudentPortal(CONFIG.classCode || localStorage.getItem('koreanClassCode') || '');
+        if (CONFIG.view === 'teacher') {
+          const savedToken = await AppApi.getTeacherToken();
+          if (savedToken) {
+            state.teacherToken = savedToken;
+            sessionStorage.setItem('koreanClassTeacherToken', savedToken);
+            return loadTeacherPortal();
+          }
+          return renderTeacherEntry();
+        }
+        if (CONFIG.view === 'admin') {
+          const savedToken = await AppApi.getAdminToken();
+          if (savedToken) {
+            state.adminToken = savedToken;
+            sessionStorage.setItem('koreanClassAdminToken', savedToken);
+          }
+          return renderAdminEntry();
+        }
+        renderError('지원하지 않는 화면입니다.');
+      } catch (error) {
+        renderError(error && error.message ? error.message : String(error));
+      }
+    }
+
+    function getAnonId() {
+      let id = localStorage.getItem('koreanClassAnonId');
+      if (/^anon_[a-z0-9-]{12,80}$/i.test(id || '')) return id;
+      const random = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID().replace(/-/g, '')
+        : (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
+      id = 'anon_' + random;
+      localStorage.setItem('koreanClassAnonId', id);
+      return id;
+    }
+
+    function api(name, ...args) {
+      return AppApi.call(name, ...args);
+    }
+
+    function esc(value) {
+      return String(value == null ? '' : value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+    }
+    function attr(value) { return esc(value).replace(/`/g, '&#96;'); }
+    function jsArg(value) { return esc(JSON.stringify(String(value == null ? '' : value))); }
+    function categoryClass(category) { return category === '비속어' ? 'badge-slang' : category === '외래어' ? 'badge-loan' : 'badge-trend'; }
+    function badge(category) { return `<span class="badge ${categoryClass(category)}">${esc(category)}</span>`; }
+    function formatScore(value) { return Number(value) ? Number(value).toFixed(1) : '-'; }
+    function setApp(html) { document.getElementById('app').innerHTML = html; }
+    function showLoading(text) { document.getElementById('loadingText').textContent = text || '불러오는 중...'; document.getElementById('loading').classList.remove('hidden'); }
+    function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
+    function toast(message, type) {
+      const item = document.createElement('div');
+      item.className = 'toast ' + (type || ''); item.textContent = message;
+      document.getElementById('toasts').appendChild(item);
+      setTimeout(() => item.remove(), 3300);
+    }
+    function friendlyError(error) {
+      const message = error && error.message ? error.message : '요청을 처리하지 못했습니다.';
+      if (/인증이 만료/.test(message)) {
+        if (CONFIG.view === 'admin') {
+          sessionStorage.removeItem('koreanClassAdminToken'); state.adminToken = '';
+          renderAdminEntry();
+        } else if (CONFIG.view === 'teacher') {
+          sessionStorage.removeItem('koreanClassTeacherToken'); state.teacherToken = '';
+          renderTeacherEntry();
+        }
+      }
+      toast(message, 'error');
+      return message;
+    }
+    function setButtonBusy(button, busy, label) {
+      if (!button) return;
+      if (busy) { button.dataset.originalText = button.textContent; button.disabled = true; button.textContent = label || '저장 중...'; }
+      else { button.disabled = false; button.textContent = button.dataset.originalText || button.textContent; }
+    }
+
+    function studentHeader(title, description) {
+      const room = state.classInfo;
+      const roomLine = room ? `<div class="class-summary no-print" style="margin-bottom:12px"><div><p class="eyebrow" style="color:#f0b9aa">참여 중인 클래스</p><strong>${esc(room.school)} · ${esc(room.grade)} ${esc(room.className)}</strong></div><span class="class-code-badge">${esc(room.classCode)}</span><div class="header-actions"><button class="btn" onclick="leaveStudentClass()">나가기</button></div></div>` : '';
+      return `<div class="student-shell">${roomLine}<header class="student-hero card"><p class="eyebrow">함께 살피는 우리말</p><h1>${esc(title)}</h1><p>${esc(description || '')}</p></header><div id="studentContent"></div></div>`;
+    }
+
+    function renderHomeView() {
+      document.body.classList.add('home-page');
+      setApp(`<div class="home-shell">
+        <nav class="home-topbar" aria-label="시작 화면">
+          <a class="home-identity" href="${attr(CONFIG.baseUrl)}"><span class="metaphor-mark" aria-hidden="true"></span><span>우리말 바로쓰기</span></a>
+          <span class="home-meta">PARTICIPATORY LANGUAGE CLASS</span>
+        </nav>
+        <header class="home-hero">
+          <div class="home-copy">
+            <p class="eyebrow">COLLECT · CONNECT · GROW</p>
+            <h1>작은 생각들이 만나<br><em>새로운 흐름이</em><br>됩니다.</h1>
+            <p class="home-lead">교실에서 스쳐 지나가던 순간을 발견하고, 서로의 시선을 연결해 더 나은 선택을 함께 만들어 갑니다.</p>
+            <div class="home-principles" aria-label="수업 과정"><span><i></i>발견</span><span><i></i>연결</span><span><i></i>변화</span></div>
+          </div>
+          <div class="home-visual" role="img" aria-label="여러 생각이 연결되어 하나의 흐름이 되는 모습을 표현한 추상 그래픽">
+            <span class="visual-index">A SHARED FLOW</span>
+            <svg class="flow-art" viewBox="0 0 500 460" role="img" aria-hidden="true">
+              <path class="flow-line secondary" d="M-65 378 C52 294 111 370 207 299 S350 105 565 188"/>
+              <path class="flow-line" d="M-45 344 C72 262 128 343 220 268 S363 91 553 166"/>
+              <path class="flow-line secondary" d="M-38 313 C83 232 151 316 239 238 S380 77 548 129"/>
+              <ellipse class="flow-orbit" cx="329" cy="194" rx="124" ry="83" transform="rotate(-29 329 194)"/>
+              <circle class="flow-seed" cx="76" cy="295" r="7"/>
+              <circle class="flow-stone" cx="170" cy="299" r="4"/>
+              <circle class="flow-seed" cx="239" cy="252" r="5"/>
+              <circle class="flow-stone" cx="308" cy="184" r="4"/>
+              <circle class="flow-seed glow" cx="390" cy="139" r="12"/>
+              <circle class="flow-line secondary" cx="390" cy="139" r="31"/>
+            </svg>
+            <div class="visual-caption"><strong>각자의 발견이 모여<br>하나의 흐름이 되는 순간</strong><span>01—03</span></div>
+          </div>
+        </header>
+        <section class="home-entry-area" aria-label="역할별 입장">
+          <div class="entry-heading"><div><p>ENTER THE CLASS</p><h2>어떤 방식으로 참여하시나요?</h2></div><span>학생은 클래스 코드로, 교사는 부여받은 교사 코드로 시작합니다.</span></div>
+          <div class="home-entry-grid">
+          <form id="studentEntryForm" class="home-entry-card card">
+            <div class="entry-card-top"><span class="entry-number">01 / STUDENT</span><span class="entry-symbol" aria-hidden="true"></span></div>
+            <h2>학생으로 입장</h2><p>선생님에게 받은 클래스 코드를 입력하세요.</p>
+            <label class="field-label" for="homeClassCode">클래스 코드</label>
+            <input id="homeClassCode" class="class-code-input" type="text" inputmode="text" minlength="4" maxlength="12" autocomplete="off" placeholder="예: HANGUL1" required>
+            <button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:14px">수업 참여하기</button>
+          </form>
+          <form id="teacherEntryForm" class="home-entry-card card">
+            <div class="entry-card-top"><span class="entry-number">02 / TEACHER</span><span class="entry-symbol" aria-hidden="true"></span></div>
+            <h2>교사로 로그인</h2><p>부여받은 교사 코드를 입력해 클래스를 개설하거나 입장하세요.</p>
+            <label class="field-label" for="homeTeacherCode">교사 코드</label><input id="homeTeacherCode" type="password" autocomplete="off" placeholder="교사 코드를 입력하세요" required>
+            <button class="btn btn-lg btn-block" type="submit" style="margin-top:14px">교사 로그인</button>
+            <button class="btn btn-soft btn-block" type="button" style="margin-top:9px" onclick="loginTeacherForRecovery('homeTeacherCode',this)">클래스 코드 찾기</button>
+          </form>
+          </div>
+        </section>
+        <footer class="home-footer"><span>학생은 개인정보 입력 없이 익명으로 참여합니다.</span><a class="text-link" href="${attr(appUrl('admin'))}">시스템 관리자</a></footer>
+      </div>`);
+      const codeInput = document.getElementById('homeClassCode');
+      codeInput.addEventListener('input', () => { codeInput.value = codeInput.value.replace(/[^a-z0-9]/gi, '').toUpperCase(); });
+      document.getElementById('studentEntryForm').addEventListener('submit', event => {
+        event.preventDefault();
+        const code = codeInput.value.trim().toUpperCase();
+        if (!/^[A-Z0-9]{4,12}$/.test(code)) return toast('클래스 코드는 영문·숫자 4~12자리입니다.', 'error');
+        location.href = appUrl('student', { code });
+      });
+      document.getElementById('teacherEntryForm').addEventListener('submit', event => loginTeacher(event, 'homeTeacherCode'));
+    }
+
+    async function loginTeacher(event, codeId) {
+      event.preventDefault();
+      const button = event.submitter; setButtonBusy(button, true, '로그인 중...');
+      try {
+        await AppApi.init('teacher');
+        const result = await api('verifyTeacherCode', document.getElementById(codeId).value);
+        state.teacherToken = result.token;
+        sessionStorage.setItem('koreanClassTeacherToken', result.token);
+        location.href = appUrl('teacher');
+      } catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+
+    async function loginTeacherForRecovery(codeId, button) {
+      setButtonBusy(button, true, '확인 중...');
+      try {
+        await AppApi.init('teacher');
+        const result = await api('verifyTeacherCode', document.getElementById(codeId).value);
+        state.teacherToken = result.token;
+        sessionStorage.setItem('koreanClassTeacherToken', result.token);
+        sessionStorage.setItem('koreanOpenClassRecovery', '1');
+        location.href = appUrl('teacher');
+      } catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+
+    function renderError(message) {
+      setApp(`<section class="error-panel card"><p class="eyebrow">안내</p><h1>화면을 열 수 없습니다</h1><p>${esc(message)}</p><div class="actions"><a class="btn" href="${attr(CONFIG.baseUrl)}">시작 화면으로</a><button class="btn btn-primary" onclick="location.reload()">다시 시도</button></div></section>`);
+    }
+
+    /* ------------------------------ 교사 화면 ------------------------------ */
+    function renderTeacherEntry() {
+      setApp(`<form id="teacherLoginForm" class="login card">
+        <p class="eyebrow">TEACHER</p><h1>교사 로그인</h1><p>부여받은 교사 코드를 입력해 주세요.</p>
+        <label class="field-label" for="teacherCode">교사 코드</label><input id="teacherCode" type="password" autocomplete="off" required>
+        <button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:16px">로그인</button>
+        <button class="btn btn-soft btn-block" type="button" style="margin-top:9px" onclick="loginTeacherForRecovery('teacherCode',this)">클래스 코드 찾기</button>
+        <a class="btn btn-block" href="${attr(CONFIG.baseUrl)}" style="margin-top:9px">처음으로</a>
+      </form>`);
+      document.getElementById('teacherLoginForm').addEventListener('submit', event => loginTeacher(event, 'teacherCode'));
+    }
+
+    async function loadTeacherPortal() {
+      showLoading('내 클래스 정보를 불러오는 중...');
+      try {
+        state.teacherClasses = await api('getTeacherClasses');
+        renderTeacherChoice();
+        if (sessionStorage.getItem('koreanOpenClassRecovery') === '1') {
+          sessionStorage.removeItem('koreanOpenClassRecovery');
+          openClassCodeRecovery();
+        }
+      } catch (error) { friendlyError(error); }
+      finally { hideLoading(); }
+    }
+
+    function renderTeacherChoice() {
+      setApp(`<div class="teacher-choice">
+        <header class="teacher-choice-head card"><p class="eyebrow">교사 공간</p><h1>클래스 관리</h1><p>새 클래스를 만들거나 기존 클래스 코드로 관리 화면에 입장하세요.</p>
+          <div class="hero-actions"><button class="btn" onclick="logoutTeacherAccount()">로그아웃</button><a class="btn" href="${attr(CONFIG.baseUrl)}">처음으로</a></div></header>
+        <section class="login-choice-grid">
+          <form id="createClassForm" class="role-card card">
+            <span class="role-kicker">NEW CLASS</span><h2>새 클래스 개설</h2><p>학교 정보와 사용할 클래스 코드를 직접 정해 주세요.</p>
+            <div class="form-row"><div><label class="field-label" for="classRegion">지역</label><input id="classRegion" type="text" maxlength="80" placeholder="예: 서울" required></div>
+            <div><label class="field-label" for="classSchool">학교명</label><input id="classSchool" type="text" maxlength="160" placeholder="예: 한빛고등학교" required></div></div>
+            <div class="form-row"><div><label class="field-label" for="classGrade">학년</label><select id="classGrade" required><option value="">선택</option><option>1학년</option><option>2학년</option><option>3학년</option></select></div>
+            <div><label class="field-label" for="className">반</label><input id="className" type="text" maxlength="40" placeholder="예: 3반" required></div></div>
+            <label class="field-label" for="newClassCode">사용할 클래스 코드</label><input id="newClassCode" class="class-code-input" type="text" minlength="4" maxlength="12" autocomplete="off" placeholder="영문·숫자 4~12자리" required>
+            <p class="help">학생에게 알려 줄 코드입니다. 이미 사용 중인 코드는 등록할 수 없습니다.</p>
+            <label class="field-label" for="classRecoveryHint">클래스 코드 찾기 힌트</label><input id="classRecoveryHint" type="password" maxlength="120" autocomplete="new-password" placeholder="본인만 기억할 답을 입력하세요" required>
+            <p class="help">코드를 잊었을 때 학급 정보와 이 힌트를 정확히 입력해 찾습니다.</p>
+            <button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:18px">클래스 개설하기</button>
+          </form>
+          <form id="enterTeacherClassForm" class="role-card card">
+            <span class="role-kicker">ENTER CLASS</span><h2>기존 클래스 입장</h2><p>전에 개설한 클래스의 코드를 입력하세요.</p>
+            <label class="field-label" for="teacherClassCode">클래스 코드</label><input id="teacherClassCode" class="class-code-input" type="text" minlength="4" maxlength="12" autocomplete="off" placeholder="영문·숫자 4~12자리" required>
+            <button class="btn btn-lg btn-block" type="submit" style="margin-top:14px">클래스 입장</button>
+            <button class="btn btn-soft btn-block" type="button" style="margin-top:9px" onclick="openClassCodeRecovery()">클래스 코드 찾기</button>
+            ${state.teacherClasses.length ? `<div class="section-head compact" style="margin-top:25px"><div><h2 style="font-size:18px">내 클래스</h2></div></div><div class="actions">${state.teacherClasses.map(item => `<button class="btn" type="button" onclick="openTeacherClass('${attr(item.classCode)}')">${esc(item.grade)} ${esc(item.className)} · ${esc(item.classCode)}</button>`).join('')}</div>` : '<p class="help" style="margin-top:24px">아직 개설한 클래스가 없습니다.</p>'}
+          </form>
+        </section>
+      </div>`);
+      const codeInput = document.getElementById('teacherClassCode');
+      codeInput.addEventListener('input', () => { codeInput.value = codeInput.value.replace(/[^a-z0-9]/gi, '').toUpperCase(); });
+      const newCodeInput = document.getElementById('newClassCode');
+      newCodeInput.addEventListener('input', () => { newCodeInput.value = newCodeInput.value.replace(/[^a-z0-9]/gi, '').toUpperCase(); });
+      document.getElementById('createClassForm').addEventListener('submit', createTeacherClass);
+      document.getElementById('enterTeacherClassForm').addEventListener('submit', event => { event.preventDefault(); openTeacherClass(codeInput.value); });
+    }
+
+    async function createTeacherClass(event) {
+      event.preventDefault(); const button = event.submitter; setButtonBusy(button, true, '개설 중...');
+      const payload = { region: document.getElementById('classRegion').value, school: document.getElementById('classSchool').value, grade: document.getElementById('classGrade').value, className: document.getElementById('className').value, classCode: document.getElementById('newClassCode').value, recoveryHint: document.getElementById('classRecoveryHint').value };
+      try {
+        const created = await api('createTeacherClass', state.teacherToken, payload);
+        state.teacherClasses.push(created); toast('클래스가 개설되었습니다.', 'success');
+        await openTeacherClass(created.classCode);
+      } catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+
+    async function openTeacherClass(classCode) {
+      const code = String(classCode || '').replace(/[^a-z0-9]/gi, '').toUpperCase();
+      if (!/^[A-Z0-9]{4,12}$/.test(code)) return toast('클래스 코드는 영문·숫자 4~12자리입니다.', 'error');
+      showLoading('클래스에 입장하는 중...');
+      try {
+        state.activeClass = await api('enterTeacherClass', state.teacherToken, code);
+        sessionStorage.setItem('koreanActiveClassCode', code);
+        await loadTeacherClassDashboard(true);
+      } catch (error) { friendlyError(error); }
+      finally { hideLoading(); }
+    }
+
+    function openClassCodeRecovery() {
+      openModal('클래스 코드 찾기', `<form id="classRecoveryForm">
+        <p class="help">클래스를 개설할 때 입력한 내용을 모두 정확히 적어 주세요.</p>
+        <div class="form-row"><div><label class="field-label" for="recoverRegion">지역</label><input id="recoverRegion" type="text" maxlength="80" required></div>
+        <div><label class="field-label" for="recoverSchool">학교명</label><input id="recoverSchool" type="text" maxlength="160" required></div></div>
+        <div class="form-row"><div><label class="field-label" for="recoverGrade">학년</label><select id="recoverGrade" required><option value="">선택</option><option>1학년</option><option>2학년</option><option>3학년</option></select></div>
+        <div><label class="field-label" for="recoverClassName">반</label><input id="recoverClassName" type="text" maxlength="40" required></div></div>
+        <label class="field-label" for="recoverHint">클래스 코드 찾기 힌트</label><input id="recoverHint" type="password" maxlength="120" autocomplete="off" required>
+      </form>`, `<button class="btn" onclick="closeModal()">취소</button><button id="recoverClassBtn" class="btn btn-primary" onclick="recoverClassCode()">코드 찾기</button>`);
+      document.getElementById('classRecoveryForm').addEventListener('submit', event => { event.preventDefault(); recoverClassCode(); });
+    }
+
+    async function recoverClassCode() {
+      const form = document.getElementById('classRecoveryForm');
+      if (!form || !form.reportValidity()) return;
+      const button = document.getElementById('recoverClassBtn'); setButtonBusy(button, true, '찾는 중...');
+      const payload = {
+        region: document.getElementById('recoverRegion').value,
+        school: document.getElementById('recoverSchool').value,
+        grade: document.getElementById('recoverGrade').value,
+        className: document.getElementById('recoverClassName').value,
+        recoveryHint: document.getElementById('recoverHint').value
+      };
+      try {
+        const matches = await api('recoverTeacherClassCode', state.teacherToken, payload);
+        if (!matches.length) { toast('입력한 정보와 일치하는 클래스가 없습니다.', 'error'); setButtonBusy(button, false); return; }
+        openModal('찾은 클래스 코드', `<p class="help">아래 코드를 복사하거나 바로 클래스에 입장하세요.</p><div class="grid">${matches.map(item => `<article class="activity-card card"><p class="eyebrow">${esc(item.region)} · ${esc(item.school)}</p><h3 class="class-code-input" style="margin-top:14px">${esc(item.classCode)}</h3><p class="help">${esc(item.grade)} ${esc(item.className)}</p><div class="card-actions"><button class="btn" onclick="copyUrl('${attr(item.classCode)}','클래스 코드를')">코드 복사</button><button class="btn btn-primary" onclick="closeModal();openTeacherClass('${attr(item.classCode)}')">입장</button></div></article>`).join('')}</div>`, `<button class="btn" onclick="closeModal()">닫기</button>`, true);
+      } catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+
+    async function loadTeacherClassDashboard(silent) {
+      if (!state.activeClass) return renderTeacherChoice();
+      if (!silent) showLoading('클래스 자료를 불러오는 중...');
+      try {
+        state.dashboard = await api('getClassDashboard', state.teacherToken, state.activeClass.id);
+        renderTeacherClassShell();
+      } catch (error) { friendlyError(error); }
+      finally { if (!silent) hideLoading(); }
+    }
+
+    function renderTeacherClassShell() {
+      const room = state.activeClass;
+      const tabs = ['lesson1','lesson2','lesson3','lesson4'];
+      if (!tabs.includes(state.tab)) {
+        state.tab = room.currentStage === 'context' ? 'lesson2' : room.currentStage === 'wordmaking' ? 'lesson3' : room.currentStage === 'dictionary' ? 'lesson4' : 'lesson1';
+      }
+      setApp(`<div class="shell teacher-workspace">
+        <header class="teacher-top no-print"><span class="mini-mark">✦</span><div><h1>${esc(room.school)} ${esc(room.grade)} ${esc(room.className)}</h1><p>${esc(room.region)} · 교사 수업 공간</p></div>
+          <div class="teacher-top-actions"><button class="btn code-button" onclick="copyUrl('${attr(room.classCode)}','클래스 코드를')">${esc(room.classCode)}</button><button class="btn" onclick="openQr('${attr(appUrl('student',{code:room.classCode}))}','학생 참여 QR')">학생 참여 QR</button><button class="btn" onclick="leaveTeacherClass()">클래스 목록</button></div></header>
+        <nav class="lesson-tabs no-print" aria-label="차시 선택">
+          <button class="lesson-tab ${state.tab==='lesson1'?'active':''}" data-lesson="lesson1"><b>LESSON 01</b><span>우리 반 언어<br>수집하기</span></button>
+          <button class="lesson-tab ${state.tab==='lesson2'?'active':''}" data-lesson="lesson2"><b>LESSON 02</b><span>언어 사용 맥락<br>고려하기</span></button>
+          <button class="lesson-tab ${state.tab==='lesson3'?'active':''}" data-lesson="lesson3"><b>LESSON 03</b><span>우리말<br>순화하기</span></button>
+          <button class="lesson-tab ${state.tab==='lesson4'?'active':''}" data-lesson="lesson4"><b>LESSON 04</b><span>우리 반 사전<br>만들기</span></button>
+        </nav><main id="teacherLessonContent"></main></div>`);
+      document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => { state.tab = button.dataset.lesson; renderTeacherClassShell(); }));
+      renderTeacherLessonTab();
+      startTeacherRefreshWatcher();
+    }
+
+    function leaveTeacherClass() {
+      if (state.teacherTimer) clearInterval(state.teacherTimer);
+      state.activeClass = null; state.dashboard = null; state.tab = 'lesson1'; renderTeacherChoice();
+    }
+
+    function startTeacherRefreshWatcher() {
+      if (state.teacherTimer) clearInterval(state.teacherTimer);
+      state.teacherTimer = setInterval(async () => {
+        if (!state.activeClass || document.hidden || document.querySelector('.modal-layer')) return;
+        try {
+          state.dashboard = await api('getClassDashboard', state.teacherToken, state.activeClass.id);
+          renderTeacherLessonTab();
+        } catch (_) { /* 다음 주기에 다시 확인합니다. */ }
+      }, 5000);
+    }
+
+    function teacherLessonHero(number, title, description, stage) {
+      const active = stage === 'submit'
+        ? ['submit','rate'].includes(state.activeClass.currentStage)
+        : state.activeClass.currentStage === stage;
+      return `<section class="lesson-hero"><span class="lesson-number">${esc(number)}</span><div class="lesson-copy"><h2>${esc(title)}</h2><p>${esc(description)}</p></div><div class="lesson-actions">${active?'<span class="live-pill">학생 화면에 진행 중</span>':`<button class="btn btn-primary" onclick="startClassStage('${attr(stage)}')">차시 시작</button>`}${state.activeClass.currentStage!=='waiting'?'<button class="btn" onclick="startClassStage(\'waiting\')">학생 화면 닫기</button>':''}</div></section>`;
+    }
+
+    function renderTeacherLessonTab() {
+      if (state.tab === 'lesson1') return renderTeacherLessonOne();
+      if (state.tab === 'lesson2') return renderTeacherLessonTwo();
+      if (state.tab === 'lesson3') return renderTeacherLessonThree();
+      return renderTeacherLessonFour();
+    }
+
+    async function startClassStage(stage, taskId) {
+      if (stage === 'context' && !(state.dashboard.contextGroups || []).length) { toast('학생에게 보여 줄 맥락과 표현을 먼저 만들어 주세요.', 'error'); return; }
+      if (stage === 'wordmaking' && !(state.dashboard.words || []).some(item => item.approved)) { toast('학생에게 보여 줄 순화 대상을 먼저 선택해 주세요.', 'error'); return; }
+      showLoading('학생 화면을 전환하는 중...');
+      try {
+        state.activeClass = await api('setClassStage', state.teacherToken, state.activeClass.id, stage, taskId || '');
+        toast('학생 화면이 전환되었습니다.', 'success'); renderTeacherClassShell();
+      } catch (error) { friendlyError(error); }
+      finally { hideLoading(); }
+    }
+
+    function averageLabel(item) {
+      return item.ratingCount ? `<span class="score-pill"><span class="score-star">★</span>${formatScore(item.averageRating)} <small>(${item.ratingCount})</small></span>` : '<span class="score-pill">아직 별점 없음</span>';
+    }
+
+    function renderTeacherLessonOne() {
+      const root = document.getElementById('teacherLessonContent'); if (!root) return;
+      const words = state.dashboard.words || [];
+      root.innerHTML = `${teacherLessonHero('01','우리 반 언어 수집하기','학생들이 적은 표현과 별점 평균을 한눈에 봅니다.','submit')}
+        <div class="lesson-tools"><div><h3>수집된 언어</h3><p><span class="live-pill">5초마다 새로 반영</span></p></div><span class="count">${words.length}개</span></div>
+        <section class="simple-panel card"><div class="simple-list">${words.length ? words.map(word => `<div class="simple-row"><div class="simple-word">${esc(word.word)} <span class="badge ${categoryClass(word.category)}">${esc(word.category)}</span><small>${word.submissionCount}명이 제출</small></div>${averageLabel(word)}<div class="row-actions actions"><button class="btn icon-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></div></div>`).join('') : '<div class="empty">학생이 표현을 입력하면 이곳에 바로 나타납니다.</div>'}</div></section>`;
+    }
+
+    function renderTeacherLessonTwo() {
+      const root = document.getElementById('teacherLessonContent'); if (!root) return;
+      const groups = state.dashboard.contextGroups || [];
+      const words = state.dashboard.words || [];
+      root.innerHTML = `${teacherLessonHero('02','언어 사용 맥락 고려하기','여러 맥락을 만들고 1차시 표현을 골라 함께 적용합니다.','context')}
+        <section class="linked-words card"><div><p class="eyebrow">1차시 연동 목록</p><strong>수집된 언어 ${words.length}개</strong></div><div class="linked-word-chips">${words.length?words.map(word=>`<span>${esc(word.word)} · ${esc(word.category)} <small>★ ${formatScore(word.averageRating)}</small></span>`).join(''):'<span class="help">1차시에서 표현을 먼저 수집해 주세요.</span>'}</div></section>
+        <div class="lesson-tools"><div><h3>공통 맥락</h3><p>맥락마다 학생에게 보여 줄 표현을 여러 개 선택할 수 있습니다.</p></div><div class="actions"><span class="count">${groups.length}개</span><button class="btn btn-primary" onclick="openContextGroupEditor()">+ 맥락 추가</button></div></div>
+        <section class="context-grid">${groups.length ? groups.map((group,index) => `<article class="context-card card"><p class="eyebrow">맥락 ${String(index+1).padStart(2,'0')}</p><h3>${esc(group.title)}</h3><p class="context-prompt">${esc(group.context)}</p><div class="context-word-list">${group.words.map(word => `<button class="context-word-result" onclick="openContextResults('${attr(word.taskId)}')"><span>${esc(word.word)} ${badge(word.category)}</span><small>답변 ${word.exampleCount} · ★ ${formatScore(word.averageRating)}</small></button>`).join('')}</div><div class="rating-summary"><span class="count">선택 표현 ${group.words.length}개 · 답변 ${group.exampleCount}개</span>${group.ratingCount?`<span class="score-pill"><span class="score-star">★</span>${formatScore(group.averageRating)}</span>`:'<span class="score-pill">별점 없음</span>'}</div><div class="card-actions"><button class="btn" onclick="openContextGroupEditor('${attr(group.id)}')">편집</button><button class="btn icon-danger" onclick="confirmDeleteContextGroup('${attr(group.id)}',${jsArg(group.title)})">삭제</button></div></article>`).join('') : '<div class="empty">‘맥락 추가’를 눌러 첫 맥락을 만들고 표현을 선택해 주세요.</div>'}</section>`;
+    }
+
+    async function renderTeacherLessonThree() {
+      const root = document.getElementById('teacherLessonContent'); if (!root) return;
+      root.innerHTML = `${teacherLessonHero('03','우리말 순화하기','1차시에 모은 표현 중 학생에게 보여 줄 대상을 선택합니다.','wordmaking')}<div class="lesson-body"><div class="empty">수집 표현을 불러오는 중...</div></div>`;
+      try {
+        const workspace = await api('getWordmakingWorkspace', managerToken(), state.activeClass.id);
+        if (state.tab !== 'lesson3' || !document.getElementById('teacherLessonContent')) return;
+        state.wordmakingWorkspace = workspace;
+        const body = document.querySelector('#teacherLessonContent .lesson-body');
+        body.innerHTML = `<div class="lesson-tools"><div><h3>1차시 수집 언어</h3><p>체크한 표현만 학생들의 3차시 목록에 나타납니다.</p></div><span class="count">선택 ${workspace.filter(item=>item.approved).length} / 전체 ${workspace.length}</span></div><section class="refine-grid">${workspace.length ? workspace.map(item => `<article class="refine-card selectable-card ${item.approved?'selected':''} card"><div class="rating-summary"><p class="eyebrow">원래 표현 · ${badge(item.category)}</p><button class="select-toggle ${item.approved?'selected':''}" onclick="toggleWordApproval('${attr(item.id)}',${!item.approved},this)">${item.approved?'✓ 학생 목록에 표시':'학생 목록에 추가'}</button></div><h3>${esc(item.word)}</h3><p class="count">1차시 별점 ${formatScore(item.averageRating)} · 순화 제안 ${item.suggestions.length}개</p><ul class="suggestion-list">${item.suggestions.length ? item.suggestions.map(suggestion => `<li><span class="suggestion-copy"><strong>${esc(suggestion.suggestedWord)}</strong><span>${esc(suggestion.reason)}</span></span>${suggestion.ratingCount?`<span class="score-pill"><span class="score-star">★</span>${formatScore(suggestion.averageRating)} <small>(${suggestion.ratingCount})</small></span>`:'<span class="score-pill">별점 없음</span>'}</li>`).join('') : '<li class="help">학생 활동이 시작되면 여러 순화말이 이곳에 쌓입니다.</li>'}</ul></article>`).join('') : '<div class="empty">1차시에 수집된 표현이 없습니다.</div>'}</section>`;
+      } catch (error) { friendlyError(error); }
+    }
+
+    async function renderTeacherLessonFour() {
+      const root = document.getElementById('teacherLessonContent'); if (!root) return;
+      root.innerHTML = `${teacherLessonHero('04','우리 반 우리말 사전 만들기','학생들의 순화말을 골라 뜻과 예문을 더하면 사전이 완성됩니다.','dictionary')}<div class="lesson-body"><div class="empty">사전 편집 자료를 불러오는 중...</div></div>`;
+      try {
+        const workspace = await api('getDictionaryWorkspace', managerToken(), state.activeClass.id);
+        if (state.tab !== 'lesson4' || !document.getElementById('teacherLessonContent')) return;
+        state.dictionaryWorkspace = workspace;
+        const body = document.querySelector('#teacherLessonContent .lesson-body');
+        const pledges = state.dashboard.pledges || [];
+        body.innerHTML = `<div class="lesson-tools"><div><h3>사전 원고</h3><p>완성 항목 ${workspace.filter(item=>item.entry&&item.entry.approved).length}개</p></div></div><section class="refine-grid">${workspace.length ? workspace.map(teacherDictionaryCard).join('') : '<div class="empty">3차시 순화 목록을 먼저 만들어 주세요.</div>'}</section>
+          <div class="lesson-tools pledge-heading"><div><h3>우리 반의 언어 순화 다짐</h3><p>학생들이 남긴 익명 다짐을 함께 읽어 봅니다.</p></div><span class="count">${pledges.length}개</span></div>
+          <section class="pledge-list">${pledges.length ? pledges.map((item,index) => `<article class="pledge-comment card"><span class="pledge-avatar">${String(index+1).padStart(2,'0')}</span><div><p class="eyebrow">익명 ${String(index+1).padStart(2,'0')}</p><p>${esc(item.pledge)}</p></div><button class="btn icon-danger no-print" onclick="confirmDeletePledge('${attr(item.id)}')">삭제</button></article>`).join('') : '<div class="empty">학생이 다짐을 남기면 이곳에 나타납니다.</div>'}</section>`;
+      } catch (error) { friendlyError(error); }
+    }
+
+    function teacherDictionaryCard(item) {
+      const entry = item.entry || {};
+      return `<article class="refine-card card"><p class="eyebrow">${entry.approved?'사전 수록 완료':'표제어 선택 대기'} · ${badge(item.category)}</p><h3>${esc(item.word)}${entry.finalWord?` <span style="color:var(--accent)">→ ${esc(entry.finalWord)}</span>`:''}</h3>${entry.meaning?`<p>${esc(entry.meaning)}</p>`:`<p class="help">학생들의 순화말 중 하나를 표제어로 고른 뒤 내용을 다듬어 주세요.</p>`}<div class="dictionary-choice-list">${item.suggestions.length?item.suggestions.map(s => `<button class="dictionary-choice ${entry.finalWord===s.suggestedWord?'selected':''}" onclick="openDictionaryEditor('${attr(item.id)}','${attr(s.id)}')"><strong>${esc(s.suggestedWord)}</strong><span>${s.ratingCount?'★ '+formatScore(s.averageRating)+' · '+s.ratingCount+'명':'별점 없음'}</span></button>`).join(''):'<span class="help">아직 학생이 제출한 순화말이 없습니다. 직접 표제어를 작성할 수도 있습니다.</span>'}</div><button class="btn btn-primary btn-block" onclick="openDictionaryEditor('${attr(item.id)}')">${entry.finalWord?'표제어·사전 내용 수정':'표제어 직접 작성'}</button></article>`;
+    }
+
+    async function reloadManagerDashboard(silent) {
+      if (state.activeClass) return loadTeacherClassDashboard(silent);
+      return loadAdminDashboard(silent);
+    }
+
+    async function logoutTeacherAccount() {
+      if (state.teacherTimer) clearInterval(state.teacherTimer);
+      try { await AppApi.signOut(); } catch (error) { friendlyError(error); }
+      sessionStorage.removeItem('koreanClassTeacherToken'); sessionStorage.removeItem('koreanActiveClassCode');
+      state.teacherToken = ''; state.teacherClasses = []; state.activeClass = null; state.dashboard = null;
+      location.href = CONFIG.baseUrl;
+    }
+
+    /* ------------------------------ 관리자 화면 ------------------------------ */
+    function renderAdminEntry() {
+      if (state.adminToken) return loadAdminDashboard();
+      setApp(`<form id="loginForm" class="login card">
+        <p class="eyebrow">관리자 전용</p><h1>우리 반 우리말 사전</h1>
+        <p>자료 승인·수정·삭제 권한이 있는 관리자만 로그인할 수 있습니다.</p>
+        <label class="field-label" for="adminEmail">관리자 이메일</label>
+        <input id="adminEmail" type="email" autocomplete="username" required>
+        <label class="field-label" for="adminPassword">관리자 비밀번호</label>
+        <input id="adminPassword" type="password" autocomplete="current-password" required>
+        <button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:16px">관리자 화면 열기</button>
+      </form>`);
+      document.getElementById('loginForm').addEventListener('submit', async event => {
+        event.preventDefault(); const button = event.submitter;
+        setButtonBusy(button, true, '확인 중...');
+        try {
+          const result = await api('verifyAdminCredentials', document.getElementById('adminEmail').value, document.getElementById('adminPassword').value);
+          state.adminToken = result.token; sessionStorage.setItem('koreanClassAdminToken', result.token);
+          await loadAdminDashboard();
+        } catch (error) { friendlyError(error); setButtonBusy(button, false); }
+      });
+    }
+
+    async function loadAdminDashboard(silent) {
+      if (!silent) showLoading('수업 자료를 불러오는 중...');
+      try {
+        state.dashboard = await api('getAdminDashboard', state.adminToken);
+        renderAdminShell();
+      } catch (error) { friendlyError(error); }
+      finally { hideLoading(); }
+    }
+
+    async function logoutAdmin() {
+      try { await AppApi.signOut(); }
+      catch (error) { friendlyError(error); }
+      sessionStorage.removeItem('koreanClassAdminToken');
+      state.adminToken = '';
+      state.dashboard = null;
+      renderAdminEntry();
+    }
+
+    function renderAdminShell() {
+      setApp(`<div class="shell">
+        <header class="app-header no-print"><div class="brand-mark">말</div><div><p class="eyebrow">관리자 화면</p><h1>우리 반 우리말 사전</h1></div><div class="header-actions"><button class="btn" onclick="logoutAdmin()">로그아웃</button></div></header>
+        <nav class="admin-nav admin-nav-four no-print" aria-label="관리자 메뉴">
+          <button class="nav-btn ${state.tab === 'words' ? 'active' : ''}" data-tab="words">① 우리 반 언어 사용 실태</button>
+          <button class="nav-btn ${state.tab === 'context' ? 'active' : ''}" data-tab="context">② 상황에 따라 달라지는 말</button>
+          <button class="nav-btn ${state.tab === 'dictionary' ? 'active' : ''}" data-tab="dictionary">③ 우리 반 우리말 사전</button>
+          <button class="nav-btn ${state.tab === 'classes' ? 'active' : ''}" data-tab="classes">④ 클래스 관리</button>
+        </nav><section id="adminContent"></section></div>`);
+      document.querySelectorAll('[data-tab]').forEach(button => button.addEventListener('click', () => {
+        state.tab = button.dataset.tab; renderAdminShell();
+      }));
+      renderAdminTab();
+    }
+
+    function renderAdminTab() {
+      if (state.tab === 'words') renderAdminWords();
+      if (state.tab === 'context') renderAdminContexts();
+      if (state.tab === 'dictionary') renderAdminDictionary();
+      if (state.tab === 'classes') renderAdminClasses();
+    }
+
+    function managerToken() { return state.activeClass ? state.teacherToken : state.adminToken; }
+    function refreshButton() { return `<button class="btn" onclick="reloadManagerDashboard()">↻ 새로고침</button>`; }
+    function appUrl(view, extra) {
+      const base = (state.dashboard && state.dashboard.baseUrl) || CONFIG.baseUrl || location.href.split('?')[0];
+      const params = new URLSearchParams(Object.assign({ view }, extra || {}));
+      return base + '?' + params.toString();
+    }
+
+    function classStageLabel(stage) {
+      if (stage === 'context') return '상황 활동';
+      const item = CLASS_STAGES.find(candidate => candidate.id === stage);
+      return item ? item.label : '수업 대기';
+    }
+
+    function renderAdminClasses() {
+      const classes = state.dashboard.classes || [];
+      document.getElementById('adminContent').innerHTML = `<section class="hero card"><h2>클래스 관리</h2><p>전체 클래스와 연결 자료를 확인하고, 더 이상 사용하지 않는 클래스를 삭제합니다.</p><div class="hero-actions">${refreshButton()}</div></section>
+        <div class="section-head"><div><h2>개설된 클래스</h2><p>전체 ${classes.length}개 · 클래스 삭제 시 학생 응답, 별점, 순화 제안과 사전 자료가 함께 삭제됩니다.</p></div></div>
+        <section class="grid">${classes.length ? classes.map(room => `<article class="activity-card card"><div><span class="badge ${room.isActive?'badge-approved':'badge-pending'}">${room.isActive?'운영 중':'종료'}</span> <span class="badge badge-pending">${esc(classStageLabel(room.currentStage))}</span></div><h3>${esc(room.school)}</h3><div class="meta-list"><div><b>지역</b>${esc(room.region)}</div><div><b>학급</b>${esc(room.grade)} ${esc(room.className)}</div><div><b>클래스 코드</b><strong>${esc(room.classCode)}</strong></div></div><p class="count">수집 표현 ${state.dashboard.words.filter(word => word.classId === room.id).length}개 · 상황 활동 ${state.dashboard.tasks.filter(task => task.classId === room.id).length}개</p><div class="card-actions"><button class="btn" onclick="copyUrl('${attr(room.classCode)}','클래스 코드를')">코드 복사</button><button class="btn btn-danger" onclick="confirmDeleteClass('${attr(room.id)}',${jsArg(room.school + ' ' + room.grade + ' ' + room.className)})">클래스 삭제</button></div></article>`).join('') : '<div class="empty">개설된 클래스가 없습니다.</div>'}</section>`;
+    }
+
+    function confirmDeleteClass(id, label) {
+      confirmModal('클래스 삭제', `${label} 클래스와 연결된 학생 표현, 별점, 상황 활동, 순화 제안, 사전 자료를 모두 삭제합니다. 되돌릴 수 없습니다.`, async () => {
+        showLoading('클래스와 연결 자료를 삭제하는 중...');
+        try { await api('deleteClass', state.adminToken, id); closeModal(); toast('클래스를 삭제했습니다.', 'success'); await loadAdminDashboard(true); }
+        catch (error) { friendlyError(error); } finally { hideLoading(); }
+      }, '클래스 삭제');
+    }
+
+    function renderAdminWords() {
+      const data = state.dashboard; const stats = data.stats;
+      const entryActions = state.activeClass
+        ? `<button class="btn btn-primary btn-lg" onclick="openQr('${attr(appUrl('student',{code:state.activeClass.classCode}))}','학생 입장 QR')">학생 입장 QR</button>`
+        : '';
+      document.getElementById('adminContent').innerHTML = `
+        <section class="hero card no-print"><h2>우리 반 언어 사용 실태</h2><p>학생들이 실제로 쓰는 표현을 모으고 적절성을 함께 살펴봅니다.</p>
+          <div class="hero-actions">${entryActions}${refreshButton()}</div></section>
+        <section class="stats-grid">
+          ${statCard('전체 수집 표현', stats.total)}${statCard('비속어', stats['비속어'])}${statCard('유행어', stats['유행어'])}${statCard('외래어', stats['외래어'])}${statCard('전체 별점 평가', stats.ratingCount)}
+        </section>
+        <section class="charts-grid">
+          ${miniChart('평균 별점 높은 표현', stats.highest, 5)}${miniChart('평균 별점 낮은 표현', stats.lowest, 5)}${miniChart('평가 차이가 큰 표현', stats.divisive, 2)}${miniChart('많이 제출된 표현', stats.frequent, Math.max(...stats.frequent.map(x=>x.value),1))}
+        </section>
+        <div class="section-head"><div><h2>수집된 표현</h2><p>같게 정규화된 표현은 한 항목으로 묶어 표시합니다.</p></div></div>
+        <section class="panel card">
+          <div class="toolbar"><div class="search"><input id="wordSearch" type="search" placeholder="표현 검색" value="${attr(state.wordSearch)}"></div>${filterButtons('word', state.wordFilter)}</div>
+          <div id="wordTable"></div>
+        </section>`;
+      document.getElementById('wordSearch').addEventListener('input', event => { state.wordSearch = event.target.value; renderWordTable(); });
+      bindFilterButtons('word', value => { state.wordFilter = value; renderWordTable(); });
+      renderWordTable();
+    }
+
+    function statCard(label, value) { return `<article class="stat card"><span>${esc(label)}</span><strong>${Number(value || 0).toLocaleString()}<small>${label === '전체 별점 평가' ? '건' : '개'}</small></strong></article>`; }
+    function miniChart(title, items, max) {
+      if (!items.length) return `<article class="mini-chart card"><h3>${esc(title)}</h3><p class="help">아직 자료가 없습니다.</p></article>`;
+      return `<article class="mini-chart card"><h3>${esc(title)}</h3>${items.map(item => `<div class="bar-row"><span class="bar-label" title="${attr(item.word)}">${esc(item.word)}</span><span class="bar-track"><span class="bar-fill" style="width:${Math.max(5, Math.min(100, Number(item.value) / max * 100))}%"></span></span><b>${Number(item.value).toFixed(Number(item.value)%1 ? 1 : 0)}</b></div>`).join('')}</article>`;
+    }
+    function filterButtons(prefix, active) { return `<div class="filter-group">${['전체', ...CATEGORIES].map(item => `<button class="filter-btn ${active === item ? 'active' : ''}" type="button" data-${prefix}-filter="${item}">${item}</button>`).join('')}</div>`; }
+    function bindFilterButtons(prefix, handler) { document.querySelectorAll(`[data-${prefix}-filter]`).forEach(button => button.addEventListener('click', () => { handler(button.dataset[`${prefix}Filter`]); })); }
+
+    function filteredWords() {
+      const query = state.wordSearch.trim().toLowerCase();
+      return state.dashboard.words.filter(word => (state.wordFilter === '전체' || word.category === state.wordFilter) && (!query || word.word.toLowerCase().includes(query) || word.normalizedWord.includes(query)));
+    }
+    function renderWordTable() {
+      const root = document.getElementById('wordTable'); if (!root) return;
+      const words = filteredWords();
+      if (!words.length) { root.innerHTML = `<div class="empty">조건에 맞는 표현이 없습니다.</div>`; return; }
+      root.innerHTML = `<div class="table-wrap"><table><thead><tr><th>표현</th><th>유형</th><th>제출</th><th>평균 별점</th><th>평가</th><th>3차시</th><th>관리</th></tr></thead><tbody>${words.map(word => `<tr>
+        <td><strong>${esc(word.word)}</strong><div class="help">${esc(word.normalizedWord)}</div></td>
+        <td><select class="inline-select" aria-label="유형 변경" onchange="changeWordCategory('${attr(word.id)}',this)">${CATEGORIES.map(category => `<option ${category===word.category?'selected':''}>${category}</option>`).join('')}</select></td>
+        <td>${word.submissionCount}회</td><td>${formatScore(word.averageRating)}</td><td>${word.ratingCount}건</td>
+        <td><span class="badge ${word.approved?'badge-approved':'badge-pending'}">${word.approved?'선택':'미선택'}</span></td>
+        <td><div class="actions"><button class="btn ${word.approved?'':'btn-primary'}" onclick="toggleWordApproval('${attr(word.id)}',${!word.approved},this)">${word.approved?'선택 해제':'순화 대상'}</button><button class="btn btn-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></div></td>
+      </tr>`).join('')}</tbody></table></div>`;
+    }
+
+    async function changeWordCategory(id, select) {
+      select.disabled = true;
+      try { await api('updateWordGroup', managerToken(), id, {category: select.value}); toast('유형을 변경했습니다.', 'success'); await reloadManagerDashboard(true); }
+      catch (error) { friendlyError(error); select.disabled = false; }
+    }
+    async function toggleWordApproval(id, approved, button) {
+      setButtonBusy(button, true, '저장 중...');
+      try { await api('updateWordGroup', managerToken(), id, {approved}); toast(approved ? '3차시 순화 목록에 추가했습니다.' : '3차시 순화 목록에서 제외했습니다.', 'success'); await reloadManagerDashboard(true); }
+      catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+    function confirmDeleteWord(id, word) {
+      confirmModal('표현 삭제', `“${word}”의 모든 제출, 평가, 연결 활동과 사전 자료를 삭제합니다. 되돌릴 수 없습니다.`, async () => {
+        showLoading('표현을 삭제하는 중...');
+        try { await api('deleteWordGroup', managerToken(), id); closeModal(); toast('표현을 삭제했습니다.', 'success'); await reloadManagerDashboard(true); }
+        catch (error) { friendlyError(error); } finally { hideLoading(); }
+      }, '삭제');
+    }
+
+    function renderAdminContexts() {
+      const tasks = state.dashboard.tasks;
+      document.getElementById('adminContent').innerHTML = `<section class="hero card"><h2>상황에 따라 달라지는 말</h2><p>클래스별 맥락 활동과 학생 응답을 확인합니다.</p>
+        <div class="hero-actions">${refreshButton()}</div></section>
+        <div class="section-head"><div><h2>상황 활동</h2><p>등록된 활동 ${tasks.length}개</p></div></div>
+        <section class="grid">${tasks.length ? tasks.map(taskCard).join('') : '<div class="empty">활동 추가 버튼으로 첫 활동을 만들어 보세요.</div>'}</section>`;
+    }
+    function taskCard(task) {
+      return `<article class="activity-card card"><div>${badge(task.category)} ${task.active?'<span class="badge badge-approved">진행 중</span>':'<span class="badge badge-pending">종료</span>'}</div><h3>${esc(task.word)}</h3>
+        <div class="meta-list"><div><b>상황</b>${esc(task.situation)}</div><div><b>상대</b>${esc(task.target)}</div><div><b>맥락</b>${esc(task.context)}</div></div>
+        <p class="count">학생 예문 ${task.exampleCount}개 · 평균 ${formatScore(task.averageRating)} · 평가 ${task.ratingCount}건</p>
+        <div class="card-actions"><button class="btn btn-danger" onclick="confirmDeleteTask('${attr(task.id)}')">삭제</button><button class="btn btn-soft" onclick="openContextResults('${attr(task.id)}')">결과 보기</button></div></article>`;
+    }
+    function openContextGroupEditor(groupId) {
+      const groups = state.dashboard.contextGroups || [];
+      const group = groups.find(item => item.id === groupId) || {};
+      const words = state.dashboard.words || [];
+      if (!words.length) { toast('1차시에서 표현을 먼저 수집해 주세요.', 'error'); return; }
+      const selected = new Set((group.words || []).map(item => String(item.wordId)));
+      openModal(`${groupId?'공통 맥락 편집':'공통 맥락 추가'}`, `<form id="contextGroupForm">
+        <label class="field-label" for="contextTitle">맥락 이름</label><input id="contextTitle" type="text" required maxlength="120" placeholder="예: 어른에게" value="${attr(group.title||'')}">
+        <label class="field-label" for="groupContext">학생들이 함께 고려할 맥락</label><textarea id="groupContext" required maxlength="500" placeholder="예: 길을 묻는 어른에게 정중하게 설명하는 상황">${esc(group.context||'')}</textarea>
+        <label class="field-label">이 맥락을 적용할 1차시 표현</label><div class="word-check-grid">${words.map(word => `<label class="word-check ${selected.has(String(word.id))?'selected':''}"><input type="checkbox" name="contextWord" value="${attr(word.id)}" ${selected.has(String(word.id))?'checked':''} onchange="this.closest('.word-check').classList.toggle('selected',this.checked)"><span>${esc(word.word)}</span><small>${esc(word.category)} · ★ ${formatScore(word.averageRating)}</small></label>`).join('')}</div>
+        <p class="help">체크한 표현들이 학생 화면에 목록으로 나타납니다.${groupId?' 선택을 해제하면 그 표현에 달린 기존 답변도 함께 삭제됩니다.':''}</p>
+      </form>`, `<button class="btn" onclick="closeModal()">취소</button><button id="saveContextGroupBtn" class="btn btn-primary" onclick="saveContextGroup('${attr(groupId||'')}')">적용하기</button>`, true);
+    }
+    async function saveContextGroup(groupId) {
+      const form = document.getElementById('contextGroupForm'); if (!form || !form.reportValidity()) return;
+      const wordIds = [...form.querySelectorAll('[name="contextWord"]:checked')].map(item => item.value);
+      if (!wordIds.length) { toast('표현을 하나 이상 선택해 주세요.', 'error'); return; }
+      const button = document.getElementById('saveContextGroupBtn'); setButtonBusy(button, true, '적용 중...');
+      const payload = { groupId, classId: state.activeClass.id, title: document.getElementById('contextTitle').value, context: document.getElementById('groupContext').value, wordIds };
+      try { await api('saveContextGroup', managerToken(), payload); closeModal(); toast('맥락과 표현 목록을 적용했습니다.', 'success'); await reloadManagerDashboard(true); }
+      catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+    function confirmDeleteContextGroup(id, title) {
+      confirmModal('공통 맥락 삭제', `“${title}” 맥락과 연결된 학생 답변·별점을 모두 삭제합니다.`, async () => {
+        showLoading('맥락을 삭제하는 중...');
+        try { await api('deleteContextGroup', managerToken(), id); closeModal(); toast('맥락을 삭제했습니다.', 'success'); await reloadManagerDashboard(true); }
+        catch (error) { friendlyError(error); } finally { hideLoading(); }
+      }, '삭제');
+    }
+    function confirmDeleteTask(id) {
+      confirmModal('활동 삭제', '이 활동의 학생 예문과 별점도 함께 삭제됩니다.', async () => {
+        showLoading('활동을 삭제하는 중...');
+        try { await api('deleteContextTask', managerToken(), id); closeModal(); toast('활동을 삭제했습니다.', 'success'); await reloadManagerDashboard(true); }
+        catch (error) { friendlyError(error); } finally { hideLoading(); }
+      }, '삭제');
+    }
+    function confirmDeletePledge(id) {
+      confirmModal('다짐 댓글 삭제', '이 학생의 다짐을 삭제합니다. 되돌릴 수 없습니다.', async () => {
+        showLoading('다짐을 삭제하는 중...');
+        try { await api('deleteClassPledge', managerToken(), id); closeModal(); toast('다짐을 삭제했습니다.', 'success'); await reloadManagerDashboard(true); }
+        catch (error) { friendlyError(error); } finally { hideLoading(); }
+      }, '삭제');
+    }
+    async function openContextResults(taskId) {
+      showLoading('활동 결과를 불러오는 중...');
+      try {
+        const data = await api('getContextResults', managerToken(), taskId);
+        state.contextData = data; showContextResults(data, 'high');
+      } catch (error) { friendlyError(error); } finally { hideLoading(); }
+    }
+    function showContextResults(data, sort) {
+      const examples = data.examples.slice().sort((a,b) => b.averageRating-a.averageRating || String(b.createdAt).localeCompare(String(a.createdAt)));
+      openModal(`${data.task.word} · 예문`, `<div class="projector"><p class="context-prompt">${esc(data.task.context)}</p>${examples.length ? examples.map(item => `<div class="result-example"><div><strong>${esc(item.sentence)}</strong><p class="intent-copy"><b>작성 의도</b>${esc(item.intent)}</p></div><span class="score-pill"><span class="score-star">★</span>${formatScore(item.averageRating)} <small>(${item.ratingCount})</small></span></div>`).join('') : '<div class="empty">아직 제출된 예문이 없습니다.</div>'}</div>`, `<button class="btn" onclick="closeModal()">닫기</button><button class="btn btn-primary" onclick="enterProjector()">큰 화면으로 보기</button>`, true);
+    }
+    function enterProjector() {
+      const modal = document.querySelector('.modal');
+      modal.classList.add('wide');
+      if (modal.requestFullscreen) modal.requestFullscreen().catch(()=>{});
+    }
+
+    async function renderAdminDictionary() {
+      document.getElementById('adminContent').innerHTML = `<section class="hero card"><h2>우리 반 우리말 사전</h2><p>학생 제안을 살펴보고 최종 추천 표현을 다듬어 사전을 완성합니다.</p><div class="hero-actions">${state.activeClass?`<button class="btn btn-primary btn-lg" onclick="startClassStage('wordmaking')">우리말 바꾸기 시작</button><button class="btn btn-soft btn-lg" onclick="startClassStage('dictionary')">완성 사전 공개</button>`:''}${refreshButton()}</div></section><div id="dictionaryWorkspace"><div class="empty">사전 편집 자료를 불러오는 중...</div></div>`;
+      try {
+        const workspace = await api('getDictionaryWorkspace', managerToken(), state.activeClass && state.activeClass.id);
+        if (state.tab !== 'dictionary') return;
+        state.dictionaryWorkspace = workspace;
+        document.getElementById('dictionaryWorkspace').innerHTML = `<div class="section-head"><div><h2>사전 편집</h2><p>승인된 표현 ${workspace.length}개</p></div></div><section class="grid">${workspace.length ? workspace.map(dictionaryWorkspaceCard).join('') : '<div class="empty">1번 탭에서 표현을 먼저 승인해 주세요.</div>'}</section>`;
+      } catch (error) { friendlyError(error); }
+    }
+    function dictionaryWorkspaceCard(item) {
+      return `<article class="word-card card"><div>${badge(item.category)} ${item.entry&&item.entry.approved?'<span class="badge badge-approved">사전 등록</span>':''}</div><h3>${esc(item.word)}</h3><p class="count">학생 제안 ${item.suggestions.length}개</p><div class="suggestions">${item.suggestions.slice(0,5).map(s => `<button class="suggestion-chip" onclick="showSuggestion('${attr(item.id)}','${attr(s.id)}')">${esc(s.suggestedWord)}</button>`).join('') || '<span class="help">아직 제안이 없습니다.</span>'}</div><button class="btn btn-primary btn-block" onclick="openDictionaryEditor('${attr(item.id)}')">최종 내용 편집</button></article>`;
+    }
+    function showSuggestion(wordId, suggestionId) {
+      const item = state.dictionaryWorkspace.find(word => word.id === wordId); const suggestion = item.suggestions.find(value => value.id === suggestionId);
+      openModal('학생 제안', `<div class="meta-list"><div><b>제안 표현</b>${esc(suggestion.suggestedWord)}</div><div><b>제안 방식</b>${esc(suggestion.suggestionType)}</div><div><b>이유</b>${esc(suggestion.reason)}</div><div><b>예문</b>${esc(suggestion.exampleSentence)}</div></div>`, `<button class="btn" onclick="closeModal()">닫기</button><button class="btn btn-primary" onclick="closeModal();openDictionaryEditor('${attr(wordId)}','${attr(suggestionId)}')">이 제안으로 편집</button>`);
+    }
+    function openDictionaryEditor(wordId, suggestionId) {
+      const item = state.dictionaryWorkspace.find(word => word.id === wordId); const entry = item.entry || {};
+      const suggestion = item.suggestions.find(value => value.id === suggestionId) || {};
+      openModal('사전 항목 편집', `<form id="dictionaryForm">
+        <label class="field-label">원래 표현</label><input id="dictOriginal" type="text" value="${attr(item.word)}" readonly>
+        <input id="dictCategory" type="hidden" value="${attr(entry.category||item.category)}">
+        <label class="field-label">우리 반이 고른 순화말</label><input id="dictFinal" type="text" required value="${attr(suggestion.suggestedWord||entry.finalWord||'')}">
+        <label class="field-label">뜻과 순화한 이유</label><textarea id="dictMeaning" required>${esc(entry.meaning||suggestion.reason||'')}</textarea>
+        <input id="dictCaution" type="hidden" value="${attr(entry.caution||'')}">
+        <label class="field-label">사용 예문 <span class="help">(선택)</span></label><textarea id="dictExample">${esc(entry.exampleSentence||'')}</textarea>
+        <label class="field-label"><input id="dictApproved" type="checkbox" ${entry.approved?'checked':''}> 완성 사전에 수록하기</label>
+      </form>`, `<button class="btn" onclick="closeModal()">취소</button><button id="saveDictBtn" class="btn btn-primary" onclick="saveDictionary('${attr(wordId)}')">저장</button>`);
+    }
+    async function saveDictionary(wordId) {
+      const form = document.getElementById('dictionaryForm'); if (!form || !form.reportValidity()) return;
+      const button = document.getElementById('saveDictBtn'); setButtonBusy(button, true, '저장 중...');
+      const payload = { wordId, originalWord: document.getElementById('dictOriginal').value, category: document.getElementById('dictCategory').value, finalWord: document.getElementById('dictFinal').value, meaning: document.getElementById('dictMeaning').value, caution: document.getElementById('dictCaution').value, exampleSentence: document.getElementById('dictExample').value, approved: document.getElementById('dictApproved').checked };
+      try { await api('saveDictionaryEntry', managerToken(), payload); closeModal(); toast('사전 내용을 저장했습니다.', 'success'); await reloadManagerDashboard(true); }
+      catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+
+    /* ------------------------------ 학생 클래스 ------------------------------ */
+    async function enterStudentPortal(classCode) {
+      const code = String(classCode || '').replace(/[^a-z0-9]/gi, '').toUpperCase();
+      if (!/^[A-Z0-9]{4,12}$/.test(code)) {
+        renderError('선생님에게 받은 영문·숫자 4~12자리 클래스 코드를 입력해 주세요.');
+        return;
+      }
+      showLoading('클래스에 입장하는 중...');
+      try {
+        state.classInfo = await api('joinClass', code);
+        localStorage.setItem('koreanClassCode', state.classInfo.classCode);
+        renderStudentStage();
+        startStudentStageWatcher();
+      } catch (error) { renderError(error && error.message ? error.message : String(error)); }
+      finally { hideLoading(); }
+    }
+
+    function startStudentStageWatcher() {
+      if (state.stageTimer) clearInterval(state.stageTimer);
+      state.stageTimer = setInterval(async () => {
+        if (!state.classInfo || document.hidden) return;
+        try {
+          const latest = await api('getStudentClassState', state.classInfo.id);
+          const changed = latest.currentStage !== state.classInfo.currentStage || latest.currentTaskId !== state.classInfo.currentTaskId;
+          state.classInfo = latest;
+          if (changed) { toast('수업 단계가 바뀌었습니다.', 'success'); renderStudentStage(); }
+        } catch (_) { /* 다음 확인 주기에 다시 시도합니다. */ }
+      }, 5000);
+    }
+
+    function renderStudentStage() {
+      if (!state.classInfo) return;
+      state.selectedMakingWord = null;
+      const stage = state.classInfo.currentStage;
+      if (stage === 'submit' || stage === 'rate') return renderSubmitView();
+      if (stage === 'context') return renderContextView();
+      if (stage === 'wordmaking') return renderWordmakingView();
+      if (stage === 'dictionary') return renderDictionaryView();
+      setApp(studentHeader('수업을 준비하고 있어요', '선생님이 차시를 시작하면 이 화면이 자동으로 바뀝니다.'));
+      document.getElementById('studentContent').innerHTML = `<section class="waiting-panel card"><div class="waiting-glyph">✦</div><h2>조금만 기다려 주세요</h2><p class="help">우리 반 네 차시 활동이 곧 시작됩니다.</p></section>`;
+    }
+
+    function leaveStudentClass() {
+      if (state.stageTimer) clearInterval(state.stageTimer);
+      localStorage.removeItem('koreanClassCode');
+      state.classInfo = null;
+      location.href = CONFIG.baseUrl;
+    }
+
+    /* ------------------------------ 학생 제출 ------------------------------ */
+    async function renderSubmitView() {
+      setApp(studentHeader('1차시 · 우리 반 언어 수집하기', '우리 반에서 자주 쓰거나 자주 듣는 표현을 모으고 함께 별점을 매겨 보세요.'));
+      document.getElementById('studentContent').innerHTML = `<form id="submitWordForm" class="student-card card">
+        <label class="field-label" for="studentWord">수집할 단어 또는 표현</label><div class="word-submit-row"><select id="studentCategory" required aria-label="단어 유형"><option value="">유형 선택</option>${CATEGORIES.map(category=>`<option value="${attr(category)}">${esc(category)}</option>`).join('')}</select><input id="studentWord" type="text" maxlength="80" required autocomplete="off" placeholder="표현을 입력해 주세요"><button class="btn btn-primary btn-lg" type="submit">추가</button></div>
+      </form><div class="lesson-tools"><div><h3>우리 반이 모은 언어</h3><p>별을 눌러 1~5점으로 평가해요.</p></div></div><div id="lessonOneStudentList"><div class="empty">목록을 불러오는 중...</div></div>`;
+      document.getElementById('submitWordForm').addEventListener('submit', async event => {
+        event.preventDefault(); const word = document.getElementById('studentWord');
+        const button = event.submitter; setButtonBusy(button, true, '저장 중...');
+        try { const category=document.getElementById('studentCategory').value; await api('submitWord', state.anonId, word.value, category, state.classInfo.id); word.value = ''; word.focus(); toast(category+'로 분류해 우리 반 목록에 추가했습니다.', 'success'); await loadLessonOneStudentWords(); }
+        catch (error) { friendlyError(error); } finally { setButtonBusy(button, false); }
+      });
+      await loadLessonOneStudentWords();
+    }
+
+    async function loadLessonOneStudentWords() {
+      const root = document.getElementById('lessonOneStudentList'); if (!root) return;
+      try {
+        const words = await api('getApprovedWords', state.anonId, state.classInfo.id);
+        if (!document.getElementById('lessonOneStudentList')) return;
+        root.innerHTML = words.length ? words.map(word => ratingCard(word, 'word')).join('') : `<div class="empty">첫 번째 표현을 입력해 주세요.</div>`;
+      } catch (error) { root.innerHTML = `<div class="empty">${esc(friendlyError(error))}</div>`; }
+    }
+
+    function renderRateView() { return renderSubmitView(); }
+    function ratingCard(item, kind) {
+      const mine = item.mine ? `<span class="mine-label">${kind==='word'?'내가 제출한 표현':'내 예문'}</span>` : '';
+      const disabled = kind === 'example' && item.mine;
+      return `<article class="student-card card"><div class="rating-summary"><div>${kind==='word'?badge(item.category):''}<h2>${esc(kind==='word'?item.word:item.sentence)} ${kind==='word'?mine:''}</h2></div><span class="score-pill"><span class="score-star">★</span>평균 ${formatScore(item.averageRating)} <small>(${item.ratingCount||0})</small></span></div>${kind==='example'?`<p class="intent-copy"><b>친구의 작성 의도</b>${esc(item.intent)}</p><p class="help">맥락과 의도가 예문에 잘 드러났는지 평가해 보세요.</p>`:''}
+        <div class="star-row" role="group" aria-label="별점">${[1,2,3,4,5].map(score => `<button type="button" class="star ${score<=item.myRating?'on':''}" ${disabled?'disabled':''} aria-label="${score}점" onclick="saveRating('${kind}','${attr(item.id)}',${score},this)">★</button>`).join('')}</div>
+        <div class="rating-copy" id="score-${attr(item.id)}">${item.myRating ? '내 별점 '+item.myRating+'점' : disabled ? '내 예문은 평가할 수 없습니다.' : '별을 눌러 평가해 주세요.'}</div></article>`;
+    }
+    async function saveRating(kind, id, score, button) {
+      const card = button.closest('.student-card'); const stars = [...card.querySelectorAll('.star')]; stars.forEach(item => item.disabled = true);
+      try {
+        await api(kind === 'word' ? 'saveWordRating' : 'saveExampleRating', state.anonId, id, score);
+        stars.forEach((star,index) => star.classList.toggle('on', index < score)); document.getElementById('score-'+id).textContent = '내 별점 ' + score + '점'; toast('별점을 저장했습니다.', 'success');
+        if (kind === 'word') await loadLessonOneStudentWords();
+        else await refreshContextLesson(true);
+      } catch (error) { friendlyError(error); }
+      finally { stars.forEach(item => item.disabled = false); }
+    }
+
+    /* ------------------------------ 상황 활동 학생 ------------------------------ */
+    async function renderContextView() {
+      setApp(studentHeader('2차시 · 언어 사용 맥락 고려하기', '표현과 맥락을 하나씩 골라 예문을 만들고, 그렇게 쓴 의도까지 설명해 보세요.'));
+      document.getElementById('studentContent').innerHTML = `<div class="empty">활동을 불러오는 중...</div>`;
+      state.selectedContextTask = null; state.contextShowRatings = false;
+      try { state.contextLesson = await api('getContextLesson', state.anonId, state.classInfo.id); renderContextLessonList(); }
+      catch (error) { document.getElementById('studentContent').innerHTML = `<div class="empty">${esc(friendlyError(error))}</div>`; }
+    }
+    function renderContextLessonList() {
+      const groups = (state.contextLesson && state.contextLesson.groups) || [];
+      document.getElementById('studentContent').innerHTML = `<div class="lesson-tools"><div><h3>맥락과 표현 고르기</h3><p>목록을 하나씩 눌러 예문과 작성 의도를 완성해요.</p></div><button class="btn" onclick="renderContextView()">↻ 목록 새로고침</button></div><section class="context-student-groups">${groups.length?groups.map((group,index)=>`<article class="student-card context-student-group card"><p class="eyebrow">맥락 ${String(index+1).padStart(2,'0')}</p><h2>${esc(group.title)}</h2><p class="context-prompt">${esc(group.context)}</p><div class="context-student-words">${group.words.map(word=>`<button class="context-student-word ${word.submitted?'done':''}" onclick="selectContextTask('${attr(word.taskId)}')"><span>${esc(word.word)} ${badge(word.category)}</span><small>${word.submitted?'✓ 답변 완료':'답변하기'} · ${word.exampleCount}명 참여</small></button>`).join('')}</div></article>`).join(''):'<div class="empty">선생님이 맥락과 표현 목록을 준비하고 있습니다.</div>'}</section>`;
+    }
+    function findContextTask(taskId) {
+      for (const group of ((state.contextLesson && state.contextLesson.groups) || [])) {
+        const word = group.words.find(item => item.taskId === taskId);
+        if (word) return Object.assign({}, word, { groupId: group.id, contextTitle: group.title, context: group.context });
+      }
+      return null;
+    }
+    function selectContextTask(taskId) { state.selectedContextTask=findContextTask(taskId);state.contextShowRatings=false;renderStudentContext(false);window.scrollTo({top:0,behavior:'smooth'}); }
+    function renderStudentContext(showRatings) {
+      const task = state.selectedContextTask;
+      if (!task) { renderContextLessonList(); return; }
+      if (showRatings) {
+        const others = task.examples.filter(item => !item.mine);
+        document.getElementById('studentContent').innerHTML = `<button class="btn btn-block" onclick="renderStudentContext(false)" style="margin-bottom:12px">← 내 답변으로 돌아가기</button><div class="student-card card"><p class="eyebrow">${esc(task.contextTitle)}</p>${badge(task.category)}<h2>${esc(task.word)} · 친구들의 예문</h2><p class="context-prompt">${esc(task.context)}</p></div>${others.length ? others.map(item => ratingCard(item,'example')).join('') : '<div class="empty">평가할 다른 친구의 예문이 아직 없습니다.</div>'}`;
+        return;
+      }
+      const mine = task.ownResponse;
+      document.getElementById('studentContent').innerHTML = `<button class="btn btn-block" onclick="state.selectedContextTask=null;renderContextLessonList()" style="margin-bottom:12px">← 전체 목록</button><article class="student-card card"><p class="eyebrow">${esc(task.contextTitle)} · 함께 살펴볼 표현</p>${badge(task.category)}<h2>${esc(task.word)}</h2><p class="context-prompt">${esc(task.context)}</p></article>
+        <form id="exampleForm" class="student-card card"><label class="field-label" for="sentence">이 맥락에서 사용할 예문</label><textarea id="sentence" required maxlength="800" placeholder="예문을 직접 만들어 보세요.">${esc(mine?mine.sentence:'')}</textarea>
+        <label class="field-label" for="exampleIntent">이 문장을 만든 의도</label><textarea id="exampleIntent" required maxlength="600" placeholder="왜 이 표현과 문장을 골랐는지, 어떤 느낌이나 뜻을 전하려 했는지 적어 보세요.">${esc(mine?mine.intent:'')}</textarea><button class="btn btn-primary btn-lg btn-block" type="submit">${mine?'예문과 의도 수정':'예문과 의도 제출'}</button></form>
+        ${mine?'<button class="btn btn-soft btn-lg btn-block" onclick="refreshContextLesson(true)">다른 친구들이 만든 예문 평가하기</button>':''}`;
+      document.getElementById('exampleForm').addEventListener('submit', async event => {
+        event.preventDefault(); const button = event.submitter; setButtonBusy(button,true,'저장 중...');
+        try { await api('submitContextExample',state.anonId,task.taskId,document.getElementById('sentence').value,document.getElementById('exampleIntent').value); toast('예문과 작성 의도를 저장했습니다.','success'); await refreshContextLesson(false); }
+        catch(error){friendlyError(error);setButtonBusy(button,false);}
+      });
+    }
+    async function refreshContextLesson(showRatings){const taskId=state.selectedContextTask&&state.selectedContextTask.taskId;showLoading('활동을 새로 불러오는 중...');try{state.contextLesson=await api('getContextLesson',state.anonId,state.classInfo.id);state.selectedContextTask=taskId?findContextTask(taskId):null;state.contextShowRatings=Boolean(showRatings);if(state.selectedContextTask)renderStudentContext(state.contextShowRatings);else renderContextLessonList();}catch(error){friendlyError(error);}finally{hideLoading();}}
+
+    /* ------------------------------ 우리말 만들기 학생 ------------------------------ */
+    async function renderWordmakingView() {
+      setApp(studentHeader('3차시 · 우리말 순화하기', '알맞은 우리말과 바꾼 이유를 제안하고, 친구들의 생각에 별점을 매겨 보세요.'));
+      document.getElementById('studentContent').innerHTML='<div class="empty">표현 목록을 불러오는 중...</div>';
+      try { state.makingWords=await api('getWordmakingWords',state.anonId,state.classInfo.id); if(CONFIG.wordId) state.selectedMakingWord=state.makingWords.find(item=>item.id===CONFIG.wordId)||null; renderMakingContent(); }
+      catch(error){document.getElementById('studentContent').innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;}
+    }
+    function renderMakingContent(){
+      const root=document.getElementById('studentContent');
+      if(state.selectedMakingWord){ const word=state.selectedMakingWord; const own=word.ownSuggestion||{}; root.innerHTML=`<button class="btn btn-block" onclick="state.selectedMakingWord=null;renderMakingContent()" style="margin-bottom:12px">← 다른 표현 고르기</button><article class="student-card card"><p class="eyebrow">원래 표현</p>${badge(word.category)}<h2>${esc(word.word)}</h2></article>
+        <form id="suggestionForm" class="student-card card"><label class="field-label" for="suggestedWord">내가 생각한 순화말</label><input id="suggestedWord" type="text" maxlength="120" required placeholder="더 알맞은 우리말을 적어 보세요" value="${attr(own.suggestedWord||'')}">
+        <label class="field-label" for="suggestionReason">이렇게 바꾼 이유</label><textarea id="suggestionReason" maxlength="600" required placeholder="말의 느낌과 뜻을 생각해 설명해 보세요">${esc(own.reason||'')}</textarea>
+        <button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:18px">${word.submitted?'우리말 제안 수정':'우리말 제안 제출'}</button></form>
+        <div class="lesson-tools"><div><h3>우리 반의 순화말</h3><p>친구들의 순화말과 이유를 읽고 1~5점으로 평가해요.</p></div><span class="count">${word.suggestionCount||0}개</span></div>
+        <div class="suggestion-rating-list">${word.suggestions&&word.suggestions.length?word.suggestions.map(suggestionRatingCard).join(''):'<div class="empty">첫 번째 순화말을 제안해 주세요.</div>'}</div>`;
+        document.getElementById('suggestionForm').addEventListener('submit',submitSuggestion); return;
+      }
+      root.innerHTML=`<div class="lesson-tools"><div><h3>순화할 표현</h3><p>하나씩 골라 나만의 순화말을 제안해요.</p></div><button class="btn" onclick="renderWordmakingView()">↻ 목록 새로고침</button></div><div id="makingList"></div>`;
+      renderMakingList();
+    }
+    function renderMakingList(){ const root=document.getElementById('makingList'); if(!root)return;root.innerHTML=state.makingWords.length?state.makingWords.map(item=>`<article class="student-card card"><div class="rating-summary"><span>${badge(item.category)} ${item.submitted?'<span class="mine-label">제안 완료</span>':''}</span><span class="count">순화말 ${item.suggestionCount||0}개</span></div><h2>${esc(item.word)}</h2><button class="btn btn-primary btn-block" onclick="selectMakingWord('${attr(item.id)}')">${item.submitted?'제안·별점 보기':'이 표현 순화하기'}</button></article>`).join(''):'<div class="empty">선생님이 순화할 표현을 고르는 중입니다.</div>'; }
+    function selectMakingWord(id){state.selectedMakingWord=state.makingWords.find(item=>item.id===id);renderMakingContent();window.scrollTo({top:0,behavior:'smooth'});}
+    function suggestionRatingCard(item){const disabled=item.mine;return `<article class="suggestion-rating-card student-card card"><div class="rating-summary"><div><span class="eyebrow">${item.mine?'내 순화말':'친구의 순화말'}</span><h2>${esc(item.suggestedWord)}</h2></div><span class="score-pill"><span class="score-star">★</span>평균 ${formatScore(item.averageRating)} <small>(${item.ratingCount||0})</small></span></div><p class="intent-copy"><b>순화한 이유</b>${esc(item.reason)}</p><div class="star-row" role="group" aria-label="순화말 별점">${[1,2,3,4,5].map(score=>`<button type="button" class="star ${score<=item.myRating?'on':''}" ${disabled?'disabled':''} aria-label="${score}점" onclick="saveSuggestionScore('${attr(item.id)}',${score},this)">★</button>`).join('')}</div><div class="rating-copy">${item.myRating?'내 별점 '+item.myRating+'점':disabled?'내 순화말은 평가할 수 없습니다.':'별을 눌러 평가해 주세요.'}</div></article>`;}
+    async function submitSuggestion(event){event.preventDefault();const button=event.submitter;const wordId=state.selectedMakingWord.id;setButtonBusy(button,true,'저장 중...');const payload={wordId,suggestionType:'새로운 말 만들기',suggestedWord:document.getElementById('suggestedWord').value,reason:document.getElementById('suggestionReason').value};try{await api('submitWordSuggestion',state.anonId,payload);toast('순화말을 저장했습니다.','success');state.makingWords=await api('getWordmakingWords',state.anonId,state.classInfo.id);state.selectedMakingWord=state.makingWords.find(item=>item.id===wordId)||null;renderMakingContent();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+    async function saveSuggestionScore(id,score,button){const card=button.closest('.suggestion-rating-card');const stars=[...card.querySelectorAll('.star')];stars.forEach(item=>item.disabled=true);const wordId=state.selectedMakingWord.id;try{await api('saveSuggestionRating',state.anonId,id,score);toast('순화말 별점을 저장했습니다.','success');state.makingWords=await api('getWordmakingWords',state.anonId,state.classInfo.id);state.selectedMakingWord=state.makingWords.find(item=>item.id===wordId)||null;renderMakingContent();}catch(error){friendlyError(error);stars.forEach(item=>item.disabled=false);}}
+
+    /* ------------------------------ 공개 사전 ------------------------------ */
+    async function renderDictionaryView(){
+      setApp(studentHeader('4차시 · 우리 반 우리말 사전','완성된 사전을 함께 읽고, 바른 언어생활을 위한 나의 다짐을 남겨 보세요.'));
+      document.getElementById('studentContent').innerHTML=`<section class="dictionary-cover card"><p class="eyebrow" style="color:#d9eee6">함께 고르고, 함께 가꾼 말</p><h1>우리 반 우리말 사전</h1><button class="btn no-print" onclick="window.print()" style="margin-top:18px">인쇄 · PDF 저장</button></section><div id="dictionaryList" class="dictionary-list" style="margin-top:16px"><div class="empty">사전을 불러오는 중...</div></div>
+        <div class="lesson-tools pledge-heading"><div><h3>언어 순화를 위한 나의 다짐</h3><p>한 사람당 하나의 다짐을 익명 댓글로 남길 수 있어요.</p></div></div>
+        <form id="pledgeForm" class="student-card pledge-form card no-print"><label class="field-label" for="pledgeText">나의 다짐</label><textarea id="pledgeText" required maxlength="500" placeholder="예: 상대의 마음을 생각하며 쉽고 다정한 우리말을 사용하겠습니다."></textarea><button id="savePledgeBtn" class="btn btn-primary btn-lg btn-block" type="submit">다짐 남기기</button></form>
+        <div id="pledgeList" class="pledge-list"><div class="empty">우리 반의 다짐을 불러오는 중...</div></div>`;
+      document.getElementById('pledgeForm').addEventListener('submit',submitClassPledge);
+      try{[state.publishedDictionary,state.classPledges]=await Promise.all([api('getPublishedDictionary',state.anonId,state.classInfo.id),api('getClassPledges',state.anonId,state.classInfo.id)]);renderDictionaryList();renderPledgeList();setTimeout(()=>{if(new URLSearchParams(location.search).get('print')==='1')window.print();},500);}catch(error){document.getElementById('dictionaryList').innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;document.getElementById('pledgeList').innerHTML='';}
+    }
+    function renderDictionaryList(){const root=document.getElementById('dictionaryList');const list=state.publishedDictionary||[];root.innerHTML=list.length?list.map((item,index)=>`<article class="dictionary-card card"><p class="eyebrow">${String(index+1).padStart(2,'0')} · ${esc(item.originalWord)}</p>${badge(item.category)}<h2>${esc(item.finalWord)}</h2><div class="definition"><div><b>뜻과 순화한 이유</b>${esc(item.meaning)}</div>${item.exampleSentence?`<div><b>사용 예문</b>${esc(item.exampleSentence)}</div>`:''}</div></article>`).join(''):'<div class="empty">선생님이 사전 원고를 완성하는 중입니다.</div>';}
+    function renderPledgeList(){const root=document.getElementById('pledgeList');if(!root)return;const list=state.classPledges||[];const mine=list.find(item=>item.mine);const field=document.getElementById('pledgeText');if(field)field.value=mine?mine.pledge:'';const button=document.getElementById('savePledgeBtn');if(button)button.textContent=mine?'내 다짐 수정':'다짐 남기기';root.innerHTML=list.length?list.map((item,index)=>`<article class="pledge-comment card"><span class="pledge-avatar">${String(index+1).padStart(2,'0')}</span><div><p class="eyebrow">익명 ${String(index+1).padStart(2,'0')} ${item.mine?'<span class="mine-label">나</span>':''}</p><p>${esc(item.pledge)}</p></div></article>`).join(''):'<div class="empty">첫 번째 다짐을 남겨 주세요.</div>';}
+    async function submitClassPledge(event){event.preventDefault();const button=event.submitter;setButtonBusy(button,true,'저장 중...');try{await api('saveClassPledge',state.anonId,state.classInfo.id,document.getElementById('pledgeText').value);toast('나의 다짐을 남겼습니다.','success');state.classPledges=await api('getClassPledges',state.anonId,state.classInfo.id);setButtonBusy(button,false);renderPledgeList();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+
+    /* ------------------------------ 공통 모달 / QR ------------------------------ */
+    function openModal(title, body, footer, wide) {
+      document.getElementById('modalRoot').innerHTML=`<div class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><section class="modal ${wide?'wide':''}"><header class="modal-head"><h2 id="modalTitle">${esc(title)}</h2><button class="icon-btn" onclick="closeModal()" aria-label="닫기">×</button></header><div class="modal-body">${body}</div>${footer?`<footer class="modal-foot">${footer}</footer>`:''}</section></div>`;
+      document.addEventListener('keydown',escapeModal); document.querySelector('.modal-layer').addEventListener('click',event=>{if(event.target.classList.contains('modal-layer'))closeModal();});
+    }
+    function closeModal(){const full=document.fullscreenElement;if(full&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});document.getElementById('modalRoot').innerHTML='';document.removeEventListener('keydown',escapeModal);}
+    function escapeModal(event){if(event.key==='Escape'&&!document.fullscreenElement)closeModal();}
+    function confirmModal(title,message,onConfirm,confirmLabel){openModal(title,`<p class="confirm-copy">${esc(message)}</p>`,`<button class="btn" onclick="closeModal()">취소</button><button id="confirmAction" class="btn btn-danger">${esc(confirmLabel||'확인')}</button>`);document.getElementById('confirmAction').addEventListener('click',onConfirm);}
+    function openQr(url,title){
+      openModal(title,`<p class="drag-hint">PC에서는 창 위쪽을 잡고 빈 공간으로 옮길 수 있습니다.</p><div id="qrBox" class="qr-box"><span class="help">QR 코드를 만드는 중...</span></div><div class="url-box">${esc(url)}</div>`,`<button class="btn" onclick="closeModal()">닫기</button><button class="btn" onclick="copyUrl('${attr(url)}')">주소 복사</button><button class="btn btn-primary" onclick="toggleQrFull()">전체 화면</button>`,true);
+      const layer=document.querySelector('.modal-layer');const modal=document.querySelector('.modal');if(layer)layer.classList.add('qr-layer');if(modal){modal.classList.add('qr-modal');enableQrDrag(modal);}
+      setTimeout(()=>{const box=document.getElementById('qrBox');box.innerHTML='';if(window.QRCode){new QRCode(box,{text:url,width:460,height:460,colorDark:'#17383e',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}else{box.innerHTML='<p>QR 라이브러리를 불러오지 못했습니다.<br>아래 주소를 학생에게 공유해 주세요.</p>';}},0);
+    }
+    function enableQrDrag(modal){if(innerWidth<800||!matchMedia('(pointer:fine)').matches)return;const head=modal.querySelector('.modal-head');if(!head)return;const rect=modal.getBoundingClientRect();modal.classList.add('is-draggable');modal.style.left=rect.left+'px';modal.style.top=rect.top+'px';modal.style.width=rect.width+'px';let drag=null;head.addEventListener('pointerdown',event=>{if(event.button!==0||event.target.closest('button'))return;const current=modal.getBoundingClientRect();drag={x:event.clientX-current.left,y:event.clientY-current.top};head.setPointerCapture(event.pointerId);});head.addEventListener('pointermove',event=>{if(!drag)return;const maxLeft=Math.max(8,innerWidth-modal.offsetWidth-8);const maxTop=Math.max(8,innerHeight-70);modal.style.left=Math.min(maxLeft,Math.max(8,event.clientX-drag.x))+'px';modal.style.top=Math.min(maxTop,Math.max(8,event.clientY-drag.y))+'px';});const stop=()=>{drag=null;};head.addEventListener('pointerup',stop);head.addEventListener('pointercancel',stop);}
+    async function copyUrl(url,label){const subject=label||'주소를';try{await navigator.clipboard.writeText(url);toast(subject+' 복사했습니다.','success');}catch(error){const area=document.createElement('textarea');area.value=url;document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();toast(subject+' 복사했습니다.','success');}}
+    function toggleQrFull(){const layer=document.querySelector('.modal-layer');const modal=layer&&layer.querySelector('.modal');if(document.fullscreenElement){if(document.exitFullscreen)document.exitFullscreen().catch(()=>{});layer.classList.remove('qr-full');return;}if(!layer||!modal)return;modal.classList.remove('is-draggable');modal.style.left='';modal.style.top='';modal.style.width='';layer.classList.add('qr-full');if(layer.requestFullscreen)layer.requestFullscreen().catch(()=>{});}
+  </script>
+</body>
+</html>
