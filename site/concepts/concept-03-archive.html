@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="우리말 바로쓰기 메인 화면 시안 03 - 우리말 아카이브">
+  <title>우리말 바로쓰기 · 우리말 아카이브</title>
+  <style>
+    :root{--hanji:#eee8dc;--page:#faf6eb;--ink:#172c39;--blue:#274d61;--red:#ad3f32;--gold:#b48a4c;--line:rgba(23,44,57,.24);--muted:#6f706a}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--hanji);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;word-break:keep-all}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence baseFrequency='.04' numOctaves='4' seed='7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='.35'/%3E%3C/svg%3E")}button,input{font:inherit}a{color:inherit}
+    .frame{width:min(1380px,calc(100% - 42px));margin:21px auto;border:1px solid var(--ink);position:relative;background:rgba(238,232,220,.72)}
+    .top{min-height:82px;padding:17px clamp(20px,4vw,54px);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-bottom:1px solid var(--ink)}
+    .brand{justify-self:start;display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:900;letter-spacing:-.04em}.seal{display:grid;place-items:center;width:42px;height:42px;background:var(--red);color:var(--page);font-family:"Noto Serif KR",serif;font-weight:700;border-radius:4px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.16)}
+    .top-title{font-family:"Noto Serif KR",Batang,serif;font-size:13px;letter-spacing:.18em}.archive-no{justify-self:end;color:var(--muted);font:700 10px ui-monospace,monospace;letter-spacing:.12em}
+    .hero{display:grid;grid-template-columns:86px minmax(0,1fr);border-bottom:1px solid var(--ink);min-height:660px}
+    .spine{border-right:1px solid var(--ink);display:flex;align-items:center;flex-direction:column;padding:25px 0}.spine strong{writing-mode:vertical-rl;font-family:"Noto Serif KR",Batang,serif;font-size:18px;letter-spacing:.18em}.spine span{margin-top:auto;font:700 10px ui-monospace,monospace;color:var(--red)}
+    .hero-main{position:relative;display:grid;grid-template-columns:minmax(0,.85fr) minmax(480px,1.15fr);align-items:center;gap:clamp(24px,5vw,72px);padding:clamp(55px,7vw,88px);overflow:hidden}
+    .hero-copy{position:relative;z-index:2}.kicker{margin:0 0 20px;color:var(--red);font:800 11px ui-monospace,monospace;letter-spacing:.16em}.kicker:after{content:"";display:inline-block;width:54px;height:1px;margin-left:14px;vertical-align:middle;background:var(--red)}h1{margin:0;font-family:"Noto Serif KR",Batang,serif;font-size:clamp(52px,6.5vw,91px);font-weight:600;line-height:1.13;letter-spacing:-.07em}h1 em{display:inline-block;color:var(--red);font-style:normal;position:relative}h1 em:before{content:"";position:absolute;inset:5% -10%;border:1px solid rgba(173,63,50,.45);border-radius:50%;transform:rotate(-7deg);animation:draw 1.2s .5s ease both}
+    .lead{max-width:520px;margin:31px 0 0;color:#555e60;line-height:1.85;font-size:17px}.scroll{display:inline-flex;align-items:center;gap:9px;margin-top:35px;color:var(--blue);font-size:12px;font-weight:900;text-decoration:none}.scroll:before{content:"↓";display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--blue);border-radius:50%;animation:bob 2s ease-in-out infinite}
+    .book-wrap{position:relative;perspective:1200px}.book-shadow{position:absolute;left:7%;right:2%;bottom:-22px;height:50px;border-radius:50%;background:rgba(27,37,37,.22);filter:blur(19px)}.book{position:relative;display:grid;grid-template-columns:1fr 1fr;aspect-ratio:1.25/1;transform:rotate(2deg);filter:drop-shadow(0 23px 22px rgba(27,37,37,.18))}.page{position:relative;padding:clamp(23px,3vw,42px);background:var(--page);border:1px solid #c7bcaa;overflow:hidden}.page.left{border-radius:7px 0 0 13px;box-shadow:inset -18px 0 27px rgba(66,55,43,.08)}.page.right{border-radius:0 7px 13px 0;box-shadow:inset 18px 0 27px rgba(66,55,43,.07);transform-origin:left center;animation:page-breathe 6s ease-in-out infinite}.page small{font:700 9px ui-monospace,monospace;color:var(--gold);letter-spacing:.14em}.big-char{position:absolute;left:50%;top:50%;translate:-50% -54%;font-family:"Noto Serif KR",Batang,serif;font-size:clamp(100px,15vw,205px);color:var(--blue);line-height:1}.pronounce{position:absolute;left:28px;bottom:25px;font-size:11px;color:var(--muted);letter-spacing:.06em}.page.right h2{margin:23px 0 15px;font-family:"Noto Serif KR",Batang,serif;font-size:clamp(23px,2.4vw,34px);line-height:1.35}.page.right p{font-size:13px;color:var(--muted);line-height:1.8}.red-rule{width:30px;height:3px;background:var(--red);margin:24px 0}.word-chips{display:flex;flex-wrap:wrap;gap:7px}.word-chips span{padding:7px 9px;border:1px solid var(--line);font-size:10px;animation:ink 4s ease-in-out infinite}.word-chips span:nth-child(2){animation-delay:-1s}.word-chips span:nth-child(3){animation-delay:-2s}.word-chips span:nth-child(4){animation-delay:-3s}
+    .access{display:grid;grid-template-columns:.72fr 1.28fr;min-height:380px;border-bottom:1px solid var(--ink)}.access-copy{padding:clamp(42px,6vw,76px);border-right:1px solid var(--ink);background:var(--blue);color:var(--page)}.access-copy .label{font:700 10px ui-monospace,monospace;color:#d9b77f;letter-spacing:.16em}.access-copy h2{margin:17px 0 20px;font-family:"Noto Serif KR",Batang,serif;font-size:clamp(32px,4vw,55px);font-weight:500;line-height:1.25}.access-copy p{max-width:410px;margin:0;color:#c2d0d4;line-height:1.75;font-size:14px}
+    .catalog{padding:clamp(34px,5vw,58px);background:var(--page)}.tab-labels{display:flex;gap:7px;margin-bottom:16px}.tab-labels span{padding:7px 11px;background:var(--red);color:white;font:700 10px ui-monospace,monospace;letter-spacing:.08em}.tab-labels span:last-child{background:var(--gold)}.catalog-row{display:grid;grid-template-columns:60px minmax(0,1fr) auto;align-items:center;border-top:1px solid var(--ink);padding:24px 0;gap:22px}.catalog-row:last-child{border-bottom:1px solid var(--ink)}.card-no{font:700 12px ui-monospace,monospace;color:var(--red)}.catalog-row h3{margin:0 0 5px;font-size:20px}.catalog-row p{margin:0;color:var(--muted);font-size:12px}.form-cell{display:flex;gap:7px;min-width:330px}input{min-width:0;width:100%;height:49px;padding:0 14px;border:1px solid var(--ink);background:transparent;outline:none;text-transform:uppercase;font-weight:800;letter-spacing:.1em}input:focus{box-shadow:inset 0 0 0 2px var(--red)}.btn{min-height:49px;padding:0 19px;border:1px solid var(--ink);background:var(--ink);color:var(--page);display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:850;transition:.22s;white-space:nowrap}.btn:hover{background:var(--red);border-color:var(--red);transform:translateY(-2px)}.teacher-btn{min-width:170px}
+    .curriculum{padding:58px clamp(24px,6vw,82px) 64px}.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:30px}.section-head h2{margin:0;font-family:"Noto Serif KR",Batang,serif;font-size:34px}.section-head span{font:700 10px ui-monospace,monospace;color:var(--red);letter-spacing:.14em}.lessons{display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--ink)}.lesson{padding:27px 23px;min-height:146px;border-right:1px solid var(--line)}.lesson:last-child{border-right:0}.lesson b{font:700 10px ui-monospace,monospace;color:var(--red)}.lesson strong{display:block;margin:29px 0 5px;font-family:"Noto Serif KR",Batang,serif;font-size:18px}.lesson small{color:var(--muted)}footer{display:flex;justify-content:space-between;padding:24px clamp(24px,6vw,82px);border-top:1px solid var(--ink);font-size:11px;color:var(--muted)}
+    .toast{position:fixed;left:50%;bottom:26px;z-index:10;translate:-50% 10px;padding:13px 20px;background:var(--red);color:white;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1;translate:-50% 0}
+    @keyframes draw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}@keyframes bob{50%{transform:translateY(6px)}}@keyframes page-breathe{50%{transform:rotateY(-3deg)}}@keyframes ink{50%{background:var(--blue);color:var(--page)}}
+    @media(max-width:1000px){.hero-main{grid-template-columns:1fr;padding-bottom:70px}.hero-copy{text-align:center}.lead{margin-inline:auto}.book-wrap{width:min(620px,100%);margin:auto}.access{grid-template-columns:1fr}.access-copy{border-right:0;border-bottom:1px solid var(--ink)}.lessons{grid-template-columns:1fr 1fr}.lesson:nth-child(2){border-right:0}.lesson:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+    @media(max-width:680px){.frame{width:calc(100% - 16px);margin:8px auto}.top{grid-template-columns:1fr auto}.top-title{display:none}.hero{grid-template-columns:45px minmax(0,1fr)}.spine{padding-block:17px}.spine strong{font-size:13px}.hero-main{padding:55px 19px}.hero-copy{text-align:left}.book{aspect-ratio:1/1.08}.page{padding:19px}.page.right p{font-size:11px}.word-chips span:nth-child(n+3){display:none}.catalog{padding:28px 20px}.catalog-row{grid-template-columns:38px 1fr}.form-cell,.teacher-btn{grid-column:1/-1;min-width:0;width:100%}.form-cell{display:grid}.section-head{display:block}.section-head span{display:block;margin-top:10px}.lessons{grid-template-columns:1fr}.lesson{border-right:0;border-bottom:1px solid var(--line)!important}.lesson:last-child{border-bottom:0!important}footer{flex-direction:column;gap:10px}.archive-no{font-size:0}.archive-no:after{content:"VOL.03";font-size:10px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="frame">
+    <nav class="top"><a class="brand" href="../index.html"><span class="seal">우리</span><span>우리말 바로쓰기</span></a><span class="top-title">교실에서 함께 만드는 살아 있는 우리말 기록</span><span class="archive-no">ARCHIVE · VOL.03</span></nav>
+    <section class="hero">
+      <aside class="spine"><strong>우리 반 말모이</strong><span>2026</span></aside>
+      <div class="hero-main">
+        <div class="hero-copy">
+          <p class="kicker">THE LIVING LANGUAGE ARCHIVE</p>
+          <h1>오늘의 말을<br>내일의 <em>기록</em>으로.</h1>
+          <p class="lead">교실에서 발견한 말 한마디를 오래 들여다봅니다. 쓰임을 살피고 더 나은 표현을 찾아, 우리 반만의 우리말 사전을 완성합니다.</p>
+          <a class="scroll" href="#catalog">수업 입장 펼치기</a>
+        </div>
+        <div class="book-wrap" aria-label="펼쳐진 우리말 사전 그래픽">
+          <div class="book-shadow"></div><div class="book">
+            <article class="page left"><small>ENTRY · 001</small><span class="big-char">말</span><span class="pronounce">[말ː] 생각과 마음을 전하는 소리</span></article>
+            <article class="page right"><small>우리 반 새말 사전</small><h2>함께 찾고,<br>함께 다듬은 말</h2><div class="red-rule"></div><p>한 사람의 발견이 친구의 관점을 만나 새로운 언어가 됩니다.</p><div class="word-chips"><span>발견</span><span>맥락</span><span>배려</span><span>기록</span></div></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="access" id="catalog">
+      <div class="access-copy"><span class="label">CLASSROOM CATALOG</span><h2>우리 반 기록실에<br>입장합니다.</h2><p>학생은 개인정보 없이 클래스 코드만으로 참여합니다. 교사는 별도의 수업 관리 공간에서 활동을 운영합니다.</p></div>
+      <div class="catalog">
+        <div class="tab-labels"><span>열람 카드</span><span>수업 등록</span></div>
+        <form class="catalog-row student-form"><span class="card-no">A-01</span><div><h3>학생 참여</h3><p>선생님에게 받은 클래스 코드를 적어 주세요.</p></div><div class="form-cell"><input class="class-code" maxlength="12" autocomplete="off" placeholder="HANGUL1" aria-label="클래스 코드" required><button class="btn" type="submit">기록실 입장</button></div></form>
+        <div class="catalog-row"><span class="card-no">T-02</span><div><h3>교사 수업 관리</h3><p>클래스를 개설하고 차시와 사전 원고를 관리합니다.</p></div><a class="btn teacher-btn" href="../index.html?view=teacher">교사 화면 열기</a></div>
+      </div>
+    </section>
+
+    <section class="curriculum">
+      <div class="section-head"><h2>한 권의 사전이 만들어지는 과정</h2><span>FOUR LESSONS · ONE ARCHIVE</span></div>
+      <div class="lessons">
+        <article class="lesson"><b>첫째 장</b><strong>우리 반 언어 모으기</strong><small>일상에서 표현을 발견합니다.</small></article>
+        <article class="lesson"><b>둘째 장</b><strong>말의 맥락 살피기</strong><small>쓰임과 영향을 이야기합니다.</small></article>
+        <article class="lesson"><b>셋째 장</b><strong>새로운 우리말 짓기</strong><small>더 나은 표현을 제안합니다.</small></article>
+        <article class="lesson"><b>넷째 장</b><strong>우리말 사전 엮기</strong><small>함께 고른 말을 기록합니다.</small></article>
+      </div>
+    </section>
+    <footer><span>우리말 바로쓰기 · 참여형 국어 수업</span><a href="../index.html?view=admin">시스템 관리자</a></footer>
+  </main>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const input=document.querySelector('.class-code'),form=document.querySelector('.student-form'),toast=document.querySelector('.toast');
+    input.addEventListener('input',()=>input.value=input.value.replace(/[^a-z0-9]/gi,'').toUpperCase());
+    form.addEventListener('submit',event=>{event.preventDefault();const code=input.value.trim();if(!/^[A-Z0-9]{4,12}$/.test(code)){toast.textContent='클래스 코드는 영문·숫자 4~12자리입니다.';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400);return;}location.href='../index.html?view=student&code='+encodeURIComponent(code)});
+  </script>
+</body>
+</html>

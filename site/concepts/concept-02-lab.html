@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="우리말 바로쓰기 메인 화면 시안 02 - 디지털 언어 연구실">
+  <title>우리말 바로쓰기 · 디지털 언어 연구실</title>
+  <style>
+    :root{--navy:#071629;--panel:#0c2037;--panel2:#102945;--cyan:#72efff;--lime:#c9ff62;--white:#f5f8fc;--muted:#8da2b9;--line:rgba(166,211,255,.18)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--navy);color:var(--white);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;word-break:keep-all;overflow-x:hidden}button,input{font:inherit}a{color:inherit}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(rgba(114,239,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(114,239,255,.035) 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(to bottom,#000,transparent 92%)}
+    .app{display:grid;grid-template-columns:86px minmax(0,1fr);min-height:100vh;position:relative}
+    .rail{position:relative;z-index:3;border-right:1px solid var(--line);display:flex;align-items:center;flex-direction:column;padding:22px 0;background:rgba(4,16,30,.74);backdrop-filter:blur(16px)}
+    .logo{width:44px;height:44px;border:1px solid var(--cyan);border-radius:14px;display:grid;place-items:center;text-decoration:none;color:var(--cyan);font-weight:900;box-shadow:inset 0 0 18px rgba(114,239,255,.08),0 0 25px rgba(114,239,255,.08)}
+    .rail-text{margin:auto;writing-mode:vertical-rl;rotate:180deg;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.22em}
+    .rail-index{font:700 10px/1 ui-monospace,monospace;color:var(--lime)}
+    .content{min-width:0}
+    .nav{height:88px;border-bottom:1px solid var(--line);padding:0 clamp(22px,4vw,62px);display:flex;align-items:center;gap:25px}
+    .brand{font-weight:900;letter-spacing:-.035em}.status{display:flex;align-items:center;gap:8px;margin-left:auto;color:var(--muted);font:700 11px ui-monospace,monospace;letter-spacing:.08em}.status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime);animation:blink 1.8s ease-in-out infinite}
+    .nav a{color:var(--muted);font-size:12px;text-decoration:none}.nav a:hover{color:var(--cyan)}
+    .hero{position:relative;isolation:isolate;min-height:630px;padding:clamp(60px,8vw,104px) clamp(24px,6vw,92px) 70px;overflow:hidden;border-bottom:1px solid var(--line)}
+    .copy{position:relative;z-index:2;max-width:760px}.kicker{display:inline-flex;align-items:center;gap:10px;margin:0;color:var(--cyan);font:700 11px ui-monospace,monospace;letter-spacing:.16em}.kicker:before{content:"01";display:grid;place-items:center;width:28px;height:28px;border:1px solid currentColor;border-radius:50%;font-size:9px}
+    h1{margin:27px 0 25px;font-size:clamp(53px,7.3vw,106px);line-height:.98;letter-spacing:-.075em}.outline{color:transparent;-webkit-text-stroke:1px var(--cyan);text-shadow:0 0 42px rgba(114,239,255,.15)}
+    .lead{max-width:570px;margin:0;color:#b1c0d0;font-size:clamp(16px,1.5vw,20px);line-height:1.75}.hero-actions{display:flex;gap:12px;margin-top:36px}
+    .btn{min-height:51px;padding:0 21px;border:1px solid var(--cyan);border-radius:8px;background:var(--cyan);color:#071629;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:900;transition:.2s}.btn:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(114,239,255,.2)}.btn.ghost{background:transparent;color:var(--cyan)}
+    .network{position:absolute;z-index:-1;right:-40px;top:20px;width:min(58vw,780px);height:610px;opacity:.84}.network svg{width:100%;height:100%;overflow:visible}.net-line{fill:none;stroke:rgba(114,239,255,.28);stroke-width:1;stroke-dasharray:4 8;animation:dash 15s linear infinite}.net-line.lime{stroke:rgba(201,255,98,.38)}.node-ring{fill:rgba(7,22,41,.72);stroke:rgba(114,239,255,.58);stroke-width:1}.node-core{fill:var(--cyan);filter:drop-shadow(0 0 10px var(--cyan));animation:node 3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.node-core.lime{fill:var(--lime);filter:drop-shadow(0 0 10px var(--lime));animation-delay:-1.2s}.data-label{fill:#bed1e4;font-size:10px;font-family:ui-monospace,monospace;letter-spacing:.08em}
+    .float-card{position:absolute;z-index:1;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:rgba(10,31,52,.72);backdrop-filter:blur(12px);box-shadow:0 20px 60px rgba(0,0,0,.25);font:700 10px ui-monospace,monospace;letter-spacing:.08em;animation:float 6s ease-in-out infinite}.fc1{right:8%;top:18%}.fc2{right:31%;bottom:16%;animation-delay:-3s}.float-card b{display:block;margin-top:7px;color:var(--lime);font-size:18px}.float-card i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-right:6px}
+    .access{position:relative;z-index:2;margin:-30px clamp(20px,5vw,70px) 0;border:1px solid rgba(114,239,255,.35);border-radius:18px;background:rgba(10,31,52,.92);box-shadow:0 25px 80px rgba(0,0,0,.38);backdrop-filter:blur(18px);display:grid;grid-template-columns:.7fr 1fr .8fr;overflow:hidden}
+    .access-title{padding:31px;border-right:1px solid var(--line)}.access-title small{color:var(--cyan);font:700 10px ui-monospace,monospace;letter-spacing:.14em}.access-title h2{margin:11px 0 5px;font-size:24px;letter-spacing:-.04em}.access-title p{margin:0;color:var(--muted);font-size:12px}
+    .student-form{padding:24px 30px;border-right:1px solid var(--line)}label{display:block;margin-bottom:8px;color:#a9bbcd;font-size:11px;font-weight:800}.field-row{display:flex;gap:8px}input{width:100%;min-width:0;height:51px;border:1px solid var(--line);border-radius:8px;background:#07192c;color:var(--white);padding:0 15px;outline:none;text-transform:uppercase;font-weight:800;letter-spacing:.1em}input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(114,239,255,.1)}
+    .teacher{padding:24px 30px;display:flex;flex-direction:column;justify-content:center}.teacher span{color:var(--muted);font-size:12px;margin-bottom:10px}.teacher .btn{width:100%;background:transparent;color:var(--lime);border-color:rgba(201,255,98,.5)}.teacher .btn:hover{background:var(--lime);color:var(--navy);box-shadow:0 12px 35px rgba(201,255,98,.16)}
+    .lesson-strip{padding:74px clamp(24px,6vw,92px) 55px}.strip-head{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:27px}.strip-head small{color:var(--cyan);font:700 10px ui-monospace,monospace;letter-spacing:.14em}.strip-head h2{margin:8px 0 0;font-size:clamp(28px,3vw,40px);letter-spacing:-.04em}.strip-head p{max-width:380px;color:var(--muted);font-size:13px;line-height:1.7;text-align:right}
+    .lesson-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.lesson{position:relative;overflow:hidden;min-height:170px;padding:23px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(16,41,69,.7),rgba(7,22,41,.4));transition:.25s}.lesson:hover{translate:0 -5px;border-color:rgba(114,239,255,.5)}.lesson:after{content:"";position:absolute;width:60px;height:60px;right:-18px;bottom:-18px;border:1px solid var(--cyan);border-radius:50%;opacity:.3}.lesson b{font:700 10px ui-monospace,monospace;color:var(--lime)}.lesson strong{display:block;margin:42px 0 5px;font-size:17px}.lesson span{color:var(--muted);font-size:12px}
+    footer{display:flex;justify-content:space-between;padding:25px clamp(24px,6vw,92px);border-top:1px solid var(--line);color:var(--muted);font-size:11px}.toast{position:fixed;right:25px;bottom:25px;z-index:20;padding:14px 18px;border:1px solid var(--cyan);border-radius:8px;background:var(--panel);color:white;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:none}
+    @keyframes blink{50%{opacity:.35}}@keyframes dash{to{stroke-dashoffset:-120}}@keyframes node{50%{transform:scale(1.8);opacity:.55}}@keyframes float{50%{transform:translateY(-12px)}}
+    @media(max-width:1000px){.access{grid-template-columns:1fr 1fr}.access-title{grid-column:1/-1;border-right:0;border-bottom:1px solid var(--line)}.network{right:-180px;opacity:.48}.lesson-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:680px){.app{grid-template-columns:1fr}.rail{display:none}.nav{height:70px;padding-inline:20px}.status{font-size:0}.nav>a:last-child{display:none}.hero{min-height:650px;padding:66px 22px}.network{width:620px;right:-310px;top:80px}.float-card{display:none}.access{margin:-34px 14px 0;grid-template-columns:1fr}.student-form{border-right:0;border-bottom:1px solid var(--line)}.field-row{display:grid}.strip-head{display:block}.strip-head p{text-align:left}.lesson-strip{padding:65px 18px 45px}.lesson-grid{grid-template-columns:1fr 1fr}.lesson{min-height:145px;padding:18px}.lesson strong{margin-top:30px}.hero-actions{flex-wrap:wrap}.hero-actions .btn{flex:1}footer{flex-direction:column;gap:10px}}
+    @media(max-width:420px){.lesson-grid{grid-template-columns:1fr}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="rail"><a class="logo" href="../index.html" aria-label="우리말 바로쓰기 홈">우</a><span class="rail-text">PARTICIPATORY LANGUAGE LAB</span><span class="rail-index">02</span></aside>
+    <div class="content">
+      <nav class="nav"><strong class="brand">우리말 바로쓰기</strong><span class="status">SYSTEM READY · 익명 참여</span><a href="../index.html?view=admin">관리자</a></nav>
+      <section class="hero">
+        <div class="copy">
+          <p class="kicker">OPEN LANGUAGE LABORATORY</p>
+          <h1>교실의 말을<br><span class="outline">탐구 데이터로.</span></h1>
+          <p class="lead">익숙한 표현을 수집하고, 사용 맥락을 연결하고, 새로운 우리말을 실험합니다. 모든 학생의 생각이 살아 움직이는 디지털 국어 수업.</p>
+          <div class="hero-actions"><a class="btn" href="#access">수업 참여하기</a><a class="btn ghost" href="#curriculum">과정 살펴보기</a></div>
+        </div>
+        <div class="network" aria-hidden="true">
+          <svg viewBox="0 0 800 610">
+            <path class="net-line" d="M80 430 C180 280 240 390 327 257 S530 70 720 142"/><path class="net-line lime" d="M90 185 C215 98 277 170 349 248 S535 420 730 340"/><path class="net-line" d="M155 540 C260 430 385 480 451 365 S579 198 738 230"/>
+            <g transform="translate(90 430)"><circle class="node-ring" r="34"/><circle class="node-core" r="4"/><text class="data-label" x="-22" y="54">COLLECT</text></g>
+            <g transform="translate(349 248)"><circle class="node-ring" r="57"/><circle class="node-core lime" r="6"/><text class="data-label" x="-24" y="80">CONTEXT</text></g>
+            <g transform="translate(535 420)"><circle class="node-ring" r="38"/><circle class="node-core" r="4"/><text class="data-label" x="-17" y="60">CREATE</text></g>
+            <g transform="translate(720 142)"><circle class="node-ring" r="72"/><circle class="node-core lime" r="8"/><text class="data-label" x="-29" y="98">DICTIONARY</text></g>
+          </svg>
+        </div>
+        <div class="float-card fc1"><i></i>CONNECTED VOICES<b>우리 반 전체</b></div><div class="float-card fc2"><i></i>LESSON FLOW<b>4 STAGES</b></div>
+      </section>
+
+      <section class="access" id="access">
+        <div class="access-title"><small>ACCESS TERMINAL</small><h2>수업 연결</h2><p>역할에 맞는 방법으로 시작하세요.</p></div>
+        <form class="student-form"><label for="code2">STUDENT · 클래스 코드</label><div class="field-row"><input id="code2" class="class-code" maxlength="12" autocomplete="off" placeholder="HANGUL1" required><button class="btn" type="submit">연결</button></div></form>
+        <div class="teacher"><span>TEACHER · 수업 설계 및 운영</span><a class="btn" href="../index.html?view=teacher">교사 콘솔 열기 →</a></div>
+      </section>
+
+      <section class="lesson-strip" id="curriculum">
+        <div class="strip-head"><div><small>4-STEP LEARNING PROTOCOL</small><h2>관찰에서 변화까지</h2></div><p>학생의 실제 언어생활을 출발점으로 삼아 탐구·토론·창작·기록을 한 흐름으로 연결합니다.</p></div>
+        <div class="lesson-grid">
+          <article class="lesson"><b>01 / INPUT</b><strong>표현 수집</strong><span>우리 반의 언어를 발견해요.</span></article>
+          <article class="lesson"><b>02 / ANALYZE</b><strong>맥락 탐구</strong><span>쓰임과 영향을 함께 살펴요.</span></article>
+          <article class="lesson"><b>03 / CREATE</b><strong>우리말 제안</strong><span>더 좋은 표현을 실험해요.</span></article>
+          <article class="lesson"><b>04 / ARCHIVE</b><strong>사전 완성</strong><span>우리 반의 생각을 기록해요.</span></article>
+        </div>
+      </section>
+      <footer><span>© 우리말 바로쓰기 · 학교 수업용 참여 플랫폼</span><span>PERSONAL DATA FREE · ANONYMOUS ACCESS</span></footer>
+    </div>
+  </main>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const input=document.querySelector('.class-code'),form=document.querySelector('.student-form'),toast=document.querySelector('.toast');
+    input.addEventListener('input',()=>input.value=input.value.replace(/[^a-z0-9]/gi,'').toUpperCase());
+    form.addEventListener('submit',event=>{event.preventDefault();const code=input.value.trim();if(!/^[A-Z0-9]{4,12}$/.test(code)){toast.textContent='클래스 코드는 영문·숫자 4~12자리입니다.';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400);return;}location.href='../index.html?view=student&code='+encodeURIComponent(code)});
+  </script>
+</body>
+</html>

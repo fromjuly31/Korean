@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="우리말 바로쓰기 메인 화면 시안 04 - 모듈형 러닝 OS">
+  <title>우리말 바로쓰기 · Learning OS</title>
+  <style>
+    :root{--bg:#f2f4f8;--ink:#12151c;--blue:#3159e8;--yellow:#ffd84a;--pink:#ff6a98;--mint:#a7f1d4;--white:#fff;--line:#1c202a;--muted:#697181}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;word-break:keep-all}button,input{font:inherit}a{color:inherit}
+    .shell{width:min(1500px,100%);margin:auto;padding:16px}
+    .nav{height:70px;padding:0 22px;border:1px solid var(--line);border-radius:17px;background:var(--white);display:flex;align-items:center;gap:16px;box-shadow:4px 4px 0 var(--line)}
+    .brand{display:flex;align-items:center;gap:11px;text-decoration:none;font-weight:900;letter-spacing:-.04em}.mark{width:38px;height:38px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;transform:rotate(-4deg)}.nav-chip{margin-left:auto;padding:7px 11px;border:1px solid var(--line);border-radius:99px;background:var(--mint);font-size:10px;font-weight:900;letter-spacing:.08em}.nav a:last-child{font-size:12px;font-weight:800;text-decoration:none}
+    .hero-grid{display:grid;grid-template-columns:1.45fr .55fr;grid-template-rows:auto auto;gap:14px;margin-top:14px}
+    .hero{position:relative;overflow:hidden;min-height:510px;padding:clamp(40px,6vw,80px);border:1px solid var(--line);border-radius:24px;background:var(--blue);color:#fff;box-shadow:4px 4px 0 var(--line)}
+    .kicker{display:inline-flex;gap:8px;align-items:center;padding:7px 11px;border:1px solid white;border-radius:99px;margin:0;font-size:10px;font-weight:900;letter-spacing:.12em}.kicker:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 4px rgba(255,216,74,.2)}
+    h1{position:relative;z-index:2;max-width:800px;margin:28px 0 24px;font-size:clamp(55px,7.1vw,105px);line-height:.95;letter-spacing:-.08em}h1 em{font-style:normal;color:var(--yellow)}.lead{position:relative;z-index:2;max-width:610px;margin:0;color:#dbe1ff;font-size:clamp(16px,1.45vw,20px);line-height:1.7}
+    .hero-arrow{position:absolute;right:8%;top:9%;width:100px;height:100px;border-radius:50%;background:var(--yellow);color:var(--ink);display:grid;place-items:center;font-size:37px;border:1px solid var(--line);animation:bounce 3s ease-in-out infinite}.hero-shape{position:absolute;right:-70px;bottom:-155px;width:430px;height:430px;border:70px solid rgba(255,255,255,.1);border-radius:50%;animation:spin 25s linear infinite}.hero-shape:before,.hero-shape:after{content:"";position:absolute;border-radius:50%}.hero-shape:before{width:38px;height:38px;background:var(--pink);top:-58px;left:80px}.hero-shape:after{width:24px;height:24px;background:var(--mint);bottom:-46px;right:73px}
+    .login-card{grid-row:span 2;padding:28px;border:1px solid var(--line);border-radius:24px;background:var(--white);box-shadow:4px 4px 0 var(--line);display:flex;flex-direction:column}.card-top{display:flex;justify-content:space-between;align-items:center}.window-dots{display:flex;gap:5px}.window-dots i{width:8px;height:8px;border-radius:50%;background:var(--pink)}.window-dots i:nth-child(2){background:var(--yellow)}.window-dots i:nth-child(3){background:var(--mint)}.card-index{font:800 10px ui-monospace,monospace;color:var(--muted)}
+    .login-card h2{margin:54px 0 9px;font-size:34px;line-height:1.12;letter-spacing:-.055em}.login-card>p{margin:0 0 31px;color:var(--muted);font-size:13px;line-height:1.6}label{display:block;margin-bottom:8px;font-size:11px;font-weight:900}.input-wrap{position:relative}input{width:100%;height:56px;padding:0 52px 0 15px;border:1px solid var(--line);border-radius:11px;background:#f7f8fa;outline:none;text-transform:uppercase;font-weight:900;letter-spacing:.12em}input:focus{box-shadow:0 0 0 4px rgba(49,89,232,.16)}.input-wrap span{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:8px;background:var(--yellow);display:grid;place-items:center;font-weight:900}
+    .btn{width:100%;min-height:55px;padding:0 17px;border:1px solid var(--line);border-radius:11px;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:900;transition:.2s;box-shadow:3px 3px 0 #8890a0}.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #8890a0}.student-form .btn{margin-top:11px;background:var(--blue);box-shadow:3px 3px 0 var(--ink)}.student-form .btn:hover{box-shadow:6px 6px 0 var(--ink)}.or{display:flex;align-items:center;gap:10px;margin:22px 0;color:var(--muted);font-size:10px;font-weight:800}.or:before,.or:after{content:"";height:1px;flex:1;background:#ccd0d8}.teacher-btn{margin-top:0;background:white;color:var(--ink)}.privacy{margin-top:auto!important;padding-top:27px!important;display:flex;align-items:flex-start;gap:9px}.privacy:before{content:"✓";flex:0 0 23px;height:23px;border:1px solid;border-radius:50%;display:grid;place-items:center;color:var(--blue);font-weight:900}
+    .marquee{min-width:0;height:74px;border:1px solid var(--line);border-radius:17px;background:var(--yellow);box-shadow:4px 4px 0 var(--line);display:flex;align-items:center;overflow:hidden}.track{display:flex;width:max-content;animation:marquee 24s linear infinite}.track span{font-size:18px;font-weight:900;letter-spacing:-.03em;white-space:nowrap}.track i{margin:0 20px;font-style:normal;color:var(--blue)}
+    .bento-head{display:flex;align-items:end;justify-content:space-between;padding:72px 12px 24px}.bento-head small{color:var(--blue);font-weight:900;letter-spacing:.12em}.bento-head h2{margin:8px 0 0;font-size:clamp(34px,4vw,57px);letter-spacing:-.06em}.bento-head p{max-width:380px;color:var(--muted);line-height:1.7;font-size:13px;text-align:right}
+    .bento{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:180px;gap:14px}.tile{position:relative;overflow:hidden;padding:25px;border:1px solid var(--line);border-radius:21px;background:white;box-shadow:4px 4px 0 var(--line);transition:.22s}.tile:hover{transform:translateY(-5px)}.tile.one{grid-column:span 5;background:var(--pink)}.tile.two{grid-column:span 3;background:var(--mint)}.tile.three{grid-column:span 4;background:white}.tile.four{grid-column:span 4;background:var(--yellow)}.tile.five{grid-column:span 5;background:var(--blue);color:white}.tile.six{grid-column:span 3}.tile-no{font:900 10px ui-monospace,monospace;letter-spacing:.08em}.tile strong{position:absolute;left:25px;bottom:40px;font-size:22px;letter-spacing:-.04em}.tile small{position:absolute;left:25px;bottom:21px;color:rgba(18,21,28,.65)}.tile.five small{color:rgba(255,255,255,.68)}.icon{position:absolute;right:20px;top:20px;font-size:37px;animation:tilt 4s ease-in-out infinite}.ring{position:absolute;right:18px;bottom:17px;width:80px;height:80px;border:12px solid rgba(18,21,28,.13);border-top-color:var(--blue);border-radius:50%;animation:spin 5s linear infinite}.bars{position:absolute;right:22px;bottom:20px;display:flex;align-items:end;gap:5px;height:70px}.bars i{width:11px;border:1px solid var(--line);background:var(--blue);animation:bar 2s ease-in-out infinite}.bars i:nth-child(1){height:30%;animation-delay:-.5s}.bars i:nth-child(2){height:65%;animation-delay:-1s}.bars i:nth-child(3){height:45%;animation-delay:-1.5s}.bars i:nth-child(4){height:90%}
+    footer{display:flex;justify-content:space-between;padding:31px 12px 18px;color:var(--muted);font-size:11px}.toast{position:fixed;left:50%;bottom:23px;z-index:20;translate:-50% 12px;padding:13px 18px;border:1px solid var(--line);border-radius:10px;background:var(--pink);font-weight:800;opacity:0;transition:.2s;pointer-events:none}.toast.show{translate:-50% 0;opacity:1}
+    @keyframes bounce{50%{transform:translateY(10px) rotate(6deg)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes marquee{to{transform:translateX(-50%)}}@keyframes tilt{50%{transform:rotate(14deg) scale(1.08)}}@keyframes bar{50%{height:85%}}
+    @media(max-width:980px){.hero-grid{grid-template-columns:1fr}.login-card{grid-row:auto}.marquee{grid-row:2}.login-card h2{margin-top:35px}.privacy{margin-top:25px!important}.bento{grid-template-columns:repeat(2,1fr);grid-auto-rows:170px}.tile{grid-column:span 1!important}.tile.one,.tile.five{grid-column:span 2!important}}
+    @media(max-width:620px){.shell{padding:8px}.nav{height:63px}.nav-chip{font-size:0;padding:0;width:10px;height:10px;background:var(--mint)}.nav a:last-child{display:none}.hero{min-height:555px;padding:52px 22px}.hero-arrow{width:66px;height:66px;right:19px;top:19px;font-size:25px}.hero-shape{opacity:.6}.login-card{padding:22px}.bento-head{display:block;padding-top:55px}.bento-head p{text-align:left}.bento{grid-template-columns:1fr}.tile,.tile.one,.tile.five{grid-column:span 1!important}.hero-grid{gap:10px}.nav,.hero,.login-card,.marquee,.tile{box-shadow:3px 3px 0 var(--line)}footer{flex-direction:column;gap:9px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <nav class="nav"><a class="brand" href="../index.html"><span class="mark">우</span><span>우리말 바로쓰기</span></a><span class="nav-chip">SAFE CLASSROOM · ONLINE</span><a href="../index.html?view=admin">관리자</a></nav>
+    <section class="hero-grid">
+      <header class="hero">
+        <p class="kicker">PARTICIPATORY KOREAN CLASS</p>
+        <h1>생각을 켜고,<br><em>우리말을 잇다.</em></h1>
+        <p class="lead">수집하고, 토론하고, 새롭게 표현하는 4차시 협업 수업. 학생 한 명 한 명의 언어 감각이 교실의 배움이 됩니다.</p>
+        <div class="hero-arrow" aria-hidden="true">↘</div><div class="hero-shape" aria-hidden="true"></div>
+      </header>
+      <aside class="login-card">
+        <div class="card-top"><span class="window-dots"><i></i><i></i><i></i></span><span class="card-index">ACCESS / 04</span></div>
+        <h2>수업에 바로<br>참여하세요.</h2><p>학생은 클래스 코드만 있으면 이름이나 이메일 없이 참여할 수 있어요.</p>
+        <form class="student-form"><label for="code4">학생 클래스 코드</label><div class="input-wrap"><input id="code4" class="class-code" maxlength="12" autocomplete="off" placeholder="HANGUL1" required><span>→</span></div><button class="btn" type="submit">학생으로 수업 입장</button></form>
+        <div class="or">또는</div><a class="btn teacher-btn" href="../index.html?view=teacher">교사 수업 관리 시작</a>
+        <p class="privacy">학생 개인정보를 수집하지 않는 익명 참여 방식입니다.</p>
+      </aside>
+      <div class="marquee" aria-hidden="true"><div class="track"><span>발견하기 <i>✦</i> 맥락 살피기 <i>✦</i> 새말 만들기 <i>✦</i> 사전 완성하기 <i>✦</i> 발견하기 <i>✦</i> 맥락 살피기 <i>✦</i> 새말 만들기 <i>✦</i> 사전 완성하기 <i>✦</i></span></div></div>
+    </section>
+
+    <section aria-labelledby="flow-title">
+      <div class="bento-head"><div><small>CLASS MODULES · 01—04</small><h2 id="flow-title">배움이 연결되는 네 장면</h2></div><p>실제 언어생활에서 출발한 질문이 탐구와 창작을 거쳐 우리 반의 공동 기록으로 완성됩니다.</p></div>
+      <div class="bento">
+        <article class="tile one"><span class="tile-no">MODULE 01</span><span class="icon">⌁</span><strong>우리 반 표현 수집</strong><small>일상 속 언어를 발견해요.</small></article>
+        <article class="tile two"><span class="tile-no">LIVE INPUT</span><div class="ring"></div><strong>모두의 목소리</strong><small>익명으로 자유롭게</small></article>
+        <article class="tile three"><span class="tile-no">MODULE 02</span><span class="icon">◎</span><strong>맥락 탐구</strong><small>쓰임과 영향을 살펴요.</small></article>
+        <article class="tile four"><span class="tile-no">MODULE 03</span><span class="icon">✎</span><strong>우리말 제안</strong><small>새로운 표현을 만들어요.</small></article>
+        <article class="tile five"><span class="tile-no">MODULE 04 · FINAL</span><span class="icon">▤</span><strong>우리말 사전 완성</strong><small>우리 반의 생각을 한 권으로</small></article>
+        <article class="tile six"><span class="tile-no">CLASS INSIGHT</span><div class="bars"><i></i><i></i><i></i><i></i></div><strong>함께 성장</strong><small>참여가 배움의 데이터로</small></article>
+      </div>
+    </section>
+    <footer><span>우리말 바로쓰기 · 학교 수업용 협업 플랫폼</span><span>DESIGNED FOR EVERY VOICE IN THE CLASSROOM</span></footer>
+  </main>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const input=document.querySelector('.class-code'),form=document.querySelector('.student-form'),toast=document.querySelector('.toast');
+    input.addEventListener('input',()=>input.value=input.value.replace(/[^a-z0-9]/gi,'').toUpperCase());
+    form.addEventListener('submit',event=>{event.preventDefault();const code=input.value.trim();if(!/^[A-Z0-9]{4,12}$/.test(code)){toast.textContent='클래스 코드는 영문·숫자 4~12자리입니다.';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400);return;}location.href='../index.html?view=student&code='+encodeURIComponent(code)});
+  </script>
+</body>
+</html>

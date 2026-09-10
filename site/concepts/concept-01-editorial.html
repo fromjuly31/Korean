@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="우리말 바로쓰기 메인 화면 시안 01 - 에디토리얼 스튜디오">
+  <title>우리말 바로쓰기 · 에디토리얼 스튜디오</title>
+  <style>
+    :root {
+      --paper:#f3f0e8; --ink:#161916; --red:#e7442e; --green:#183b32;
+      --line:rgba(22,25,22,.18); --muted:#6d7069; --white:#fffdf7;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;word-break:keep-all;overflow-x:hidden}
+    button,input{font:inherit}
+    button,a{cursor:pointer}
+    a{color:inherit}
+    .noise{position:fixed;inset:0;z-index:20;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
+    .page{width:min(1440px,100%);margin:auto;min-height:100vh;border-inline:1px solid var(--line);background:var(--paper)}
+    .topbar{height:78px;padding:0 clamp(22px,4vw,64px);display:flex;align-items:center;border-bottom:1px solid var(--ink);text-transform:uppercase;letter-spacing:.08em;font-size:12px;font-weight:800}
+    .brand{display:flex;align-items:center;gap:13px;text-decoration:none;font-size:15px;letter-spacing:-.04em;text-transform:none}
+    .brand-mark{width:38px;height:38px;display:grid;place-items:center;background:var(--ink);color:var(--paper);font-family:Georgia,serif;font-size:18px;border-radius:50%}
+    .issue{margin-left:auto;color:var(--muted)}
+    .top-link{margin-left:36px;text-decoration:none;border-bottom:1px solid;padding-bottom:3px}
+    .hero{display:grid;grid-template-columns:minmax(0,1.22fr) minmax(380px,.78fr);min-height:620px;border-bottom:1px solid var(--ink)}
+    .hero-copy{position:relative;padding:clamp(55px,8vw,112px) clamp(24px,6vw,86px) 62px;border-right:1px solid var(--ink);overflow:hidden}
+    .serial{display:flex;align-items:center;gap:12px;margin:0 0 30px;color:var(--red);font-size:12px;font-weight:900;letter-spacing:.16em}
+    .serial:before{content:"";width:42px;height:2px;background:var(--red)}
+    h1{max-width:780px;margin:0;font-size:clamp(60px,7.6vw,116px);font-weight:900;line-height:.91;letter-spacing:-.085em}
+    h1 span{position:relative;display:inline-block;color:var(--red);font-family:"Noto Serif KR",Georgia,serif;font-weight:500;font-style:italic}
+    h1 span:after{content:"";position:absolute;left:-2%;right:-4%;bottom:-4px;height:8px;background:var(--red);transform:scaleX(0);transform-origin:left;animation:underline 1s .75s cubic-bezier(.2,.7,.2,1) forwards}
+    .lead{max-width:610px;margin:38px 0 0;font-size:clamp(17px,1.55vw,21px);line-height:1.75;color:#43483f}
+    .stamp{position:absolute;right:5%;top:9%;width:96px;height:96px;border:1px solid var(--red);border-radius:50%;display:grid;place-items:center;color:var(--red);font-size:10px;font-weight:900;letter-spacing:.12em;text-align:center;animation:spin 22s linear infinite}
+    .hero-panel{display:flex;flex-direction:column;background:var(--green);color:#f7f0df;overflow:hidden}
+    .panel-head{padding:34px 38px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.22);font-size:11px;font-weight:800;letter-spacing:.14em}
+    .live{display:flex;align-items:center;gap:8px}.live:before{content:"";width:7px;height:7px;border-radius:50%;background:#ff735e;box-shadow:0 0 0 6px rgba(255,115,94,.14);animation:pulse 2s infinite}
+    .word-field{position:relative;flex:1;min-height:360px;overflow:hidden}
+    .orbit{position:absolute;border:1px solid rgba(255,255,255,.18);border-radius:50%;animation:spin 24s linear infinite}
+    .orbit.one{width:390px;height:390px;left:50%;top:47%;translate:-50% -50%}
+    .orbit.two{width:255px;height:255px;left:50%;top:47%;translate:-50% -50%;animation-direction:reverse;animation-duration:17s}
+    .core{position:absolute;left:50%;top:47%;translate:-50% -50%;width:126px;height:126px;border-radius:50%;display:grid;place-items:center;background:var(--red);font-family:"Noto Serif KR",serif;font-size:29px;box-shadow:0 0 0 18px rgba(231,68,46,.12);animation:breathe 4s ease-in-out infinite}
+    .word{position:absolute;padding:8px 12px;border:1px solid rgba(255,255,255,.28);border-radius:99px;background:rgba(255,255,255,.05);font-size:12px;letter-spacing:.04em;backdrop-filter:blur(4px);animation:float 5s ease-in-out infinite}
+    .w1{left:8%;top:20%}.w2{right:7%;top:29%;animation-delay:-2s}.w3{left:12%;bottom:18%;animation-delay:-1s}.w4{right:13%;bottom:15%;animation-delay:-3s}
+    .quote{padding:26px 38px 34px;border-top:1px solid rgba(255,255,255,.22);font-family:"Noto Serif KR",Georgia,serif;font-size:20px;line-height:1.6}
+    .entry{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);border-bottom:1px solid var(--ink)}
+    .entry-intro{padding:48px clamp(24px,5vw,68px);border-right:1px solid var(--ink)}
+    .eyebrow{margin:0 0 15px;color:var(--red);font-size:11px;font-weight:900;letter-spacing:.16em}
+    h2{margin:0;font-size:clamp(30px,3.5vw,52px);line-height:1.12;letter-spacing:-.055em}
+    .entry-intro p:last-child{max-width:430px;color:var(--muted);line-height:1.7}
+    .entry-cards{display:grid;grid-template-columns:1fr 1fr}
+    .entry-card{padding:42px clamp(22px,3vw,42px);display:flex;flex-direction:column;min-height:330px}
+    .entry-card+ .entry-card{border-left:1px solid var(--ink);background:var(--white)}
+    .number{font:700 12px/1 Georgia,serif;color:var(--red)}
+    .entry-card h3{margin:30px 0 8px;font-size:26px;letter-spacing:-.04em}
+    .entry-card>p{margin:0 0 22px;color:var(--muted);font-size:14px;line-height:1.65}
+    label{display:block;margin:auto 0 8px;font-size:12px;font-weight:800}
+    .code-row{display:flex}
+    input{min-width:0;width:100%;height:52px;padding:0 15px;border:1px solid var(--ink);border-radius:0;background:transparent;outline:none;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+    input:focus{box-shadow:inset 0 0 0 2px var(--red)}
+    .btn{height:52px;padding:0 22px;border:1px solid var(--ink);background:var(--ink);color:white;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-weight:850;white-space:nowrap;transition:.25s ease}
+    .btn:hover{background:var(--red);border-color:var(--red);transform:translateY(-2px)}
+    .btn.outline{margin-top:auto;background:transparent;color:var(--ink)}
+    .btn.outline:hover{background:var(--ink);color:white;border-color:var(--ink)}
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);padding:0 clamp(22px,4vw,64px)}
+    .step{position:relative;padding:34px 24px 40px;min-height:150px;border-right:1px solid var(--line)}
+    .step:first-child{border-left:1px solid var(--line)}
+    .step small{display:block;color:var(--red);font:700 11px Georgia,serif}
+    .step strong{display:block;margin-top:18px;font-size:16px}.step span{display:block;margin-top:5px;color:var(--muted);font-size:12px}
+    footer{display:flex;justify-content:space-between;padding:25px clamp(22px,4vw,64px);border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .toast{position:fixed;left:50%;bottom:24px;z-index:30;translate:-50% 20px;padding:13px 18px;background:var(--ink);color:#fff;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1;translate:-50% 0}
+    @keyframes underline{to{transform:scaleX(1)}}@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{box-shadow:0 0 0 11px rgba(255,115,94,0)}}@keyframes breathe{50%{transform:scale(1.06)}}@keyframes float{50%{transform:translateY(-10px)}}
+    @media(max-width:900px){.hero{grid-template-columns:1fr}.hero-copy{border-right:0;border-bottom:1px solid var(--ink)}.hero-panel{min-height:520px}.entry{grid-template-columns:1fr}.entry-intro{border-right:0;border-bottom:1px solid var(--ink)}}
+    @media(max-width:620px){.topbar{height:66px}.top-link,.issue{display:none}.hero-copy{padding:68px 23px 48px}.stamp{width:70px;height:70px;top:20px;right:20px;font-size:8px}h1{font-size:clamp(48px,14.5vw,60px)}.entry-cards{grid-template-columns:1fr}.entry-card+.entry-card{border-left:0;border-top:1px solid var(--ink)}.steps{grid-template-columns:1fr 1fr}.step:nth-child(odd){border-left:1px solid var(--line)}.code-row{display:grid}.code-row .btn{margin-top:-1px}.panel-head,.quote{padding-inline:24px}.word-field{min-height:330px}footer{gap:18px;flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <main class="page">
+    <nav class="topbar">
+      <a class="brand" href="../index.html"><span class="brand-mark">우</span><span>우리말 바로쓰기</span></a>
+      <span class="issue">국어 수업 프로젝트 · 2026</span>
+      <a class="top-link" href="#entry">수업 입장</a>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="serial">LANGUAGE EDITION — 01</p>
+        <h1>말을 보고,<br><span>생각을 잇다.</span></h1>
+        <p class="lead">매일 쓰는 표현을 관찰하고, 맥락을 토론하고, 더 다정하고 정확한 우리말을 함께 만드는 참여형 국어 수업입니다.</p>
+        <div class="stamp" aria-hidden="true">READ<br>THINK<br>REWRITE</div>
+      </div>
+      <aside class="hero-panel" aria-label="우리말이 모이는 모습의 움직이는 그래픽">
+        <div class="panel-head"><span>오늘의 언어 관찰실</span><span class="live">CLASS LIVE</span></div>
+        <div class="word-field">
+          <div class="orbit one"></div><div class="orbit two"></div>
+          <span class="core">우리말</span>
+          <span class="word w1">발견한 표현</span><span class="word w2">친구의 관점</span><span class="word w3">새로운 맥락</span><span class="word w4">더 나은 선택</span>
+        </div>
+        <div class="quote">“우리가 고른 말이<br>우리 반의 문화를 만듭니다.”</div>
+      </aside>
+    </section>
+
+    <section class="entry" id="entry">
+      <div class="entry-intro">
+        <p class="eyebrow">ENTER THE CLASSROOM</p>
+        <h2>수업의 문을<br>열어 주세요.</h2>
+        <p>학생은 선생님이 안내한 클래스 코드로 익명 참여하며, 교사는 수업 생성과 차시 운영을 관리합니다.</p>
+      </div>
+      <div class="entry-cards">
+        <form class="entry-card student-form">
+          <span class="number">01 / STUDENT</span>
+          <h3>학생으로 참여</h3>
+          <p>클래스 코드를 입력하면 현재 진행 중인 차시로 바로 연결됩니다.</p>
+          <label for="code1">클래스 코드</label>
+          <div class="code-row"><input id="code1" class="class-code" maxlength="12" placeholder="HANGUL1" autocomplete="off" required><button class="btn" type="submit">입장 →</button></div>
+        </form>
+        <article class="entry-card">
+          <span class="number">02 / TEACHER</span>
+          <h3>교사 수업 관리</h3>
+          <p>클래스를 만들고, 활동 단계를 열고, 우리 반의 언어 자료를 한눈에 관리합니다.</p>
+          <a class="btn outline" href="../index.html?view=teacher">교사 화면 시작하기 →</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="steps" aria-label="4차시 수업 흐름">
+      <div class="step"><small>LESSON 01</small><strong>표현 수집</strong><span>우리 반 언어 발견하기</span></div>
+      <div class="step"><small>LESSON 02</small><strong>맥락 탐구</strong><span>쓰임과 영향 살피기</span></div>
+      <div class="step"><small>LESSON 03</small><strong>우리말 제안</strong><span>더 나은 표현 만들기</span></div>
+      <div class="step"><small>LESSON 04</small><strong>사전 완성</strong><span>생각을 함께 기록하기</span></div>
+    </section>
+    <footer><span>개인정보 입력 없이 안전하게 참여합니다.</span><a href="../index.html?view=admin">시스템 관리자</a></footer>
+  </main>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const toast=document.querySelector('.toast');
+    document.querySelectorAll('.class-code').forEach(input=>input.addEventListener('input',()=>input.value=input.value.replace(/[^a-z0-9]/gi,'').toUpperCase()));
+    document.querySelectorAll('.student-form').forEach(form=>form.addEventListener('submit',event=>{event.preventDefault();const code=form.querySelector('.class-code').value.trim();if(!/^[A-Z0-9]{4,12}$/.test(code)){toast.textContent='클래스 코드는 영문·숫자 4~12자리입니다.';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400);return;}location.href='../index.html?view=student&code='+encodeURIComponent(code);}));
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="우리말 바로쓰기 메인 화면 시안 05 - 언어 정원">
+  <title>우리말 바로쓰기 · 언어 정원</title>
+  <style>
+    :root{--cream:#f7f3e7;--green:#17483d;--leaf:#3d7864;--lime:#cadd83;--peach:#f08b6f;--yellow:#f1c760;--ink:#20322d;--muted:#6b7973;--white:#fffdf6;--line:rgba(32,50,45,.15)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--cream);color:var(--ink);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;word-break:keep-all;overflow-x:hidden}button,input{font:inherit}a{color:inherit}
+    .page{position:relative;isolation:isolate}.page:before{content:"";position:absolute;z-index:-2;left:-220px;top:350px;width:520px;height:520px;border:1px solid rgba(61,120,100,.16);border-radius:48% 52% 57% 43%/58% 42% 58% 42%;animation:morph 14s ease-in-out infinite}
+    .nav{width:min(1280px,calc(100% - 44px));height:82px;margin:auto;display:flex;align-items:center;gap:24px;border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-weight:900;letter-spacing:-.04em}.mark{position:relative;width:40px;height:40px;border-radius:50% 50% 50% 12%;background:var(--green);transform:rotate(-45deg)}.mark:after{content:"우";position:absolute;inset:0;display:grid;place-items:center;color:var(--white);transform:rotate(45deg);font-size:13px}.nav-note{margin-left:auto;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.1em}.nav-link{text-decoration:none;font-size:12px;font-weight:850}.nav-link:hover{color:var(--peach)}
+    .hero{width:min(1280px,calc(100% - 44px));min-height:680px;margin:auto;display:grid;grid-template-columns:minmax(0,.9fr) minmax(500px,1.1fr);align-items:center;gap:clamp(30px,6vw,85px);padding:55px 0 72px}.hero-copy{position:relative;z-index:2}.kicker{display:flex;align-items:center;gap:10px;margin:0;color:var(--leaf);font-size:11px;font-weight:900;letter-spacing:.16em}.kicker:before{content:"";width:26px;height:12px;border-radius:100% 0 100% 0;background:var(--lime);transform:rotate(-12deg)}h1{margin:24px 0 27px;font-size:clamp(55px,6.7vw,92px);line-height:1.01;letter-spacing:-.075em}h1 em{font-style:normal;color:var(--peach);font-family:"Noto Serif KR",Georgia,serif;font-weight:500}.lead{max-width:565px;margin:0;color:var(--muted);font-size:clamp(17px,1.5vw,20px);line-height:1.8}.principles{display:flex;gap:18px;margin-top:31px}.principles span{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:850}.principles i{width:8px;height:8px;border-radius:50%;background:var(--peach)}.principles span:nth-child(2) i{background:var(--yellow)}.principles span:nth-child(3) i{background:var(--leaf)}
+    .garden{position:relative;width:100%;max-width:650px;aspect-ratio:1/.92;margin-left:auto}.blob{position:absolute;inset:4% 2% 1% 5%;overflow:hidden;border-radius:48% 52% 47% 53%/58% 47% 53% 42%;background:var(--green);box-shadow:0 33px 75px rgba(23,72,61,.2);animation:morph 13s ease-in-out infinite}.blob:after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.22) .75px,transparent .75px);background-size:19px 19px;mask-image:linear-gradient(135deg,#000,transparent 75%)}.vine{position:absolute;inset:0;width:100%;height:100%;z-index:1}.stem{fill:none;stroke:#dce7b0;stroke-width:2;stroke-linecap:round;stroke-dasharray:8 8;animation:grow 16s linear infinite}.branch{fill:none;stroke:rgba(220,231,176,.4);stroke-width:1.2}.leaf{fill:var(--lime);transform-box:fill-box;transform-origin:center;animation:sway 4s ease-in-out infinite}.leaf.peach{fill:var(--peach);animation-delay:-2s}.seed{fill:var(--yellow);filter:drop-shadow(0 0 9px rgba(241,199,96,.6));animation:seed 3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.garden-copy{position:absolute;z-index:3;left:19%;top:22%;color:white}.garden-copy small{font-size:10px;letter-spacing:.15em;font-weight:850;color:#dce7b0}.garden-copy strong{display:block;margin-top:15px;font-family:"Noto Serif KR",Georgia,serif;font-size:clamp(24px,3vw,39px);font-weight:500;line-height:1.42;letter-spacing:-.03em}.petal{position:absolute;z-index:3;width:70px;height:38px;border-radius:100% 0 100% 0;background:var(--peach);box-shadow:0 14px 25px rgba(23,72,61,.12);animation:drift 6s ease-in-out infinite}.p1{right:0;top:10%;rotate:22deg}.p2{left:0;bottom:17%;width:48px;height:26px;background:var(--yellow);rotate:-18deg;animation-delay:-2s}.p3{right:10%;bottom:0;width:39px;height:21px;background:var(--lime);rotate:51deg;animation-delay:-4s}
+    .access-wrap{position:relative;background:var(--green);color:white;padding:74px 0 80px}.access-wrap:before{content:"";position:absolute;left:-3%;right:-3%;top:-38px;height:78px;border-radius:50%;background:var(--cream)}.access{width:min(1180px,calc(100% - 44px));margin:auto;display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(40px,7vw,90px);align-items:center}.access-copy .eyebrow{color:var(--lime);font-size:10px;font-weight:900;letter-spacing:.16em}.access-copy h2{margin:16px 0 17px;font-family:"Noto Serif KR",Georgia,serif;font-size:clamp(33px,4vw,55px);font-weight:500;line-height:1.3}.access-copy p{margin:0;color:#bdd0c9;line-height:1.75;font-size:14px}.access-cards{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.access-card{padding:28px;border-radius:25px;background:var(--white);color:var(--ink);box-shadow:0 18px 55px rgba(5,35,28,.25)}.access-card.teacher{display:flex;flex-direction:column;background:var(--lime)}.tag{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:900;letter-spacing:.1em;color:var(--leaf)}.tag:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--peach)}.access-card h3{margin:23px 0 7px;font-size:24px;letter-spacing:-.045em}.access-card p{margin:0 0 24px;color:var(--muted);font-size:12px;line-height:1.6}label{display:block;margin-bottom:8px;font-size:11px;font-weight:900}.form-row{display:flex;gap:7px}input{width:100%;min-width:0;height:52px;padding:0 14px;border:1px solid var(--line);border-radius:13px;background:#f3f1e8;outline:none;text-transform:uppercase;font-weight:900;letter-spacing:.1em}input:focus{box-shadow:0 0 0 3px rgba(61,120,100,.18);border-color:var(--leaf)}.btn{min-height:52px;padding:0 19px;border:0;border-radius:13px;background:var(--green);color:white;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;font-weight:900;transition:.22s}.btn:hover{transform:translateY(-3px);box-shadow:0 13px 25px rgba(23,72,61,.18)}.teacher .btn{margin-top:auto;background:var(--white);color:var(--green)}
+    .journey{width:min(1180px,calc(100% - 44px));margin:0 auto;padding:86px 0 92px}.journey-head{text-align:center}.journey-head small{color:var(--peach);font-weight:900;letter-spacing:.14em}.journey-head h2{margin:13px 0 11px;font-family:"Noto Serif KR",Georgia,serif;font-size:clamp(34px,4vw,53px);font-weight:500}.journey-head p{margin:0;color:var(--muted)}.path{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:55px}.path:before{content:"";position:absolute;left:10%;right:10%;top:41px;border-top:2px dashed rgba(61,120,100,.3)}.step{position:relative;text-align:center}.stone{position:relative;z-index:1;width:84px;height:84px;margin:auto;border-radius:43% 57% 51% 49%/55% 44% 56% 45%;display:grid;place-items:center;background:var(--white);border:1px solid var(--line);box-shadow:0 13px 29px rgba(32,50,45,.08);font-family:Georgia,serif;color:var(--peach);font-weight:700;transition:.25s}.step:hover .stone{background:var(--green);color:white;transform:translateY(-7px) rotate(7deg)}.step h3{margin:20px 0 6px;font-size:17px}.step p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}
+    footer{border-top:1px solid var(--line);width:min(1280px,calc(100% - 44px));margin:auto;padding:25px 0 31px;display:flex;justify-content:space-between;color:var(--muted);font-size:11px}.toast{position:fixed;left:50%;bottom:25px;z-index:20;translate:-50% 12px;padding:13px 19px;border-radius:99px;background:var(--peach);color:white;font-weight:800;opacity:0;transition:.2s;pointer-events:none}.toast.show{opacity:1;translate:-50% 0}
+    @keyframes morph{0%,100%{border-radius:48% 52% 47% 53%/58% 47% 53% 42%}50%{border-radius:55% 45% 58% 42%/43% 59% 41% 57%}}@keyframes grow{to{stroke-dashoffset:-160}}@keyframes sway{50%{transform:rotate(16deg) scale(1.1)}}@keyframes seed{50%{transform:scale(1.45);opacity:.65}}@keyframes drift{50%{transform:translate(9px,-13px) rotate(8deg)}}
+    @media(max-width:960px){.hero{grid-template-columns:1fr;padding-top:80px}.hero-copy{text-align:center}.lead{margin-inline:auto}.kicker,.principles{justify-content:center}.garden{margin:0 auto}.access{grid-template-columns:1fr}.access-copy{text-align:center}.path{grid-template-columns:1fr 1fr;gap:45px 22px}.path:before{display:none}}
+    @media(max-width:650px){.nav,.hero,.access,.journey,footer{width:calc(100% - 28px)}.nav{height:69px}.nav-note,.nav-link{display:none}.hero{padding:55px 0 82px}.hero-copy{text-align:left}.kicker,.principles{justify-content:flex-start}.principles{flex-wrap:wrap}.garden{width:112%;margin-left:-6%}.garden-copy{left:17%}.access-wrap{padding-top:52px}.access-cards{grid-template-columns:1fr}.teacher{min-height:230px}.form-row{display:grid}.path{grid-template-columns:1fr}.step{display:grid;grid-template-columns:84px 1fr;text-align:left;gap:0 20px;align-items:center}.stone{grid-row:1/3}.step h3{margin:0 0 5px}.journey{padding:68px 0}.journey-head{text-align:left}footer{flex-direction:column;gap:8px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="nav"><a class="brand" href="../index.html"><span class="mark"></span><span>우리말 바로쓰기</span></a><span class="nav-note">WORDS GROW WHEN SHARED</span><a class="nav-link" href="#access">수업 입장</a><a class="nav-link" href="../index.html?view=admin">관리자</a></nav>
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="kicker">A LIVING LANGUAGE CLASSROOM</p>
+        <h1>한마디의 발견이<br><em>생각의 숲</em>으로.</h1>
+        <p class="lead">학생들이 매일 쓰는 말을 씨앗으로 삼아, 맥락을 살피고 서로의 생각을 나누며 더 다정한 우리말을 함께 가꿉니다.</p>
+        <div class="principles"><span><i></i>관찰하는 힘</span><span><i></i>질문하는 태도</span><span><i></i>함께 만드는 변화</span></div>
+      </div>
+      <div class="garden" aria-label="생각의 씨앗이 자라 언어의 정원이 되는 움직이는 그래픽">
+        <div class="blob"></div>
+        <svg class="vine" viewBox="0 0 650 600" aria-hidden="true">
+          <path class="stem" d="M97 543 C178 483 148 385 238 344 S306 201 416 169 S512 79 612 80"/>
+          <path class="branch" d="M207 369 Q149 327 139 269M294 281 Q352 314 395 290M413 170 Q374 120 389 77M512 116 Q556 159 593 143"/>
+          <path class="leaf" d="M137 270 Q89 263 80 223 Q126 217 145 251Z"/><path class="leaf peach" d="M393 290 Q428 251 468 271 Q449 311 407 308Z"/><path class="leaf" d="M389 78 Q352 44 365 10 Q407 19 414 58Z"/><path class="leaf peach" d="M592 144 Q630 111 650 132 Q631 169 600 169Z"/>
+          <circle class="seed" cx="98" cy="542" r="8"/><circle class="seed" cx="294" cy="281" r="6"/><circle class="seed" cx="513" cy="116" r="9"/>
+        </svg>
+        <div class="garden-copy"><small>COLLECT · CONNECT · GROW</small><strong>서로 다른 말과 생각이<br>만나 자라는 교실</strong></div>
+        <i class="petal p1"></i><i class="petal p2"></i><i class="petal p3"></i>
+      </div>
+    </header>
+
+    <section class="access-wrap" id="access">
+      <div class="access">
+        <div class="access-copy"><span class="eyebrow">WELCOME TO OUR CLASS</span><h2>오늘의 언어 정원에<br>함께해요.</h2><p>학생은 클래스 코드로 익명 참여하고, 교사는 수업의 흐름과 우리 반의 언어 자료를 관리합니다.</p></div>
+        <div class="access-cards">
+          <form class="access-card student-form"><span class="tag">STUDENT</span><h3>학생으로 참여</h3><p>선생님이 알려 준 클래스 코드를 입력하세요.</p><label for="code5">클래스 코드</label><div class="form-row"><input id="code5" class="class-code" maxlength="12" autocomplete="off" placeholder="HANGUL1" required><button class="btn" type="submit">수업 입장</button></div></form>
+          <article class="access-card teacher"><span class="tag">TEACHER</span><h3>교사 수업 관리</h3><p>클래스를 열고 학생들과 4차시 여정을 시작하세요.</p><a class="btn" href="../index.html?view=teacher">교사 화면 열기 →</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="journey">
+      <div class="journey-head"><small>THE FOUR-STAGE JOURNEY</small><h2>한 알의 생각이 사전이 되기까지</h2><p>관찰하고 질문하고 제안하며, 우리 반의 언어 문화를 함께 가꿉니다.</p></div>
+      <div class="path">
+        <article class="step"><span class="stone">01</span><h3>표현을 발견해요</h3><p>일상 속 비속어·유행어·외래어 수집</p></article>
+        <article class="step"><span class="stone">02</span><h3>맥락을 살펴요</h3><p>표현의 쓰임과 상대에게 미치는 영향 탐구</p></article>
+        <article class="step"><span class="stone">03</span><h3>우리말을 제안해요</h3><p>뜻과 느낌을 살린 새로운 표현 만들기</p></article>
+        <article class="step"><span class="stone">04</span><h3>사전을 완성해요</h3><p>함께 고른 말을 우리 반 기록으로 남기기</p></article>
+      </div>
+    </section>
+    <footer><span>우리말 바로쓰기 · 학생들과 함께 만드는 우리 반 우리말 사전</span><span>개인정보 없이 안전한 익명 참여</span></footer>
+  </main>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script>
+    const input=document.querySelector('.class-code'),form=document.querySelector('.student-form'),toast=document.querySelector('.toast');
+    input.addEventListener('input',()=>input.value=input.value.replace(/[^a-z0-9]/gi,'').toUpperCase());
+    form.addEventListener('submit',event=>{event.preventDefault();const code=input.value.trim();if(!/^[A-Z0-9]{4,12}$/.test(code)){toast.textContent='클래스 코드는 영문·숫자 4~12자리입니다.';toast.classList.add('show');setTimeout(()=>toast.classList.remove('show'),2400);return;}location.href='../index.html?view=student&code='+encodeURIComponent(code)});
+  </script>
+</body>
+</html>

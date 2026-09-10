@@ -14,6 +14,8 @@
     if (/email not confirmed/i.test(raw)) return '계정의 이메일 인증을 먼저 완료해 주세요.';
     if (/failed to fetch|load failed|networkerror/i.test(raw)) return 'Supabase에 연결할 수 없습니다. 인터넷 연결과 프로젝트 설정을 확인해 주세요.';
     if (/row-level security|permission denied/i.test(raw)) return '이 작업을 수행할 권한이 없습니다.';
+    if ((error && error.code === '23505') || /duplicate key|unique constraint/i.test(raw)) return '이미 평가한 항목입니다.';
+    if (error && error.code && !/[가-힣]/.test(raw)) return '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
     return raw;
   }
 
@@ -47,13 +49,7 @@
   }
 
   function normalizeWord(value) {
-    return String(value || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[.!！?？,，。·~～…]+/g, '')
-      .replace(/[ㅋㅎㅠㅜ]{2,}$/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
+    return String(value || '').trim();
   }
 
   function average(numbers) {
@@ -95,6 +91,10 @@
     return result.data.user;
   }
 
+  async function getStudentUuid() {
+    return (await currentUser()).id;
+  }
+
   async function assertAdmin() {
     const sessionResult = await client.auth.getSession();
     if (sessionResult.error || !sessionResult.data.session) {
@@ -110,8 +110,10 @@
     if (sessionResult.error || !sessionResult.data.session) {
       throw new Error('교사 인증이 만료되었습니다. 다시 로그인해 주세요.');
     }
-    const isTeacher = check(await client.rpc('is_teacher'));
-    if (!isTeacher) throw new Error('교사 인증이 만료되었거나 권한이 없습니다. 다시 로그인해 주세요.');
+    const [teacherResult, adminResult] = await Promise.all([client.rpc('is_teacher'), client.rpc('is_admin')]);
+    const isTeacher = check(teacherResult);
+    const isAdmin = check(adminResult);
+    if (!isTeacher && !isAdmin) throw new Error('교사 인증이 만료되었거나 권한이 없습니다. 다시 로그인해 주세요.');
     return sessionResult.data.session;
   }
 
@@ -156,7 +158,7 @@
         word: representative.word,
         normalizedWord: representative.normalized_word,
         category,
-        submissionCount: submissions.length,
+        submissionCount: submissions.reduce((sum, row) => sum + Math.max(1, Number(row.submit_count) || 1), 0),
         averageRating: Math.round(mean * 10) / 10,
         ratingCount: scores.length,
         ratingSpread: Math.round(Math.sqrt(variance) * 10) / 10,
@@ -232,6 +234,17 @@
     }).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
   }
 
+  function usabilityTaskSummaries(tasks, responses) {
+    return tasks.map(task => {
+      const rows = responses.filter(row => String(row.test_id) === String(task.id));
+      return Object.assign(publicTask(task), {
+        averageRating: average(rows.map(row => row.score)),
+        ratingCount: rows.length,
+        responseCount: rows.length
+      });
+    }).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  }
+
   function contextGroupSummaries(tasks, examples, ratings) {
     const summaries = taskSummaries(tasks, examples, ratings);
     const grouped = groupBy(summaries, 'contextGroupId');
@@ -267,6 +280,7 @@
     return {
       id: row.id,
       wordId: row.word_id,
+      suggestionId: row.suggestion_id || '',
       originalWord: row.original_word,
       category: row.category,
       finalWord: row.final_word,
@@ -333,6 +347,7 @@
       classCode: row.class_code,
       currentStage: row.current_stage,
       currentTaskId: row.current_task_id || '',
+      usageTrackingEnabled: Boolean(row.usage_tracking_enabled),
       isActive: Boolean(row.is_active),
       createdAt: row.created_at,
       updatedAt: row.updated_at
@@ -350,22 +365,16 @@
   async function getTeacherToken() {
     const session = await client.auth.getSession();
     if (session.error || !session.data.session) return '';
-    const result = await client.rpc('is_teacher');
-    if (result.error || !result.data) return '';
+    const [teacherResult, adminResult] = await Promise.all([client.rpc('is_teacher'), client.rpc('is_admin')]);
+    if (teacherResult.error || adminResult.error || (!teacherResult.data && !adminResult.data)) return '';
     return 'supabase-session';
   }
 
   async function verifyTeacherCode(code) {
-    const teacherCode = requiredText(code, '교사 코드', 80);
+    const teacherCode = requiredText(code, '교사 비밀번호', 80);
     const allowed = check(await client.rpc('claim_teacher_access', { p_code: teacherCode }));
-    if (!allowed) throw new Error('교사 코드가 올바르지 않습니다.');
+    if (!allowed) throw new Error('교사 비밀번호가 올바르지 않습니다.');
     return { token: 'supabase-session' };
-  }
-
-  async function getTeacherClasses() {
-    await assertTeacher();
-    const rows = await fetchRows('classes', '*', query => query.order('created_at'));
-    return rows.map(mapClass);
   }
 
   async function createTeacherClass(_token, payload) {
@@ -420,7 +429,8 @@
     const code = normalizeClassCode(classCode);
     const rows = check(await client.rpc('enter_teacher_class', { p_code: code }));
     if (!rows || !rows.length) throw new Error('클래스 코드를 확인해 주세요.');
-    return mapClass(rows[0]);
+    const row = check(await client.from('classes').select('*').eq('id', rows[0].id).maybeSingle());
+    return mapClass(row || rows[0]);
   }
 
   async function joinClass(classCode) {
@@ -455,46 +465,35 @@
     ]);
     const wordIds = words.map(item => item.id);
     const taskIds = tasks.map(item => item.id);
-    const [wordRatings, examples, dictionary, pledges] = await Promise.all([
-      wordIds.length ? fetchRows('word_ratings', '*', query => query.in('word_id', wordIds)) : [],
-      taskIds.length ? fetchRows('context_examples', '*', query => query.in('task_id', taskIds)) : [],
-      wordIds.length ? fetchRows('dictionary', '*', query => query.in('word_id', wordIds)) : [],
-      fetchRows('class_pledges', '*', query => query.eq('class_id', id).order('created_at'))
+    const [dictionary, usabilityResponses] = await Promise.all([
+      wordIds.length ? fetchRows('dictionary', '*', query => query.in('word_id', wordIds).eq('approved', true)) : [],
+      taskIds.length ? fetchRows('usability_responses', '*', query => query.in('test_id', taskIds)) : []
     ]);
-    const exampleIds = examples.map(item => item.id);
-    const exampleRatings = exampleIds.length
-      ? await fetchRows('example_ratings', '*', query => query.in('example_id', exampleIds))
-      : [];
-    const groups = buildWordGroups(words, wordRatings);
+    const groups = buildWordGroups(words, []);
     return {
       words: groups.map(publicAdminWord),
       stats: buildWordStats(groups),
-      tasks: taskSummaries(tasks, examples, exampleRatings),
-      contextGroups: contextGroupSummaries(tasks, examples, exampleRatings),
+      tasks: usabilityTaskSummaries(tasks, usabilityResponses),
       dictionaryCount: dictionary.filter(item => item.approved).length,
-      pledges: pledges.map(row => ({ id: row.id, pledge: row.pledge, createdAt: row.created_at })),
       baseUrl: location.origin + location.pathname
     };
   }
 
   async function getAdminDashboard() {
     await assertAdmin();
-    const [classes, words, wordRatings, tasks, examples, exampleRatings, dictionary] = await Promise.all([
+    const [classes, words, tasks, dictionary, usabilityResponses] = await Promise.all([
       fetchRows('classes', '*', query => query.order('created_at', { ascending: false })),
       fetchRows('words', '*', query => query.order('created_at')),
-      fetchRows('word_ratings'),
       fetchRows('context_tasks'),
-      fetchRows('context_examples'),
-      fetchRows('example_ratings'),
-      fetchRows('dictionary')
+      fetchRows('dictionary'),
+      fetchRows('usability_responses')
     ]);
-    const groups = buildWordGroups(words, wordRatings);
+    const groups = buildWordGroups(words, []);
     return {
       classes: classes.map(mapClass),
       words: groups.map(publicAdminWord),
       stats: buildWordStats(groups),
-      tasks: taskSummaries(tasks, examples, exampleRatings),
-      contextGroups: contextGroupSummaries(tasks, examples, exampleRatings),
+      tasks: usabilityTaskSummaries(tasks, usabilityResponses),
       dictionaryCount: dictionary.filter(item => item.approved).length,
       baseUrl: location.origin + location.pathname
     };
@@ -533,35 +532,27 @@
   }
 
   async function submitWord(_anonId, word, category, classId) {
-    const user = await currentUser();
+    await currentUser();
     const targetClassId = requiredText(classId, '클래스', 80);
     assertCategory(category);
     const original = requiredText(word, '단어 또는 표현', 80);
     const normalized = normalizeWord(original);
     if (!normalized || !/[\p{L}\p{N}]/u.test(normalized)) throw new Error('문자나 숫자가 포함된 표현을 입력해 주세요.');
-    const cutoff = new Date(Date.now() - 15000).toISOString();
-    const recent = check(await client.from('words').select('id').eq('owner_id', user.id)
-      .eq('class_id', targetClassId).eq('normalized_word', normalized).eq('category', category)
-      .gte('created_at', cutoff).limit(1).maybeSingle());
-    if (recent) return { ok: true, duplicatePrevented: true, id: recent.id };
-    const saved = check(await client.from('words').insert({
-      owner_id: user.id,
-      class_id: targetClassId,
-      word: original,
-      normalized_word: normalized,
-      category,
-      approved: false
-    }).select('id').single());
-    return { ok: true, id: saved.id };
+    const rows = check(await client.rpc('submit_word', {
+      p_class_id: targetClassId,
+      p_word: original,
+      p_category: category
+    }));
+    const saved = rows && rows[0];
+    if (!saved) throw new Error('저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+    return { ok: true, id: saved.id, submissionCount: saved.submit_count, merged: Boolean(saved.duplicate) };
   }
 
   async function getApprovedWords(_anonId, classId) {
     const user = await currentUser();
     const targetClassId = requiredText(classId, '클래스', 80);
     const words = await fetchRows('words', '*', query => query.eq('class_id', targetClassId).order('created_at'));
-    const wordIds = words.map(item => item.id);
-    const ratings = wordIds.length ? await fetchRows('word_ratings', '*', query => query.in('word_id', wordIds)) : [];
-    return buildWordGroups(words, ratings).map(word => ({
+    return buildWordGroups(words, []).map(word => ({
       id: word.id,
       word: word.word,
       category: word.category,
@@ -717,11 +708,82 @@
     return { ok: true };
   }
 
+  function mapUsabilityTest(task, responses, userId) {
+    const rows = responses.filter(row => String(row.test_id) === String(task.id));
+    const mine = rows.find(row => row.owner_id === userId);
+    return {
+      id: task.id,
+      classId: task.class_id,
+      wordId: task.word_id,
+      word: task.word,
+      category: task.category,
+      situation: task.situation,
+      audience: task.target,
+      purpose: task.context,
+      active: Boolean(task.active),
+      myScore: mine ? Number(mine.score) : 0,
+      averageScore: average(rows.map(row => row.score)),
+      responseCount: rows.length,
+      createdAt: task.created_at
+    };
+  }
+
+  async function getUsabilityLesson(_anonId, classId) {
+    const user = await currentUser();
+    const id = requiredText(classId, '클래스', 80);
+    const tasks = await fetchRows('context_tasks', '*', query => query.eq('class_id', id).eq('active', true).order('created_at'));
+    const taskIds = tasks.map(item => item.id);
+    const responses = taskIds.length
+      ? await fetchRows('usability_responses', '*', query => query.in('test_id', taskIds))
+      : [];
+    return { tests: tasks.map(task => mapUsabilityTest(task, responses, user.id)) };
+  }
+
+  async function getUsabilityWorkspace(_token, classId) {
+    const id = await assertClassManager(classId);
+    const tasks = await fetchRows('context_tasks', '*', query => query.eq('class_id', id).order('created_at'));
+    const taskIds = tasks.map(item => item.id);
+    const responses = taskIds.length
+      ? await fetchRows('usability_responses', '*', query => query.in('test_id', taskIds))
+      : [];
+    return { tests: tasks.map(task => mapUsabilityTest(task, responses, '')) };
+  }
+
+  async function saveUsabilityResponse(_anonId, testId, score) {
+    const user = await currentUser();
+    const rating = assertRating(score);
+    const existing = check(await client.from('usability_responses').select('id')
+      .eq('test_id', testId).eq('owner_id', user.id).maybeSingle());
+    if (existing) throw new Error('이미 평가한 항목입니다.');
+    const saved = check(await client.from('usability_responses').insert({
+      test_id: testId,
+      owner_id: user.id,
+      score: rating
+    }).select('id').single());
+    return { ok: true, id: saved.id };
+  }
+
+  async function setUsabilityTestActive(_token, testId, active) {
+    const task = check(await client.from('context_tasks').select('id,class_id').eq('id', testId).maybeSingle());
+    if (!task) throw new Error('사용성 테스트를 찾을 수 없습니다.');
+    await assertClassManager(task.class_id);
+    const saved = check(await client.from('context_tasks').update({ active: Boolean(active) }).eq('id', task.id).select('id').maybeSingle());
+    if (!saved) throw new Error('테스트 상태를 변경하지 못했습니다.');
+    return { ok: true };
+  }
+
   async function deleteClass(_token, classId) {
     await assertAdmin();
     const id = requiredText(classId, '클래스', 80);
     const deleted = check(await client.from('classes').delete().eq('id', id).select('id'));
     if (!deleted.length) throw new Error('삭제할 클래스를 찾을 수 없습니다.');
+    return { ok: true };
+  }
+
+  async function resetClassResults(_token, classId) {
+    const id = await assertClassManager(classId);
+    const result = check(await client.rpc('reset_class_results', { p_class_id: id }));
+    if (!result) throw new Error('수업 결과를 초기화하지 못했습니다.');
     return { ok: true };
   }
 
@@ -802,25 +864,74 @@
     };
   }
 
+  function summarizeRedesignReviews(rows) {
+    const meaningScore = average(rows.map(item => item.meaning_score));
+    const naturalScore = average(rows.map(item => item.natural_score));
+    const universalScore = average(rows.map(item => item.universal_score));
+    const clarityScore = average(rows.map(item => item.clarity_score == null ? item.memorable_score : item.clarity_score));
+    return {
+      meaningScore,
+      naturalScore,
+      universalScore,
+      clarityScore,
+      overallScore: rows.length ? average([meaningScore, naturalScore, universalScore, clarityScore]) : 0,
+      reviewCount: rows.length
+    };
+  }
+
+  function summarizeUsabilityByWord(tasks, responses) {
+    const responsesByTest = groupBy(responses, 'test_id');
+    const tasksByWord = groupBy(tasks, 'word_id');
+    const result = Object.create(null);
+    Object.keys(tasksByWord).forEach(wordId => {
+      const scenarioAverages = [];
+      const allScores = [];
+      tasksByWord[wordId].forEach(task => {
+        const scores = (responsesByTest[String(task.id)] || []).map(row => Number(row.score));
+        if (scores.length) {
+          scenarioAverages.push(average(scores));
+          allScores.push(...scores);
+        }
+      });
+      const rangeScore = scenarioAverages.length > 1
+        ? Math.max(...scenarioAverages) - Math.min(...scenarioAverages)
+        : 0;
+      result[wordId] = {
+        averageScore: average(allScores),
+        responseCount: allScores.length,
+        situationCount: tasksByWord[wordId].length,
+        rangeScore,
+        rangeLabel: scenarioAverages.length < 2 ? '판단 대기' : rangeScore < 0.8 ? '좁음' : rangeScore < 1.6 ? '보통' : '넓음'
+      };
+    });
+    return result;
+  }
+
   async function getWordmakingWords(_anonId, classId) {
     const user = await currentUser();
     const targetClassId = requiredText(classId, '클래스', 80);
-    const words = await fetchRows('words', '*', query => query.eq('class_id', targetClassId).eq('approved', true).order('created_at'));
+    const words = await fetchRows('words', '*', query => query.eq('class_id', targetClassId).order('created_at'));
     const wordIds = words.map(item => item.id);
-    const [ratings, suggestions] = await Promise.all([
-      wordIds.length ? fetchRows('word_ratings', '*', query => query.in('word_id', wordIds)) : [],
-      wordIds.length ? fetchRows('word_suggestions', '*', query => query.in('word_id', wordIds)) : []
+    const [suggestions, usabilityTasks] = await Promise.all([
+      wordIds.length ? fetchRows('word_suggestions', '*', query => query.in('word_id', wordIds)) : [],
+      wordIds.length ? fetchRows('context_tasks', '*', query => query.in('word_id', wordIds)) : []
     ]);
+    const usabilityTaskIds = usabilityTasks.map(item => item.id);
+    const usabilityResponses = usabilityTaskIds.length
+      ? await fetchRows('usability_responses', '*', query => query.in('test_id', usabilityTaskIds))
+      : [];
     const suggestionIds = suggestions.map(item => item.id);
     const suggestionRatings = suggestionIds.length
       ? await fetchRows('suggestion_ratings', '*', query => query.in('suggestion_id', suggestionIds))
       : [];
     const byWord = groupBy(suggestions, 'word_id');
     const ratingsBySuggestion = groupBy(suggestionRatings, 'suggestion_id');
-    return buildWordGroups(words, ratings).filter(word => word.approved).map(word => ({
+    const usabilityByWord = summarizeUsabilityByWord(usabilityTasks, usabilityResponses);
+    return buildWordGroups(words, []).map(word => ({
       id: word.id,
       word: word.word,
       category: word.category,
+      usability: usabilityByWord[String(word.id)] || { averageScore: 0, responseCount: 0, situationCount: 0, rangeScore: 0, rangeLabel: '판단 대기' },
       submitted: (byWord[String(word.id)] || []).some(row => row.owner_id === user.id),
       suggestionCount: (byWord[String(word.id)] || []).length,
       ownSuggestion: (() => {
@@ -828,6 +939,8 @@
         return row ? {
           id: row.id,
           suggestionType: row.suggestion_type,
+          meaning: row.meaning || row.example_sentence || '',
+          coreFeature: row.core_feature || '',
           suggestedWord: row.suggested_word,
           reason: row.reason,
           exampleSentence: row.example_sentence
@@ -836,16 +949,23 @@
       suggestions: (byWord[String(word.id)] || []).map(row => {
         const list = ratingsBySuggestion[String(row.id)] || [];
         const ownRating = list.find(item => item.owner_id === user.id);
-        return {
+        return Object.assign({
           id: row.id,
+          originalWord: row.original_word,
+          meaning: row.meaning || row.example_sentence || '',
+          coreFeature: row.core_feature || '',
           suggestedWord: row.suggested_word,
           reason: row.reason,
           mine: row.owner_id === user.id,
-          myRating: ownRating ? Number(ownRating.rating) : 0,
-          averageRating: average(list.map(item => item.rating)),
-          ratingCount: list.length
-        };
-      }).sort((a, b) => b.averageRating - a.averageRating || b.ratingCount - a.ratingCount)
+          reviewed: Boolean(ownRating),
+          myReview: ownRating ? {
+            meaningScore: Number(ownRating.meaning_score),
+            naturalScore: Number(ownRating.natural_score),
+            universalScore: Number(ownRating.universal_score),
+            clarityScore: Number(ownRating.clarity_score == null ? ownRating.memorable_score : ownRating.clarity_score)
+          } : null
+        }, summarizeRedesignReviews(list));
+      }).sort((a, b) => b.overallScore - a.overallScore || b.reviewCount - a.reviewCount)
     }));
   }
 
@@ -853,34 +973,41 @@
     const id = await assertClassManager(classId);
     const words = await fetchRows('words', '*', query => query.eq('class_id', id).order('created_at'));
     const wordIds = words.map(item => item.id);
-    const [wordRatings, suggestions] = await Promise.all([
-      wordIds.length ? fetchRows('word_ratings', '*', query => query.in('word_id', wordIds)) : [],
-      wordIds.length ? fetchRows('word_suggestions', '*', query => query.in('word_id', wordIds)) : []
+    const [suggestions, usabilityTasks] = await Promise.all([
+      wordIds.length ? fetchRows('word_suggestions', '*', query => query.in('word_id', wordIds)) : [],
+      wordIds.length ? fetchRows('context_tasks', '*', query => query.in('word_id', wordIds)) : []
     ]);
+    const usabilityTaskIds = usabilityTasks.map(item => item.id);
+    const usabilityResponses = usabilityTaskIds.length
+      ? await fetchRows('usability_responses', '*', query => query.in('test_id', usabilityTaskIds))
+      : [];
     const suggestionIds = suggestions.map(item => item.id);
     const suggestionRatings = suggestionIds.length
       ? await fetchRows('suggestion_ratings', '*', query => query.in('suggestion_id', suggestionIds))
       : [];
     const byWord = groupBy(suggestions, 'word_id');
     const ratingsBySuggestion = groupBy(suggestionRatings, 'suggestion_id');
-    return buildWordGroups(words, wordRatings).map(word => ({
+    const usabilityByWord = summarizeUsabilityByWord(usabilityTasks, usabilityResponses);
+    return buildWordGroups(words, []).map(word => ({
       id: word.id,
       word: word.word,
       category: word.category,
+      submissionCount: word.submissionCount,
       approved: word.approved,
       averageRating: word.averageRating,
       ratingCount: word.ratingCount,
+      usability: usabilityByWord[String(word.id)] || { averageScore: 0, responseCount: 0, situationCount: 0, rangeScore: 0, rangeLabel: '판단 대기' },
       suggestions: (byWord[String(word.id)] || []).map(row => {
         const list = ratingsBySuggestion[String(row.id)] || [];
-        return {
+        return Object.assign({
           id: row.id,
+          meaning: row.meaning || row.example_sentence || '',
+          coreFeature: row.core_feature || '',
           suggestedWord: row.suggested_word,
           reason: row.reason,
-          averageRating: average(list.map(item => item.rating)),
-          ratingCount: list.length,
           createdAt: row.created_at
-        };
-      }).sort((a, b) => b.averageRating - a.averageRating || b.ratingCount - a.ratingCount)
+        }, summarizeRedesignReviews(list));
+      }).sort((a, b) => b.overallScore - a.overallScore || b.reviewCount - a.reviewCount)
     }));
   }
 
@@ -890,42 +1017,190 @@
     const suggestionType = SUGGESTION_TYPES.includes(payload.suggestionType)
       ? payload.suggestionType
       : '새로운 말 만들기';
+    const meaning = requiredText(payload.meaning, '이 말이 전달하려는 의미', 600);
+    const coreFeature = requiredText(payload.coreFeature, '핵심 특징', 600);
     const suggestedWord = requiredText(payload.suggestedWord, '바꾼 표현', 120);
     const reason = requiredText(payload.reason, '바꾼 이유', 600);
-    const exampleSentence = cleanText(payload.exampleSentence, 800) || suggestedWord;
-    const [words, ratings] = await Promise.all([
-      fetchRows('words', '*', query => query.eq('approved', true).order('created_at')),
-      fetchRows('word_ratings')
-    ]);
-    const word = buildWordGroups(words, ratings).find(item => String(item.id) === String(payload.wordId) && item.approved);
+    const exampleSentence = meaning;
+    const words = await fetchRows('words', '*', query => query.order('created_at'));
+    const word = buildWordGroups(words, []).find(item => String(item.id) === String(payload.wordId));
     if (!word) throw new Error('제안할 표현을 찾을 수 없습니다.');
     const existing = check(await client.from('word_suggestions').select('id').eq('owner_id', user.id).eq('word_id', word.id).maybeSingle());
-    const saved = check(await client.from('word_suggestions').upsert({
+    if (existing) throw new Error('이 표현에는 이미 리디자인 제안을 등록했습니다.');
+    const saved = check(await client.from('word_suggestions').insert({
       owner_id: user.id,
       word_id: word.id,
       original_word: word.word,
       category: word.category,
       suggestion_type: suggestionType,
+      meaning,
+      core_feature: coreFeature,
       suggested_word: suggestedWord,
       reason,
       example_sentence: exampleSentence
-    }, { onConflict: 'owner_id,word_id' }).select('id').single());
-    return { ok: true, id: saved.id, updated: Boolean(existing) };
+    }).select('id').single());
+    return { ok: true, id: saved.id };
   }
 
-  async function saveSuggestionRating(_anonId, suggestionId, rating) {
+  async function saveSuggestionReview(_anonId, suggestionId, scores) {
     const user = await currentUser();
-    const score = assertRating(rating);
+    scores ||= {};
+    const meaningScore = assertRating(scores.meaningScore);
+    const naturalScore = assertRating(scores.naturalScore);
+    const universalScore = assertRating(scores.universalScore);
+    const clarityScore = assertRating(scores.clarityScore);
     const suggestion = check(await client.from('word_suggestions').select('id,owner_id').eq('id', suggestionId).maybeSingle());
-    if (!suggestion) throw new Error('평가할 순화말을 찾을 수 없습니다.');
-    if (suggestion.owner_id === user.id) throw new Error('내 순화말은 평가할 수 없습니다.');
+    if (!suggestion) throw new Error('평가할 리디자인 제안을 찾을 수 없습니다.');
+    if (suggestion.owner_id === user.id) throw new Error('내 제안은 평가할 수 없습니다.');
     const existing = check(await client.from('suggestion_ratings').select('id').eq('owner_id', user.id).eq('suggestion_id', suggestionId).maybeSingle());
-    const saved = check(await client.from('suggestion_ratings').upsert({
+    if (existing) throw new Error('이미 평가한 항목입니다.');
+    const overall = Math.round(((meaningScore + naturalScore + universalScore + clarityScore) / 4) * 10) / 10;
+    const saved = check(await client.from('suggestion_ratings').insert({
       owner_id: user.id,
       suggestion_id: suggestionId,
-      rating: score
-    }, { onConflict: 'owner_id,suggestion_id' }).select('id').single());
-    return { ok: true, id: saved.id, updated: Boolean(existing) };
+      rating: Math.round(overall),
+      meaning_score: meaningScore,
+      natural_score: naturalScore,
+      universal_score: universalScore,
+      clarity_score: clarityScore,
+      memorable_score: clarityScore
+    }).select('id').single());
+    return { ok: true, id: saved.id, overallScore: overall };
+  }
+
+  async function deleteWordSuggestion(_token, suggestionId) {
+    const suggestion = check(await client.from('word_suggestions').select('id,word_id').eq('id', suggestionId).maybeSingle());
+    if (!suggestion) throw new Error('삭제할 리디자인 제안을 찾을 수 없습니다.');
+    const word = check(await client.from('words').select('class_id').eq('id', suggestion.word_id).maybeSingle());
+    if (!word) throw new Error('원래 표현을 찾을 수 없습니다.');
+    await assertClassManager(word.class_id);
+    check(await client.from('word_suggestions').delete().eq('id', suggestion.id));
+    return { ok: true };
+  }
+
+  const AB_CHOICES = ['A', 'SAME', 'B'];
+  const AB_FIELDS = {
+    clarity: 'clarity_choice',
+    natural: 'natural_choice',
+    universal: 'universal_choice',
+    usage: 'usage_choice'
+  };
+
+  function summarizeAbResponses(rows) {
+    const metrics = {};
+    Object.keys(AB_FIELDS).forEach(key => {
+      const field = AB_FIELDS[key];
+      const counts = { A: 0, SAME: 0, B: 0 };
+      rows.forEach(row => { if (AB_CHOICES.includes(row[field])) counts[row[field]] += 1; });
+      const total = counts.A + counts.SAME + counts.B;
+      metrics[key] = {
+        a: counts.A,
+        same: counts.SAME,
+        b: counts.B,
+        aPercent: total ? Math.round(counts.A / total * 100) : 0,
+        samePercent: total ? Math.round(counts.SAME / total * 100) : 0,
+        bPercent: total ? Math.round(counts.B / total * 100) : 0
+      };
+    });
+    const improvementScore = rows.length
+      ? Math.round(average(Object.values(metrics).map(item => item.bPercent - item.aPercent)))
+      : 0;
+    return { responseCount: rows.length, improvementScore, metrics };
+  }
+
+  async function getAbTestLesson(_anonId, classId) {
+    const user = await currentUser();
+    const id = requiredText(classId, '클래스', 80);
+    const tests = await fetchRows('ab_tests', '*', query => query.eq('class_id', id).eq('active', true).order('created_at'));
+    const testIds = tests.map(item => item.id);
+    const wordIds = [...new Set(tests.map(item => item.word_id))];
+    const suggestionIds = [...new Set(tests.map(item => item.suggestion_id))];
+    const [words, suggestions, responses] = await Promise.all([
+      wordIds.length ? fetchRows('words', '*', query => query.in('id', wordIds)) : [],
+      suggestionIds.length ? fetchRows('word_suggestions', '*', query => query.in('id', suggestionIds)) : [],
+      testIds.length ? fetchRows('ab_responses', '*', query => query.in('ab_test_id', testIds)) : []
+    ]);
+    const wordById = Object.fromEntries(words.map(row => [String(row.id), row]));
+    const suggestionById = Object.fromEntries(suggestions.map(row => [String(row.id), row]));
+    const responsesByTest = groupBy(responses, 'ab_test_id');
+    const mapped = tests.map(test => {
+      const word = wordById[String(test.word_id)];
+      const suggestion = suggestionById[String(test.suggestion_id)];
+      const list = responsesByTest[String(test.id)] || [];
+      if (!word || !suggestion) return null;
+      return Object.assign({
+        id: test.id,
+        wordId: word.id,
+        suggestionId: suggestion.id,
+        category: word.category,
+        originalWord: word.word,
+        redesignedWord: suggestion.suggested_word,
+        meaning: suggestion.meaning || suggestion.example_sentence || '',
+        myResponse: Boolean(list.find(row => row.owner_id === user.id))
+      }, summarizeAbResponses(list));
+    }).filter(Boolean);
+    return { tests: mapped, completedCount: mapped.filter(item => item.myResponse).length };
+  }
+
+  async function saveAbResponse(_anonId, testId, answers) {
+    const user = await currentUser();
+    answers ||= {};
+    const values = {};
+    Object.keys(AB_FIELDS).forEach(key => {
+      const value = String(answers[key] || '').toUpperCase();
+      if (!AB_CHOICES.includes(value)) throw new Error('네 가지 비교 항목을 모두 선택해 주세요.');
+      values[AB_FIELDS[key]] = value;
+    });
+    const existing = check(await client.from('ab_responses').select('id').eq('ab_test_id', testId).eq('owner_id', user.id).maybeSingle());
+    if (existing) throw new Error('이미 응답한 비교입니다.');
+    const saved = check(await client.from('ab_responses').insert(Object.assign({
+      ab_test_id: testId,
+      owner_id: user.id
+    }, values)).select('id').single());
+    return { ok: true, id: saved.id };
+  }
+
+  async function saveAbTest(_token, suggestionId) {
+    const suggestion = check(await client.from('word_suggestions').select('id,word_id').eq('id', suggestionId).maybeSingle());
+    if (!suggestion) throw new Error('검증할 리디자인 제안을 찾을 수 없습니다.');
+    const word = check(await client.from('words').select('id,class_id').eq('id', suggestion.word_id).maybeSingle());
+    if (!word) throw new Error('원래 표현을 찾을 수 없습니다.');
+    await assertClassManager(word.class_id);
+    const existing = check(await client.from('ab_tests').select('id').eq('suggestion_id', suggestion.id).maybeSingle());
+    if (existing) {
+      check(await client.from('ab_tests').update({ active: true }).eq('id', existing.id));
+      return { ok: true, id: existing.id, updated: true };
+    }
+    const saved = check(await client.from('ab_tests').insert({
+      class_id: word.class_id,
+      word_id: word.id,
+      suggestion_id: suggestion.id,
+      active: true
+    }).select('id').single());
+    return { ok: true, id: saved.id, updated: false };
+  }
+
+  async function setAbTestActive(_token, testId, active) {
+    const test = check(await client.from('ab_tests').select('id,class_id').eq('id', testId).maybeSingle());
+    if (!test) throw new Error('검증 항목을 찾을 수 없습니다.');
+    await assertClassManager(test.class_id);
+    check(await client.from('ab_tests').update({ active: Boolean(active) }).eq('id', test.id));
+    return { ok: true };
+  }
+
+  async function deleteAbTest(_token, testId) {
+    const test = check(await client.from('ab_tests').select('id,class_id').eq('id', testId).maybeSingle());
+    if (!test) throw new Error('삭제할 검증 항목을 찾을 수 없습니다.');
+    await assertClassManager(test.class_id);
+    check(await client.from('ab_tests').delete().eq('id', test.id));
+    return { ok: true };
+  }
+
+  function currentWeekStart() {
+    const date = new Date();
+    const day = (date.getDay() + 6) % 7;
+    date.setDate(date.getDate() - day);
+    return [date.getFullYear(), String(date.getMonth()+1).padStart(2,'0'), String(date.getDate()).padStart(2,'0')].join('-');
   }
 
   async function getDictionaryWorkspace(_token, classId) {
@@ -938,33 +1213,52 @@
       wordRows = await fetchRows('words', '*', query => query.order('created_at'));
     }
     const wordIds = wordRows.map(item => item.id);
-    const [ratings, suggestions, dictionary] = await Promise.all([
-      wordIds.length ? fetchRows('word_ratings', '*', query => query.in('word_id', wordIds)) : [],
+    const [suggestions, dictionary, abTests, usabilityTasks] = await Promise.all([
       wordIds.length ? fetchRows('word_suggestions', '*', query => query.in('word_id', wordIds)) : [],
-      wordIds.length ? fetchRows('dictionary', '*', query => query.in('word_id', wordIds)) : []
+      wordIds.length ? fetchRows('dictionary', '*', query => query.in('word_id', wordIds)) : [],
+      wordIds.length ? fetchRows('ab_tests', '*', query => query.in('word_id', wordIds)) : [],
+      wordIds.length ? fetchRows('context_tasks', '*', query => query.in('word_id', wordIds)) : []
     ]);
     const suggestionIds = suggestions.map(item => item.id);
-    const suggestionRatings = suggestionIds.length
-      ? await fetchRows('suggestion_ratings', '*', query => query.in('suggestion_id', suggestionIds))
-      : [];
+    const abTestIds = abTests.map(item => item.id);
+    const usabilityTaskIds = usabilityTasks.map(item => item.id);
+    const dictionaryIds = dictionary.map(item => item.id);
+    const [suggestionRatings, abResponses, usabilityResponses, usageLogs] = await Promise.all([
+      suggestionIds.length ? fetchRows('suggestion_ratings', '*', query => query.in('suggestion_id', suggestionIds)) : [],
+      abTestIds.length ? fetchRows('ab_responses', '*', query => query.in('ab_test_id', abTestIds)) : [],
+      usabilityTaskIds.length ? fetchRows('usability_responses', '*', query => query.in('test_id', usabilityTaskIds)) : [],
+      dictionaryIds.length ? fetchRows('dictionary_usage_logs', '*', query => query.in('dictionary_id', dictionaryIds).eq('week_start', currentWeekStart())) : []
+    ]);
     const byWord = groupBy(suggestions, 'word_id');
     const ratingsBySuggestion = groupBy(suggestionRatings, 'suggestion_id');
+    const abTestBySuggestion = Object.fromEntries(abTests.map(row => [String(row.suggestion_id), row]));
+    const responsesByTest = groupBy(abResponses, 'ab_test_id');
+    const usabilityByWord = summarizeUsabilityByWord(usabilityTasks, usabilityResponses);
+    const usageByDictionary = groupBy(usageLogs, 'dictionary_id');
     const entryByWord = Object.create(null);
-    dictionary.map(mapDictionary).forEach(entry => { entryByWord[String(entry.wordId)] = entry; });
-    return buildWordGroups(wordRows, ratings).filter(word => word.approved).map(word => ({
+    dictionary.map(mapDictionary).forEach(entry => {
+      entry.usageCount = (usageByDictionary[String(entry.id)] || []).length;
+      entryByWord[String(entry.wordId)] = entry;
+    });
+    return buildWordGroups(wordRows, []).map(word => ({
       id: word.id,
       word: word.word,
       category: word.category,
-      suggestions: (byWord[String(word.id)] || []).map(row => ({
-        id: row.id,
-        suggestionType: row.suggestion_type,
-        suggestedWord: row.suggested_word,
-        reason: row.reason,
-        exampleSentence: row.example_sentence,
-        averageRating: average((ratingsBySuggestion[String(row.id)] || []).map(item => item.rating)),
-        ratingCount: (ratingsBySuggestion[String(row.id)] || []).length,
-        createdAt: row.created_at
-      })).sort((a, b) => b.averageRating - a.averageRating || b.ratingCount - a.ratingCount),
+      usability: usabilityByWord[String(word.id)] || { averageScore: 0, responseCount: 0, situationCount: 0, rangeScore: 0, rangeLabel: '판단 대기' },
+      suggestions: (byWord[String(word.id)] || []).map(row => {
+        const test = abTestBySuggestion[String(row.id)];
+        return Object.assign({
+          id: row.id,
+          suggestionType: row.suggestion_type,
+          meaning: row.meaning || row.example_sentence || '',
+          coreFeature: row.core_feature || '',
+          suggestedWord: row.suggested_word,
+          reason: row.reason,
+          exampleSentence: row.example_sentence,
+          createdAt: row.created_at,
+          abTest: test ? Object.assign({ id: test.id, active: Boolean(test.active) }, summarizeAbResponses(responsesByTest[String(test.id)] || [])) : null
+        }, summarizeRedesignReviews(ratingsBySuggestion[String(row.id)] || []));
+      }).sort((a, b) => Number(b.abTest && b.abTest.improvementScore || -999) - Number(a.abTest && a.abTest.improvementScore || -999) || b.overallScore - a.overallScore),
       entry: entryByWord[String(word.id)] || null
     }));
   }
@@ -980,15 +1274,14 @@
     const approved = Boolean(payload.approved);
     if (approved && (!finalWord || !meaning)) throw new Error('사전에 등록하려면 최종 추천 표현과 뜻을 입력해 주세요.');
     const target = check(await client.from('words').select('class_id').eq('id', payload.wordId).maybeSingle());
-    if (!target) throw new Error('승인된 원래 표현을 찾을 수 없습니다.');
+    if (!target) throw new Error('원래 표현을 찾을 수 없습니다.');
     await assertClassManager(target.class_id);
     const words = await fetchRows('words', '*', query => query.eq('class_id', target.class_id));
-    const wordIds = words.map(item => item.id);
-    const ratings = wordIds.length ? await fetchRows('word_ratings', '*', query => query.in('word_id', wordIds)) : [];
-    const word = buildWordGroups(words, ratings).find(item => String(item.id) === String(payload.wordId));
-    if (!word || !word.approved) throw new Error('승인된 원래 표현을 찾을 수 없습니다.');
+    const word = buildWordGroups(words, []).find(item => String(item.id) === String(payload.wordId));
+    if (!word) throw new Error('원래 표현을 찾을 수 없습니다.');
     const saved = check(await client.from('dictionary').upsert({
       word_id: word.id,
+      suggestion_id: payload.suggestionId || null,
       original_word: originalWord,
       category: payload.category,
       final_word: finalWord,
@@ -1001,14 +1294,52 @@
     return { ok: true, id: saved.id };
   }
 
+  async function setUsageTrackingEnabled(_token, classId, enabled) {
+    const id = await assertClassManager(classId);
+    const saved = check(await client.from('classes').update({
+      usage_tracking_enabled: Boolean(enabled),
+      updated_at: new Date().toISOString()
+    }).eq('id', id).select('id,usage_tracking_enabled').maybeSingle());
+    if (!saved) throw new Error('실제 사용 기록 설정을 바꾸지 못했습니다.');
+    return { ok: true, enabled: Boolean(saved.usage_tracking_enabled) };
+  }
+
   async function getPublishedDictionary(_anonId, classId) {
-    await currentUser();
-    const words = await fetchRows('words', 'id', query => query.eq('class_id', requiredText(classId, '클래스', 80)));
+    const user = await currentUser();
+    const id = requiredText(classId, '클래스', 80);
+    const classRow = check(await client.from('classes').select('id,usage_tracking_enabled').eq('id', id).maybeSingle());
+    const words = await fetchRows('words', 'id', query => query.eq('class_id', id));
     const wordIds = words.map(item => item.id);
     const rows = wordIds.length
       ? await fetchRows('dictionary', '*', query => query.in('word_id', wordIds).eq('approved', true).order('original_word'))
       : [];
-    return rows.map(mapDictionary);
+    const dictionaryIds = rows.map(item => item.id);
+    const ownUsage = dictionaryIds.length
+      ? await fetchRows('dictionary_usage_logs', '*', query => query.in('dictionary_id', dictionaryIds).eq('owner_id', user.id).eq('week_start', currentWeekStart()))
+      : [];
+    const usedIds = new Set(ownUsage.map(row => String(row.dictionary_id)));
+    return {
+      usageTrackingEnabled: Boolean(classRow && classRow.usage_tracking_enabled),
+      entries: rows.map(row => Object.assign(mapDictionary(row), { usedThisWeek: usedIds.has(String(row.id)) }))
+    };
+  }
+
+  async function saveDictionaryUsage(_anonId, dictionaryId, usageContext) {
+    const user = await currentUser();
+    const entry = check(await client.from('dictionary').select('id,word_id,approved').eq('id', dictionaryId).maybeSingle());
+    if (!entry || !entry.approved) throw new Error('사용 기록을 남길 사전 표현을 찾을 수 없습니다.');
+    const word = check(await client.from('words').select('class_id').eq('id', entry.word_id).maybeSingle());
+    if (!word) throw new Error('클래스를 찾을 수 없습니다.');
+    const classRow = check(await client.from('classes').select('usage_tracking_enabled').eq('id', word.class_id).maybeSingle());
+    if (!classRow || !classRow.usage_tracking_enabled) throw new Error('선생님이 실제 사용 기록 기능을 켠 뒤 참여할 수 있습니다.');
+    const context = cleanText(usageContext, 400);
+    const saved = check(await client.from('dictionary_usage_logs').insert({
+      dictionary_id: entry.id,
+      owner_id: user.id,
+      week_start: currentWeekStart(),
+      usage_context: context
+    }).select('id').single());
+    return { ok: true, id: saved.id };
   }
 
   async function getClassPledges(_anonId, classId) {
@@ -1044,9 +1375,9 @@
   }
 
   const methods = {
+    getStudentUuid,
     verifyAdminCredentials,
     verifyTeacherCode,
-    getTeacherClasses,
     createTeacherClass,
     recoverTeacherClassCode,
     enterTeacherClass,
@@ -1060,27 +1391,29 @@
     deleteWordGroup,
     submitWord,
     getApprovedWords,
-    saveWordRating,
     saveContextTask,
-    saveContextGroup,
-    deleteContextGroup,
-    getContextLesson,
     deleteContextTask,
+    getUsabilityLesson,
+    getUsabilityWorkspace,
+    saveUsabilityResponse,
+    setUsabilityTestActive,
     deleteClass,
-    getContextActivity,
-    submitContextExample,
-    saveExampleRating,
-    getContextResults,
+    resetClassResults,
     getWordmakingWords,
     getWordmakingWorkspace,
     submitWordSuggestion,
-    saveSuggestionRating,
+    saveSuggestionReview,
+    deleteWordSuggestion,
+    getAbTestLesson,
+    saveAbResponse,
+    saveAbTest,
+    setAbTestActive,
+    deleteAbTest,
     getDictionaryWorkspace,
     saveDictionaryEntry,
+    setUsageTrackingEnabled,
     getPublishedDictionary,
-    getClassPledges,
-    saveClassPledge,
-    deleteClassPledge
+    saveDictionaryUsage
   };
 
   global.AppApi = Object.freeze({
