@@ -18,6 +18,9 @@
     if (/failed to fetch|load failed|networkerror/i.test(raw)) return 'Supabase에 연결할 수 없습니다. 인터넷 연결과 프로젝트 설정을 확인해 주세요.';
     if (/row-level security|permission denied/i.test(raw)) return '이 작업을 수행할 권한이 없습니다.';
     if ((error && error.code === '23505') || /duplicate key|unique constraint/i.test(raw)) return '이미 평가한 항목입니다.';
+    if ((error && ['PGRST202', 'PGRST204', 'PGRST205'].includes(error.code)) || /schema cache|could not find the (table|function|column)/i.test(raw)) {
+      return '수업 기능 업데이트가 필요합니다. Supabase에서 lesson-flow-update.sql을 한 번 실행해 주세요.';
+    }
     if (error && error.code && !/[가-힣]/.test(raw)) return '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
     return raw;
   }
@@ -360,6 +363,7 @@
       classCode: row.class_code,
       currentStage: row.current_stage,
       currentTaskId: row.current_task_id || '',
+      diagnosticWordCapacity: Math.max(1, Number(row.diagnostic_word_capacity) || 4),
       usageTrackingEnabled: Boolean(row.usage_tracking_enabled),
       isActive: Boolean(row.is_active),
       createdAt: row.created_at,
@@ -780,6 +784,128 @@
     };
   }
 
+  function mapDiagnosticCard(card, word) {
+    return {
+      id: card.id,
+      classId: card.class_id,
+      wordId: card.word_id,
+      word: word ? word.word : '',
+      category: word ? word.category : '유행어',
+      status: card.status || 'draft',
+      complete: card.status === 'complete',
+      dimensions: Array.isArray(card.dimensions) ? card.dimensions : [],
+      appropriate: {
+        partner: card.appropriate_partner || '',
+        place: card.appropriate_place || '',
+        situation: card.appropriate_situation || '',
+        example: card.appropriate_example || '',
+        rating: Number(card.appropriate_rating) || 0
+      },
+      inappropriate: {
+        partner: card.inappropriate_partner || '',
+        place: card.inappropriate_place || '',
+        situation: card.inappropriate_situation || '',
+        example: card.inappropriate_example || '',
+        rating: Number(card.inappropriate_rating) || 0
+      },
+      ratingReason: card.rating_reason || '',
+      ownerId: card.owner_id,
+      createdAt: card.created_at,
+      updatedAt: card.updated_at
+    };
+  }
+
+  async function diagnosticData(classId, manager) {
+    const id = manager ? await assertClassManager(classId) : requiredText(classId, '클래스', 80);
+    const user = manager ? null : await currentUser();
+    const [classRow, wordRows, cardRows] = await Promise.all([
+      client.from('classes').select('id,diagnostic_word_capacity').eq('id', id).maybeSingle().then(check),
+      fetchRows('words', '*', query => query.eq('class_id', id).order('created_at')),
+      fetchRows('diagnostic_cards', '*', query => query.eq('class_id', id).order('created_at'))
+    ]);
+    if (!classRow) throw new Error('클래스를 찾을 수 없습니다.');
+    const words = buildWordGroups(wordRows, []);
+    const wordById = Object.fromEntries(words.map(word => [String(word.id), word]));
+    const cards = cardRows.map(card => mapDiagnosticCard(card, wordById[String(card.word_id)])).filter(card => card.word);
+    const selectedByWord = cards.reduce((counts, card) => {
+      counts[String(card.wordId)] = (counts[String(card.wordId)] || 0) + 1;
+      return counts;
+    }, Object.create(null));
+    const capacity = Math.max(1, Number(classRow.diagnostic_word_capacity) || 4);
+    return {
+      capacity,
+      words: words.map(word => {
+        const selectedCount = selectedByWord[String(word.id)] || 0;
+        return {
+          id: word.id,
+          word: word.word,
+          category: word.category,
+          submissionCount: word.submissionCount,
+          selectedCount,
+          remainingCount: Math.max(0, capacity - selectedCount),
+          full: selectedCount >= capacity
+        };
+      }),
+      cards,
+      myCard: user ? (cards.find(card => card.ownerId === user.id) || null) : null
+    };
+  }
+
+  async function getDiagnosticLesson(_anonId, classId) {
+    return diagnosticData(classId, false);
+  }
+
+  async function getDiagnosticWorkspace(_token, classId) {
+    return diagnosticData(classId, true);
+  }
+
+  async function setDiagnosticCapacity(_token, classId, capacity) {
+    const id = await assertClassManager(classId);
+    const value = Number(capacity);
+    if (!Number.isInteger(value) || value < 1 || value > 50) throw new Error('표현별 선택 인원은 1~50명으로 설정해 주세요.');
+    const row = check(await client.from('classes').update({
+      diagnostic_word_capacity: value,
+      updated_at: new Date().toISOString()
+    }).eq('id', id).select('id,diagnostic_word_capacity').maybeSingle());
+    if (!row) throw new Error('선택 인원 설정을 저장하지 못했습니다.');
+    return { ok: true, capacity: Number(row.diagnostic_word_capacity) };
+  }
+
+  async function claimDiagnosticWord(_anonId, classId, wordId) {
+    await currentUser();
+    const result = check(await client.rpc('claim_diagnostic_word', {
+      p_class_id: requiredText(classId, '클래스', 80),
+      p_word_id: requiredText(wordId, '표현', 80)
+    }));
+    if (!result || !result.length) throw new Error('표현을 선택하지 못했습니다.');
+    return { ok: true, id: result[0].card_id };
+  }
+
+  async function saveDiagnosticCard(_anonId, payload) {
+    await currentUser();
+    payload ||= {};
+    const dimensions = [...new Set((Array.isArray(payload.dimensions) ? payload.dimensions : []).filter(value => ['partner', 'place', 'situation'].includes(value)))];
+    if (dimensions.length < 2) throw new Error('대화 상대, 장소, 상황 중 두 가지 이상을 선택해 주세요.');
+    const appropriate = payload.appropriate || {};
+    const inappropriate = payload.inappropriate || {};
+    const result = check(await client.rpc('save_diagnostic_card', {
+      p_card_id: requiredText(payload.cardId, '진단 카드', 80),
+      p_dimensions: dimensions,
+      p_appropriate_partner: cleanText(appropriate.partner, 200),
+      p_appropriate_place: cleanText(appropriate.place, 200),
+      p_appropriate_situation: cleanText(appropriate.situation, 500),
+      p_appropriate_example: requiredText(appropriate.example, '적절한 경우의 예문', 800),
+      p_appropriate_rating: assertRating(appropriate.rating),
+      p_inappropriate_partner: cleanText(inappropriate.partner, 200),
+      p_inappropriate_place: cleanText(inappropriate.place, 200),
+      p_inappropriate_situation: cleanText(inappropriate.situation, 500),
+      p_inappropriate_example: requiredText(inappropriate.example, '그렇지 않은 경우의 예문', 800),
+      p_inappropriate_rating: assertRating(inappropriate.rating),
+      p_rating_reason: requiredText(payload.ratingReason, '평가 이유', 800)
+    }));
+    return { ok: true, id: result && result[0] ? result[0].card_id : payload.cardId };
+  }
+
   async function getUsabilityLesson(_anonId, classId) {
     const user = await currentUser();
     const id = requiredText(classId, '클래스', 80);
@@ -1063,6 +1189,67 @@
     }));
   }
 
+  async function redesignData(classId, manager) {
+    const id = manager ? await assertClassManager(classId) : requiredText(classId, '클래스', 80);
+    const user = manager ? null : await currentUser();
+    const [wordRows, cardRows] = await Promise.all([
+      fetchRows('words', '*', query => query.eq('class_id', id).order('created_at')),
+      fetchRows('diagnostic_cards', '*', query => query.eq('class_id', id).eq('status', 'complete').order('updated_at'))
+    ]);
+    const words = buildWordGroups(wordRows, []);
+    const wordById = Object.fromEntries(words.map(word => [String(word.id), word]));
+    const cardIds = cardRows.map(card => card.id);
+    const suggestions = cardIds.length
+      ? await fetchRows('word_suggestions', '*', query => query.in('diagnostic_card_id', cardIds).order('created_at'))
+      : [];
+    const suggestionsByCard = groupBy(suggestions, 'diagnostic_card_id');
+    return cardRows.map(row => {
+      const card = mapDiagnosticCard(row, wordById[String(row.word_id)]);
+      const linked = (suggestionsByCard[String(row.id)] || []).map(suggestion => ({
+        id: suggestion.id,
+        wordId: suggestion.word_id,
+        diagnosticCardId: suggestion.diagnostic_card_id,
+        originalWord: suggestion.original_word,
+        suggestedWord: suggestion.suggested_word,
+        meaning: suggestion.meaning || '',
+        coreFeature: suggestion.core_feature || '',
+        reason: suggestion.reason || '',
+        exampleSentence: suggestion.example_sentence || '',
+        mine: user ? suggestion.owner_id === user.id : false,
+        createdAt: suggestion.created_at
+      }));
+      card.suggestions = linked;
+      card.submitted = user ? linked.some(suggestion => suggestion.mine) : false;
+      return card;
+    }).filter(card => card.word);
+  }
+
+  async function getRedesignLesson(_anonId, classId) {
+    return redesignData(classId, false);
+  }
+
+  async function getRedesignWorkspace(_token, classId) {
+    return redesignData(classId, true);
+  }
+
+  async function submitDiagnosticRedesign(_anonId, payload) {
+    await currentUser();
+    payload ||= {};
+    const suggestedWord = requiredText(payload.suggestedWord, '새 표현', 120);
+    const meaning = requiredText(payload.meaning, '새 표현의 뜻', 600);
+    const reason = requiredText(payload.reason, '바꾼 이유', 600);
+    const exampleSentence = requiredText(payload.exampleSentence, '새 예문', 800);
+    const rows = check(await client.rpc('submit_diagnostic_redesign', {
+      p_card_id: requiredText(payload.diagnosticCardId, '진단 카드', 80),
+      p_suggested_word: suggestedWord,
+      p_meaning: meaning,
+      p_reason: reason,
+      p_example_sentence: exampleSentence
+    })) || [];
+    if (!rows.length) throw new Error('새 표현을 저장하지 못했습니다.');
+    return { ok: true, id: rows[0].suggestion_id, testId: rows[0].test_id };
+  }
+
   async function submitWordSuggestion(_anonId, payload) {
     const user = await currentUser();
     payload ||= {};
@@ -1212,6 +1399,23 @@
     return { ok: true, id: saved.id };
   }
 
+  async function saveComparisonVote(_anonId, testId, choice) {
+    await currentUser();
+    const value = String(choice || '').toUpperCase();
+    if (!['A', 'B'].includes(value)) throw new Error('기존 표현과 새 표현 중 하나를 선택해 주세요.');
+    const rows = check(await client.rpc('submit_comparison_vote', {
+      p_test_id: requiredText(testId, '비교', 80),
+      p_choice: value
+    })) || [];
+    const result = rows[0] || {};
+    return {
+      ok: true,
+      winner: result.winner || '',
+      originalVotes: Number(result.original_votes) || 0,
+      redesignVotes: Number(result.redesign_votes) || 0
+    };
+  }
+
   async function saveAbTest(_token, suggestionId) {
     const suggestion = check(await client.from('word_suggestions').select('id,word_id').eq('id', suggestionId).maybeSingle());
     if (!suggestion) throw new Error('검증할 리디자인 제안을 찾을 수 없습니다.');
@@ -1265,27 +1469,20 @@
       wordRows = await fetchRows('words', '*', query => query.order('created_at'));
     }
     const wordIds = wordRows.map(item => item.id);
-    const [suggestions, dictionary, abTests, usabilityTasks] = await Promise.all([
+    const [suggestions, dictionary, abTests] = await Promise.all([
       wordIds.length ? fetchRows('word_suggestions', '*', query => query.in('word_id', wordIds)) : [],
       wordIds.length ? fetchRows('dictionary', '*', query => query.in('word_id', wordIds)) : [],
-      wordIds.length ? fetchRows('ab_tests', '*', query => query.in('word_id', wordIds)) : [],
-      wordIds.length ? fetchRows('context_tasks', '*', query => query.in('word_id', wordIds)) : []
+      wordIds.length ? fetchRows('ab_tests', '*', query => query.in('word_id', wordIds)) : []
     ]);
-    const suggestionIds = suggestions.map(item => item.id);
     const abTestIds = abTests.map(item => item.id);
-    const usabilityTaskIds = usabilityTasks.map(item => item.id);
     const dictionaryIds = dictionary.map(item => item.id);
-    const [suggestionRatings, abResponses, usabilityResponses, usageLogs] = await Promise.all([
-      suggestionIds.length ? fetchRows('suggestion_ratings', '*', query => query.in('suggestion_id', suggestionIds)) : [],
+    const [abResponses, usageLogs] = await Promise.all([
       abTestIds.length ? fetchRows('ab_responses', '*', query => query.in('ab_test_id', abTestIds)) : [],
-      usabilityTaskIds.length ? fetchRows('usability_responses', '*', query => query.in('test_id', usabilityTaskIds)) : [],
       dictionaryIds.length ? fetchRows('dictionary_usage_logs', '*', query => query.in('dictionary_id', dictionaryIds).eq('week_start', currentWeekStart())) : []
     ]);
     const byWord = groupBy(suggestions, 'word_id');
-    const ratingsBySuggestion = groupBy(suggestionRatings, 'suggestion_id');
     const abTestBySuggestion = Object.fromEntries(abTests.map(row => [String(row.suggestion_id), row]));
     const responsesByTest = groupBy(abResponses, 'ab_test_id');
-    const usabilityByWord = summarizeUsabilityByWord(usabilityTasks, usabilityResponses);
     const usageByDictionary = groupBy(usageLogs, 'dictionary_id');
     const entryByWord = Object.create(null);
     dictionary.map(mapDictionary).forEach(entry => {
@@ -1296,7 +1493,6 @@
       id: word.id,
       word: word.word,
       category: word.category,
-      usability: usabilityByWord[String(word.id)] || { averageScore: 0, responseCount: 0, situationCount: 0, rangeScore: 0, rangeLabel: '판단 대기' },
       suggestions: (byWord[String(word.id)] || []).map(row => {
         const test = abTestBySuggestion[String(row.id)];
         return Object.assign({
@@ -1309,7 +1505,7 @@
           exampleSentence: row.example_sentence,
           createdAt: row.created_at,
           abTest: test ? Object.assign({ id: test.id, active: Boolean(test.active) }, summarizeAbResponses(responsesByTest[String(test.id)] || [])) : null
-        }, summarizeRedesignReviews(ratingsBySuggestion[String(row.id)] || []));
+        }, summarizeRedesignReviews([]));
       }).sort((a, b) => Number(b.abTest && b.abTest.improvementScore || -999) - Number(a.abTest && a.abTest.improvementScore || -999) || b.overallScore - a.overallScore),
       entry: entryByWord[String(word.id)] || null
     }));
@@ -1450,15 +1646,24 @@
     getUsabilityWorkspace,
     saveUsabilityResponse,
     setUsabilityTestActive,
+    getDiagnosticLesson,
+    getDiagnosticWorkspace,
+    setDiagnosticCapacity,
+    claimDiagnosticWord,
+    saveDiagnosticCard,
     deleteClass,
     resetClassResults,
     getWordmakingWords,
     getWordmakingWorkspace,
+    getRedesignLesson,
+    getRedesignWorkspace,
+    submitDiagnosticRedesign,
     submitWordSuggestion,
     saveSuggestionReview,
     deleteWordSuggestion,
     getAbTestLesson,
     saveAbResponse,
+    saveComparisonVote,
     saveAbTest,
     setAbTestActive,
     deleteAbTest,

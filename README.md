@@ -6,8 +6,9 @@ GitHub Pages에서 실행되는 고등학교 국어 수업용 참여형 웹앱�
 
 1. Supabase에서 새 프로젝트를 만듭니다.
 2. 새 프로젝트라면 **SQL Editor**에서 [`supabase/schema.sql`](supabase/schema.sql) 전체를 실행합니다. 이미 스키마를 설치한 현재 프로젝트라면 [`supabase/permissions-update.sql`](supabase/permissions-update.sql) 전체를 실행해 최신 기능과 권한만 반영합니다.
-3. **Authentication > Providers > Anonymous Sign-Ins**를 활성화합니다.
-4. [`site/config.js`](site/config.js)에 Project URL과 publishable 키를 입력합니다.
+3. 이어서 **SQL Editor**에서 [`supabase/lesson-flow-update.sql`](supabase/lesson-flow-update.sql) 전체를 실행합니다. 이 파일은 기존 수집 자료를 지우지 않고 2~4차시 학생 주도 흐름만 추가합니다.
+4. **Authentication > Providers > Anonymous Sign-Ins**를 활성화합니다.
+5. [`site/config.js`](site/config.js)에 Project URL과 publishable 키를 입력합니다.
 
 ```js
 window.APP_CONFIG = Object.freeze({
@@ -42,9 +43,9 @@ where label = '기본 교사 코드';
 수업은 네 차시로 운영합니다.
 
 1. **발견 · 언어 데이터 수집**: `비속어·유행어·외래어`를 모읍니다. 같은 표현은 새 행을 만들지 않고 등록 횟수를 올립니다. 학생이 등록한 표현은 교사의 1·2차시 화면에 자동 반영됩니다.
-2. **진단 · 말의 사용성 테스트**: 1차시 표현이 자동 연동되며, 교사가 설정한 표현·상황·상대·목적을 보고 학생이 적절성을 1~5점으로 한 번 평가합니다. 결과에는 표현 평균과 상황별 편차 범위가 함께 표시됩니다.
-3. **설계 · 언어 UX 리디자인 LAB**: 2차시 결과를 참고해 의미·핵심 특징·새 표현·이유를 작성하고, 다른 설계안을 의미 보존성·자연스러움·보편성·명확성으로 평가합니다.
-4. **검증 · 블라인드 A/B 테스트와 출시**: 학생은 출처가 가려진 두 표현을 네 기준으로 비교합니다. 교사는 백분율 결과와 사용성 향상 정도를 확인해 사전 등재를 최종 결정합니다. 선택적으로 주간 실제 사용 기록을 켤 수 있습니다.
+2. **진단 · 맥락과 적절성**: 학생이 1차시 표현 하나를 선택합니다. 교사가 정한 표현별 최대 인원에 도달하면 해당 표현은 `마감` 처리됩니다. 학생은 대화 상대·장소·상황 중 두 가지 이상을 골라 적절한 경우와 그렇지 않은 경우의 맥락·예문·별점·평가 이유를 완성합니다.
+3. **설계 · 진단에서 새 표현으로**: 학생이 2차시 진단 카드 하나를 선택하고 내용을 확인한 뒤 새 표현·뜻·이유·예문을 작성합니다. 등록된 설계안은 4차시 1:1 비교 항목으로 자동 연결됩니다.
+4. **검증 · 기존 표현과 새 표현 1:1 비교**: 학생이 두 표현 중 맥락에 더 적합한 표현을 고르면 현재 학급 선택 결과가 사전에 즉시 반영됩니다. 교사 화면의 **우리 반 우리말 사전** 탭에서 표제어 형식으로 확인합니다.
 
 ## 권한 구조
 
@@ -62,12 +63,10 @@ classes (지역 → 학교 → 학년 → 반 → 클래스 코드)
 ├─ class_members / class_teachers
 ├─ words (학생 언어 자료와 submit_count)
 │  ├─ word_suggestions (리디자인 제안)
-│  │  ├─ suggestion_ratings (4가지 동료 평가 점수)
-│  │  └─ ab_tests / ab_responses (블라인드 A/B 검증)
+│  │  └─ ab_tests / ab_responses (기존·새 표현 1:1 검증)
 │  └─ dictionary (우리말 사전 결과)
 │     └─ dictionary_usage_logs (선택형 주간 실제 사용 기록)
-├─ context_tasks (사용성 테스트 설정)
-│  └─ usability_responses (상황별 적절성 점수)
+├─ diagnostic_cards (학생이 만든 맥락·예문·별점 진단 카드)
 └─ class_recovery (코드 찾기 힌트 해시, 직접 조회 불가)
 ```
 

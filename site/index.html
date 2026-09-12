@@ -98,6 +98,21 @@
     }
     textarea { min-height: 126px; resize: vertical; }
     input:focus, textarea:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(49, 87, 213, .13); }
+    .custom-select { position:relative; width:100%; min-width:0; }
+    .custom-select.compact { width:auto; min-width:112px; }
+    .custom-select-native { position:absolute !important; inset:0 auto auto 0; width:1px !important; height:1px !important; min-height:0 !important; padding:0 !important; border:0 !important; opacity:0; pointer-events:none; }
+    .custom-select-trigger { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:48px; padding:10px 13px; border:1px solid #cfd5df; border-radius:12px; background:#fff; color:var(--ink); text-align:left; font-weight:750; }
+    .custom-select-trigger::after { content:""; flex:0 0 8px; width:8px; height:8px; margin:-4px 2px 0 0; border-right:2px solid var(--primary); border-bottom:2px solid var(--primary); transform:rotate(45deg); transition:transform .16s; }
+    .custom-select.open .custom-select-trigger { border-color:var(--primary); box-shadow:0 0 0 3px rgba(49,95,91,.13); }
+    .custom-select.open .custom-select-trigger::after { margin-top:4px; transform:rotate(225deg); }
+    .custom-select-trigger:disabled { cursor:not-allowed; background:#f1f3f2; color:var(--muted); }
+    .custom-select-menu { position:absolute; z-index:45; top:calc(100% + 7px); left:0; right:0; display:none; max-height:248px; overflow:auto; padding:6px; border:1px solid #d9dfdc; border-radius:13px; background:#fff; box-shadow:0 18px 45px rgba(32,48,47,.17); }
+    .custom-select.open .custom-select-menu { display:grid; gap:3px; }
+    .custom-select-option { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:42px; padding:8px 10px; border:0; border-radius:9px; background:#fff; color:var(--ink); text-align:left; font-weight:700; }
+    .custom-select-option:hover,.custom-select-option.focused { background:#f0f6f4; }
+    .custom-select-option.selected { background:var(--primary); color:#fff; }
+    .custom-select-option:disabled { cursor:not-allowed; background:#f1f2f2; color:#9aa19f; opacity:1; }
+    .custom-select.compact .custom-select-trigger { min-height:39px; padding:6px 10px; font-size:14px; }
     label.field-label { display: block; margin: 16px 0 7px; font-weight: 800; }
     .filter-group { display: flex; gap: 7px; flex-wrap: wrap; }
     .filter-btn { min-height: 42px; border: 1px solid var(--line); border-radius: 99px; background: white; padding: 8px 15px; font-weight: 750; color: #4c5566; }
@@ -290,7 +305,7 @@
     .teacher-top-actions { display: flex; gap: 7px; margin-left: auto; }
     .teacher-top-actions .btn { min-height: 39px; padding: 7px 12px; font-size: 13px; }
     .code-button { border-color: #dce5e1; background: #f3f8f5; color: var(--primary); letter-spacing: .08em; }
-    .lesson-tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin: 17px 0; }
+    .lesson-tabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin: 17px 0; }
     .lesson-tab { position: relative; display:grid; grid-template-columns:48px minmax(0,1fr); align-items:center; gap:14px; min-height: 90px; padding: 14px 17px; overflow: hidden; border: 1px solid #e0e5e2; border-radius: 18px; background: rgba(255,255,255,.92); color: #596663; text-align: left; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
     .lesson-tab::after { content: ""; position: absolute; inset:0 0 auto; height:4px; background:var(--lesson-color,#b9d8cb); opacity:.88; }
     .lesson-tab-icon { position:relative; z-index:1; display:grid; place-items:center; width:48px; height:48px; border-radius:15px; background:#f2f6f4; background:color-mix(in srgb,var(--lesson-color) 14%,#fff); color:var(--lesson-color); }
@@ -599,6 +614,40 @@
     .ab-bars .bar-a { background:#697b78; }.ab-bars .bar-same { background:#b3bebc; }.ab-bars .bar-b { background:var(--primary); }
     .improvement-pill { display:inline-flex; align-items:center; border-radius:99px; padding:6px 10px; background:#e1f2ed; color:#176650; font-size:12px; font-weight:900; }
     .tracking-panel { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:13px 15px; margin-bottom:12px; border:1px solid #dce6e3; border-radius:13px; background:#f8fbfa; }
+    .lesson-subtabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; padding:6px; margin:0 0 14px; border-radius:14px; background:#e9eeec; }
+    .lesson-subtab { min-height:44px; border:0; border-radius:10px; background:transparent; color:#65716e; font-weight:850; }
+    .lesson-subtab.active { background:#fff; color:var(--primary); box-shadow:0 3px 12px rgba(32,48,47,.08); }
+    .capacity-panel { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 18px; margin-bottom:13px; }
+    .capacity-panel h3,.capacity-panel p { margin:0; }.capacity-panel p { color:var(--muted); font-size:13px; }
+    .capacity-control { display:flex; align-items:center; gap:8px; }.capacity-control input { width:82px; min-height:42px; text-align:center; }
+    .capacity-control .btn { min-height:42px; }
+    .diagnostic-word-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+    .diagnostic-word { position:relative; min-width:0; padding:16px; border:1px solid #dce3e0; border-radius:15px; background:#fff; }
+    button.diagnostic-word { text-align:left; color:var(--ink); }
+    button.diagnostic-word:not(:disabled):hover { border-color:var(--primary); transform:translateY(-1px); box-shadow:0 10px 24px rgba(49,95,91,.1); }
+    .diagnostic-word strong,.diagnostic-word small { display:block; }.diagnostic-word strong { margin:5px 0 9px; font-size:20px; }.diagnostic-word small { color:var(--muted); }
+    .diagnostic-word.full { border-color:#dfe2e1; background:#eef0ef; color:#909795; }.diagnostic-word.full .badge { background:#d7dbda; color:#717875; }
+    button.diagnostic-word.full:disabled { cursor:not-allowed; opacity:1; }
+    .context-stepper { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:0 0 12px; }
+    .context-step { display:flex; align-items:center; justify-content:center; gap:7px; min-height:42px; border-radius:11px; background:#edf1ef; color:#74807d; font-size:13px; font-weight:850; }
+    .context-step b { display:grid; place-items:center; width:22px; height:22px; border-radius:50%; background:#d9dfdc; font-size:11px; }
+    .context-step.active { background:var(--primary); color:#fff; }.context-step.active b { background:rgba(255,255,255,.18); }
+    .dimension-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:11px 0 15px; }
+    .dimension-choice { min-height:52px; border:1px solid #d8dfdc; border-radius:12px; background:#fff; color:#64716e; font-weight:850; }
+    .dimension-choice.active { border-color:var(--primary); background:var(--primary-soft); color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
+    .context-case-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+    .context-case { padding:15px; border:1px solid #e0e5e2; border-radius:14px; background:#fafbf9; }
+    .context-case.good { border-top:4px solid var(--success); }.context-case.bad { border-top:4px solid var(--accent); }
+    .context-case h3 { margin:0 0 8px; font-size:17px; }.context-case textarea { min-height:96px; }
+    .diagnostic-summary { display:grid; gap:8px; margin:12px 0; }
+    .diagnostic-summary > div { padding:12px 13px; border-radius:11px; background:#f2f6f4; }
+    .diagnostic-summary b { display:block; color:var(--primary); font-size:11px; letter-spacing:.05em; }
+    .star-choice-row { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin:8px 0; }
+    .star-choice { min-height:48px; border:1px solid #d9dfdc; border-radius:11px; background:#fff; color:#c4a347; font-size:25px; }
+    .star-choice.active { border-color:#e0a720; background:#fff7da; color:#d99500; }
+    .dictionary-headword { padding:20px; border-left:5px solid var(--primary); }
+    .dictionary-headword h2 { margin:3px 0 4px; font-size:27px; }.dictionary-headword .pronunciation { color:var(--muted); font-size:12px; }
+    .dictionary-headword .definition { margin-top:13px; }.dictionary-headword .definition b { display:inline-grid; place-items:center; width:23px; height:23px; margin-right:7px; border-radius:50%; background:var(--primary); color:#fff; font-size:12px; }
 
     @media (max-width: 980px) {
       .stats-grid { grid-template-columns: repeat(3, 1fr); }
@@ -658,7 +707,8 @@
       .teacher-top { align-items: flex-start; flex-wrap: wrap; }
       .teacher-top-actions { width: 100%; margin-left: 0; }
       .teacher-top-actions .btn { flex: 1; }
-      .lesson-tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .lesson-tabs { display:flex; overflow-x:auto; padding-bottom:4px; scroll-snap-type:x proximity; }
+      .lesson-tab { flex:0 0 112px; scroll-snap-align:start; }
       .lesson-tab { min-height: 72px; }
       .lesson-hero { align-items: flex-start; flex-direction: column; padding: 22px; }
       .lesson-actions { justify-content: flex-start; width: 100%; margin-left: 0; }
@@ -666,6 +716,8 @@
       .simple-row { grid-template-columns: minmax(0,1fr) auto; }
       .simple-row .row-actions { grid-column: 1 / -1; }
       .context-grid, .refine-grid { grid-template-columns: 1fr; }
+      .diagnostic-word-grid { grid-template-columns:1fr 1fr; }
+      .context-case-grid { grid-template-columns:1fr; }
       .section-head { align-items: start; flex-direction: column; }
       .choice-grid { grid-template-columns: 1fr; }
       .student-shell { width: min(100% - 20px, 100%); padding-top: 10px; }
@@ -713,6 +765,11 @@
       .principle-grid { grid-template-columns:1fr 1fr; }
       .usability-profile { grid-template-columns:1fr; }
       .ab-pair { grid-template-columns:1fr; }.ab-vs { justify-self:center; }
+      .capacity-panel { align-items:stretch; flex-direction:column; }
+      .capacity-control { display:grid; grid-template-columns:72px minmax(0,1fr); }.capacity-control input { width:100%; }
+      .dimension-choices { gap:5px; }.dimension-choice { min-height:46px; padding:5px; font-size:12px; }
+      .context-step { font-size:11px; }.context-step b { display:none; }
+      .diagnostic-word { padding:13px; }.diagnostic-word strong { font-size:17px; }
       .launch-word-flow strong { font-size:19px; }
       .modal-layer { padding: 8px; }
       .modal { max-height: calc(100vh - 16px); border-radius: 16px; }
@@ -725,6 +782,7 @@
       .participation-warning-icon { width:40px; height:40px; }
     }
     @media (max-width: 420px) {
+      .diagnostic-word-grid { grid-template-columns:1fr; }
       .lab-home-copy h1 { font-size:clamp(43px,12.5vw,48px); }
       .student-lesson-tab { gap:3px; padding:6px 2px; }
       .student-tab-icon { flex-basis:22px; width:22px; height:22px; border-radius:7px; }
@@ -753,7 +811,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
-  <script src="./supabase-api.js"></script>
+  <script src="./supabase-api.js?v=20260912-lesson-flow"></script>
   <script>
     'use strict';
     const query = new URLSearchParams(location.search);
@@ -792,13 +850,20 @@
       teacherWordSyncing: false,
       teacherWordSyncAgain: false,
       teacherChangedWordIds: [],
+      teacherRenderVersion: 0,
+      teacherActivityTimer: null,
       tab: 'words',
       dashboard: null,
       wordFilter: '전체', wordSearch: '',
       contextShowRatings: false,
       usabilityLesson: null,
       usabilityScore: 0,
+      diagnosticLesson: null,
+      diagnosticStep: 1,
+      diagnosticDraft: null,
       makingWords: [],
+      redesignCards: [],
+      selectedDiagnosticId: '',
       redesignReviewId: '',
       redesignReviewScores: {},
       dictionarySearch: '',
@@ -807,10 +872,11 @@
       abLesson: null,
       abAnswers: {},
       abOrders: {},
+      teacherLesson4View: 'verify',
       unloadParticipationEnded: false
     };
 
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', () => { initCustomSelects(); boot(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) syncTeacherWords(); });
     window.addEventListener('beforeunload', endActiveParticipationOnUnload);
     window.addEventListener('pagehide', endActiveParticipationOnUnload);
@@ -893,14 +959,21 @@
       const item = profile || {};
       return `<div class="usability-profile"><span>표현 평균<b>${item.responseCount?formatScore(item.averageScore)+'점':'응답 대기'}</b></span><span>상황별 편차<b>${item.responseCount?formatScore(item.rangeScore):'-'}</b></span><span>사용 범위<b>${esc(item.rangeLabel||'판단 대기')}</b></span></div>`;
     }
-    function setApp(html) { document.getElementById('app').innerHTML = html; }
+    function setApp(html) { document.getElementById('app').innerHTML = html; queueMicrotask(() => enhanceSelects(document.getElementById('app'))); }
     function showLoading(text) { document.getElementById('loadingText').textContent = text || '불러오는 중...'; document.getElementById('loading').classList.remove('hidden'); }
     function hideLoading() { document.getElementById('loading').classList.add('hidden'); }
     function toast(message, type) {
+      const key = (type || '') + '|' + String(message || '');
+      const duplicate = Array.from(document.querySelectorAll('#toasts .toast')).find(item => item.dataset.toastKey === key);
+      if (duplicate) {
+        duplicate.animate([{transform:'translateY(0)'},{transform:'translateY(-4px)'},{transform:'translateY(0)'}], {duration:180});
+        return duplicate;
+      }
       const item = document.createElement('div');
-      item.className = 'toast ' + (type || ''); item.textContent = message;
+      item.className = 'toast ' + (type || ''); item.textContent = message; item.dataset.toastKey = key;
       document.getElementById('toasts').appendChild(item);
       setTimeout(() => item.remove(), 3300);
+      return item;
     }
     function friendlyError(error) {
       const message = error && error.message ? error.message : '요청을 처리하지 못했습니다.';
@@ -920,6 +993,95 @@
       if (!button) return;
       if (busy) { button.dataset.originalText = button.textContent; button.disabled = true; button.textContent = label || '저장 중...'; }
       else { button.disabled = false; button.textContent = button.dataset.originalText || button.textContent; }
+    }
+
+    function closeCustomSelects(except) {
+      document.querySelectorAll('.custom-select.open').forEach(host => {
+        if (host === except) return;
+        host.classList.remove('open');
+        const trigger = host.querySelector('.custom-select-trigger');
+        const menu = host.querySelector('.custom-select-menu');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+        if (menu) menu.removeAttribute('style');
+      });
+    }
+
+    function positionCustomSelectMenu(host) {
+      const trigger=host.querySelector('.custom-select-trigger');const menu=host.querySelector('.custom-select-menu');if(!trigger||!menu)return;
+      const rect=trigger.getBoundingClientRect();const estimated=Math.min(248,Math.max(48,menu.childElementCount*45+12));const openAbove=innerHeight-rect.bottom<estimated+12&&rect.top>estimated;
+      menu.style.position='fixed';menu.style.left=Math.max(6,rect.left)+'px';menu.style.right='auto';menu.style.width=Math.max(112,rect.width)+'px';menu.style.top=(openAbove?Math.max(6,rect.top-estimated-7):rect.bottom+7)+'px';
+    }
+
+    function refreshCustomSelect(select) {
+      const host = select && select.closest('.custom-select');
+      if (!host) return;
+      const trigger = host.querySelector('.custom-select-trigger');
+      const menu = host.querySelector('.custom-select-menu');
+      if (!trigger || !menu) return;
+      const options = Array.from(select.options);
+      const selected = options.find(option => option.selected) || options[0];
+      trigger.querySelector('span').textContent = selected ? selected.textContent : '선택';
+      trigger.disabled = select.disabled;
+      menu.innerHTML = options.map((option, index) => `<button type="button" class="custom-select-option ${option.selected?'selected':''}" role="option" aria-selected="${option.selected?'true':'false'}" data-option-index="${index}" ${option.disabled?'disabled':''}>${esc(option.textContent)}</button>`).join('');
+      menu.querySelectorAll('[data-option-index]').forEach(optionButton => optionButton.addEventListener('click', () => {
+        const option = select.options[Number(optionButton.dataset.optionIndex)];
+        if (!option || option.disabled) return;
+        select.value = option.value;
+        select.dispatchEvent(new Event('change', { bubbles:true }));
+        refreshCustomSelect(select);
+        closeCustomSelects();
+        trigger.focus();
+      }));
+    }
+
+    function enhanceSelects(root) {
+      (root || document).querySelectorAll('select:not([data-custom-select])').forEach(select => {
+        select.dataset.customSelect = 'true';
+        const host = document.createElement('div');
+        host.className = 'custom-select' + (select.classList.contains('inline-select') ? ' compact' : '');
+        const trigger = document.createElement('button');
+        trigger.type = 'button'; trigger.className = 'custom-select-trigger';
+        trigger.setAttribute('aria-haspopup', 'listbox'); trigger.setAttribute('aria-expanded', 'false');
+        trigger.innerHTML = '<span></span>';
+        const menu = document.createElement('div');
+        menu.className = 'custom-select-menu'; menu.setAttribute('role', 'listbox');
+        select.parentNode.insertBefore(host, select); host.appendChild(select); host.appendChild(trigger); host.appendChild(menu);
+        select.classList.add('custom-select-native'); select.tabIndex = -1;
+        trigger.addEventListener('click', event => {
+          event.stopPropagation();
+          const opening = !host.classList.contains('open');
+          closeCustomSelects(host); host.classList.toggle('open', opening);
+          trigger.setAttribute('aria-expanded', String(opening));
+          if (opening) { refreshCustomSelect(select); positionCustomSelectMenu(host); }
+        });
+        trigger.addEventListener('keydown', event => {
+          if (!['ArrowDown','ArrowUp','Enter',' ','Escape'].includes(event.key)) return;
+          if (event.key === 'Escape') { closeCustomSelects(); return; }
+          if (!host.classList.contains('open')) { event.preventDefault(); trigger.click(); return; }
+          const choices = Array.from(menu.querySelectorAll('.custom-select-option:not(:disabled)'));
+          if (!choices.length) return;
+          event.preventDefault();
+          const current = choices.findIndex(item => item.classList.contains('focused'));
+          const next = event.key === 'ArrowUp' ? (current <= 0 ? choices.length - 1 : current - 1) : (current + 1) % choices.length;
+          choices.forEach((item, index) => item.classList.toggle('focused', index === next));
+          if (['Enter',' '].includes(event.key) && current >= 0) choices[current].click();
+        });
+        select.addEventListener('change', () => refreshCustomSelect(select));
+        select.addEventListener('invalid', () => trigger.focus());
+        refreshCustomSelect(select);
+      });
+    }
+
+    function initCustomSelects() {
+      document.addEventListener('click', () => closeCustomSelects());
+      window.addEventListener('resize', () => closeCustomSelects());
+      window.addEventListener('scroll', () => closeCustomSelects(), true);
+      const observer = new MutationObserver(mutations => mutations.forEach(mutation => {
+        if (mutation.target instanceof HTMLSelectElement && mutation.target.dataset.customSelect) refreshCustomSelect(mutation.target);
+        mutation.addedNodes.forEach(node => { if (node.nodeType === 1) enhanceSelects(node); });
+      }));
+      observer.observe(document.body, { childList:true, subtree:true });
+      enhanceSelects(document);
     }
 
     function lessonIcon(stage) {
@@ -1153,9 +1315,11 @@
 
     function stopTeacherWordSync() {
       if (state.teacherWordTimer) clearInterval(state.teacherWordTimer);
+      if (state.teacherActivityTimer) clearInterval(state.teacherActivityTimer);
       if (state.teacherWordUnsubscribe) state.teacherWordUnsubscribe();
       if (state.teacherWordHighlightTimer) clearTimeout(state.teacherWordHighlightTimer);
       state.teacherWordTimer = null;
+      state.teacherActivityTimer = null;
       state.teacherWordUnsubscribe = null;
       state.teacherWordHighlightTimer = null;
       state.teacherWordSyncClassId = '';
@@ -1230,7 +1394,7 @@
 
     function renderTeacherClassShell() {
       const room = state.activeClass;
-      const tabs = ['lesson1','lesson2','lesson3','lesson4'];
+      const tabs = ['lesson1','lesson2','lesson3','lesson4','classDictionary'];
       if (!tabs.includes(state.tab)) {
         state.tab = room.currentStage === 'context' ? 'lesson2' : room.currentStage === 'wordmaking' ? 'lesson3' : room.currentStage === 'dictionary' ? 'lesson4' : 'lesson1';
       }
@@ -1242,6 +1406,7 @@
           <button class="lesson-tab ${state.tab==='lesson2'?'active':''}" data-lesson="lesson2"><span class="lesson-tab-icon">${lessonIcon('context')}</span><span class="lesson-tab-copy"><small>2차시</small><b>진단</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson3'?'active':''}" data-lesson="lesson3"><span class="lesson-tab-icon">${lessonIcon('wordmaking')}</span><span class="lesson-tab-copy"><small>3차시</small><b>설계</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson4'?'active':''}" data-lesson="lesson4"><span class="lesson-tab-icon">${lessonIcon('dictionary')}</span><span class="lesson-tab-copy"><small>4차시</small><b>검증</b></span></button>
+          <button class="lesson-tab ${state.tab==='classDictionary'?'active':''}" data-lesson="classDictionary"><span class="lesson-tab-icon">${lessonIcon('dictionary')}</span><span class="lesson-tab-copy"><small>우리 반</small><b>우리말 사전</b></span></button>
         </nav><main id="teacherLessonContent"></main></div>`);
       document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => requestTeacherTab(button.dataset.lesson)));
       renderTeacherLessonTab();
@@ -1320,9 +1485,9 @@
     function lessonQrInfo(tab) {
       return ({
         lesson1: { step:'1', stage:'submit', label:'1차시 · 발견', title:'우리 반 언어 데이터 수집' },
-        lesson2: { step:'2', stage:'context', label:'2차시 · 진단', title:'말의 사용성 테스트' },
-        lesson3: { step:'3', stage:'wordmaking', label:'3차시 · 설계', title:'언어 UX 리디자인 LAB' },
-        lesson4: { step:'4', stage:'dictionary', label:'4차시 · 검증', title:'블라인드 테스트 및 출시' }
+        lesson2: { step:'2', stage:'context', label:'2차시 · 진단', title:'맥락과 적절성 진단' },
+        lesson3: { step:'3', stage:'wordmaking', label:'3차시 · 설계', title:'진단에서 새 표현으로' },
+        lesson4: { step:'4', stage:'dictionary', label:'4차시 · 검증', title:'기존 표현과 새 표현 1:1 비교' }
       })[tab] || { step:'1', stage:'submit', label:'1차시 · 발견', title:'우리 반 언어 데이터 수집' };
     }
 
@@ -1334,16 +1499,20 @@
     }
 
     function renderTeacherLessonTab() {
+      if (state.teacherActivityTimer) clearInterval(state.teacherActivityTimer);
+      state.teacherActivityTimer = null;
+      const version = ++state.teacherRenderVersion;
       if (state.tab === 'lesson1') return renderTeacherLessonOne();
-      if (state.tab === 'lesson2') return renderTeacherLessonTwo();
-      if (state.tab === 'lesson3') return renderTeacherLessonThree();
-      return renderTeacherLessonFour();
+      if (state.tab === 'lesson2') return renderTeacherLessonTwo(version);
+      if (state.tab === 'lesson3') return renderTeacherLessonThree(version);
+      if (state.tab === 'lesson4') return renderTeacherLessonFour(version);
+      return renderTeacherClassDictionary(version);
     }
 
     async function startClassStage(stage, taskId, showQr) {
-      if (stage === 'context' && !(state.dashboard.tasks || []).some(item=>item.active)) { toast('활성화된 사용성 테스트를 먼저 만들어 주세요.', 'error'); return; }
-      if (stage === 'wordmaking' && !(state.dashboard.words || []).length) { toast('1차시에서 표현을 먼저 수집해 주세요.', 'error'); return; }
-      if (stage === 'dictionary' && !(state.dictionaryWorkspace || []).some(item => (item.suggestions || []).some(candidate => candidate.abTest && candidate.abTest.active))) { toast('활성화된 블라인드 A/B 검증 항목을 먼저 만들어 주세요.', 'error'); return; }
+      if (stage === 'context' && !(state.dashboard.words || []).length) { toast('1차시에서 표현을 먼저 수집해 주세요.', 'error'); return; }
+      if (stage === 'wordmaking' && !(state.redesignWorkspace || []).length && !(state.diagnosticWorkspace && state.diagnosticWorkspace.cards || []).some(item=>item.complete)) { toast('학생이 완성한 2차시 진단 카드가 먼저 필요합니다.', 'error'); return; }
+      if (stage === 'dictionary' && !(state.dictionaryWorkspace || []).some(item => (item.suggestions || []).some(candidate => candidate.abTest && candidate.abTest.active))) { toast('3차시에서 새 표현을 먼저 등록해 주세요.', 'error'); return; }
       showLoading('학생 화면을 전환하는 중...');
       try {
         state.activeClass = await api('setClassStage', state.teacherToken, state.activeClass.id, stage, taskId || '');
@@ -1363,75 +1532,117 @@
         <section class="simple-panel card"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section>`;
     }
 
-    async function renderTeacherLessonTwo() {
+    function teacherViewIsCurrent(tab, version) {
+      return state.tab === tab && state.teacherRenderVersion === version && document.getElementById('teacherLessonContent');
+    }
+
+    function scheduleTeacherActivitySync(tab, version, callback) {
+      if (state.teacherActivityTimer) return;
+      state.teacherActivityTimer = setInterval(() => {
+        if (!document.hidden && teacherViewIsCurrent(tab, version)) callback();
+      }, 2500);
+    }
+
+    function showTeacherFeatureError(tab, version, error) {
+      if (!teacherViewIsCurrent(tab, version)) return;
+      const body = document.querySelector('#teacherLessonContent .lesson-body');
+      const message = error && error.message ? error.message : '자료를 불러오지 못했습니다.';
+      if (body) body.innerHTML = `<div class="empty"><b>자료를 불러오지 못했습니다.</b><br>${esc(message)}</div>`;
+      if (!/lesson-flow-update\.sql/.test(message)) friendlyError(error);
+    }
+
+    function diagnosticContextText(card, kind) {
+      const context = card && card[kind] || {};
+      const labels = { partner:'상대', place:'장소', situation:'상황' };
+      return (card.dimensions || []).map(key => context[key] ? `<span><b>${labels[key]}</b>${esc(context[key])}</span>` : '').filter(Boolean).join('');
+    }
+
+    function diagnosticTeacherCard(card, index) {
+      return `<article class="context-card card"><div class="rating-summary"><p class="eyebrow">CARD ${String(index + 1).padStart(2,'0')} · ${badge(card.category)}</p><span class="score-pill">${card.complete?'완료':'작성 중'}</span></div><h3>${esc(card.word)}</h3>${card.complete?`<div class="test-facts"><div class="test-fact"><b>적절한 경우 · ${card.appropriate.rating}점</b>${diagnosticContextText(card,'appropriate')}<small>${esc(card.appropriate.example)}</small></div><div class="test-fact"><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${diagnosticContextText(card,'inappropriate')}<small>${esc(card.inappropriate.example)}</small></div></div><p class="help">${esc(card.ratingReason)}</p>`:'<p class="help">학생이 맥락과 예문을 작성하고 있습니다.</p>'}</article>`;
+    }
+
+    async function renderTeacherLessonTwo(version, silent) {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      let words = state.dashboard.words || [];
-      root.innerHTML = `${teacherLessonHero('진단: 말의 사용성 테스트','표현이 상황·상대·목적에 따라 얼마나 적절한지 진단합니다.','context')}<div class="lesson-body"><div class="empty">테스트를 불러오는 중...</div></div>`;
+      if (!silent) root.innerHTML = `${teacherLessonHero('진단: 맥락과 적절성','학생이 1차시 표현을 고르고 두 맥락을 직접 설계합니다.','context')}<div class="lesson-body"><div class="empty">진단 카드를 불러오는 중...</div></div>`;
       try {
-        state.usabilityWorkspace = await api('getUsabilityWorkspace', managerToken(), state.activeClass.id);
-        if (state.tab !== 'lesson2' || !document.getElementById('teacherLessonContent')) return;
-        words = state.dashboard.words || [];
-        const tests = state.usabilityWorkspace.tests || [];
-        const profiles = Object.values(tests.reduce((all,test)=>{(all[test.word]||={word:test.word,items:[]}).items.push(test);return all;},{}));
-        document.querySelector('#teacherLessonContent .lesson-body').innerHTML = `<section class="linked-words card"><div><p class="eyebrow">1차시 연동</p><strong>수집된 표현 ${words.length}개</strong></div><div class="linked-word-chips">${words.length?words.map(word=>`<span>${esc(word.word)} · ${esc(word.category)}</span>`).join(''):'<span class="help">1차시에서 표현을 먼저 수집해 주세요.</span>'}</div></section>${profiles.length?`<section class="context-grid">${profiles.map(profile=>`<article class="context-card card"><p class="eyebrow">표현별 진단</p><h3>${esc(profile.word)}</h3>${usabilityProfileHtml(summarizeUsabilityTests(profile.items))}</article>`).join('')}</section>`:''}<div class="lesson-tools"><div><h3>사용성 테스트 세트</h3><p>학생에게는 활성화된 테스트가 한 번에 하나씩 보입니다.</p></div><div class="actions"><span class="count">${tests.length}개</span><button class="btn btn-results" onclick="openStudentResults('lesson2')">학생 응답 결과</button><button class="btn btn-primary" onclick="openUsabilityTestEditor()">+ 테스트 추가</button></div></div><section class="context-grid">${tests.length?tests.map((test,index)=>`<article class="context-card card"><div class="rating-summary"><p class="eyebrow">TEST ${String(index+1).padStart(2,'0')} · ${test.active?'활성':'비활성'}</p><span class="score-pill">${test.responseCount?formatScore(test.averageScore)+'점':'응답 대기'}</span></div><h3>${esc(test.word)}</h3><div class="test-facts"><div class="test-fact"><b>상황</b>${esc(test.situation)}</div><div class="test-fact"><b>상대</b>${esc(test.audience)}</div><div class="test-fact"><b>목적</b>${esc(test.purpose)}</div></div>${test.responseCount?`<div class="average-bar"><span>평균 적절성</span><span class="average-track"><i class="average-fill" style="width:${test.averageScore*20}%"></i></span><b>${formatScore(test.averageScore)}</b></div>`:''}<div class="card-actions"><button class="btn" onclick="openUsabilityTestEditor('${attr(test.id)}')">편집</button><button class="btn btn-soft" onclick="toggleUsabilityTest('${attr(test.id)}',${!test.active},this)">${test.active?'비활성화':'활성화'}</button><button class="btn icon-danger" onclick="confirmDeleteTask('${attr(test.id)}')">삭제</button></div></article>`).join(''):'<div class="empty">첫 사용성 테스트를 만들어 주세요.</div>'}</section>`;
-        const linkedWords = document.querySelector('#teacherLessonContent .linked-words');
-        if (linkedWords) {
-          const linkedCount = linkedWords.querySelector('strong');
-          const linkedChips = linkedWords.querySelector('.linked-word-chips');
-          if (linkedCount) linkedCount.id = 'teacherLinkedWordCount';
-          if (linkedChips) { linkedChips.id = 'teacherLinkedWordChips'; linkedChips.setAttribute('aria-live', 'polite'); }
-        }
-      } catch (error) { friendlyError(error); }
-    }
-
-    function openUsabilityTestEditor(testId) {
-      const tests = (state.usabilityWorkspace && state.usabilityWorkspace.tests) || [];
-      const test = tests.find(item => item.id === testId) || {};
-      const words = state.dashboard.words || [];
-      if (!words.length) return toast('1차시에서 표현을 먼저 수집해 주세요.', 'error');
-      openModal(testId?'사용성 테스트 편집':'사용성 테스트 추가', `<form id="usabilityTestForm"><label class="field-label" for="testWord">테스트할 표현</label><select id="testWord" required>${words.map(word=>`<option value="${attr(word.id)}" ${word.id===test.wordId?'selected':''}>${esc(word.word)} · ${esc(word.category)}</option>`).join('')}</select><label class="field-label" for="testSituation">상황</label><textarea id="testSituation" maxlength="500" required placeholder="예: 수행평가에 대한 느낌을 이야기함">${esc(test.situation||'')}</textarea><label class="field-label" for="testAudience">상대</label><input id="testAudience" maxlength="200" required placeholder="예: 친한 친구" value="${attr(test.audience||'')}"><label class="field-label" for="testPurpose">목적 또는 맥락</label><textarea id="testPurpose" maxlength="500" required placeholder="예: 짜증났던 감정을 표현함">${esc(test.purpose||'')}</textarea></form>`, `<button class="btn" onclick="closeModal()">취소</button><button id="saveUsabilityBtn" class="btn btn-primary" onclick="saveUsabilityTest('${attr(testId||'')}')">저장</button>`);
-    }
-
-    async function saveUsabilityTest(testId) {
-      const form=document.getElementById('usabilityTestForm'); if(!form||!form.reportValidity())return;
-      const button=document.getElementById('saveUsabilityBtn'); setButtonBusy(button,true,'저장 중...');
-      try { await api('saveContextTask',managerToken(),{id:testId||'',classId:state.activeClass.id,wordId:document.getElementById('testWord').value,situation:document.getElementById('testSituation').value,target:document.getElementById('testAudience').value,context:document.getElementById('testPurpose').value,active:testId?((state.usabilityWorkspace.tests.find(item=>item.id===testId)||{}).active!==false):true}); closeModal(); toast('사용성 테스트를 저장했습니다.','success'); await reloadManagerDashboard(true); }
-      catch(error){friendlyError(error);setButtonBusy(button,false);}
-    }
-
-    async function toggleUsabilityTest(id,active,button){setButtonBusy(button,true,'저장 중...');try{await api('setUsabilityTestActive',managerToken(),id,active);toast(active?'테스트를 활성화했습니다.':'테스트를 비활성화했습니다.','success');await reloadManagerDashboard(true);}catch(error){friendlyError(error);setButtonBusy(button,false);}}
-
-    async function renderTeacherLessonThree() {
-      const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      root.innerHTML = `${teacherLessonHero('설계: 언어 UX 리디자인 LAB','진단 결과를 근거로 더 잘 통하는 우리말을 설계하고 네 원칙으로 동료 검토합니다.','wordmaking')}<div class="lesson-body"><div class="empty">수집 표현을 불러오는 중...</div></div>`;
-      try {
-        const workspace = await api('getWordmakingWorkspace', managerToken(), state.activeClass.id);
-        if (state.tab !== 'lesson3' || !document.getElementById('teacherLessonContent')) return;
-        state.wordmakingWorkspace = workspace;
+        const workspace = await api('getDiagnosticWorkspace', managerToken(), state.activeClass.id);
+        if (!teacherViewIsCurrent('lesson2', version)) return;
+        if (silent && JSON.stringify(workspace) === JSON.stringify(state.diagnosticWorkspace)) return;
+        state.diagnosticWorkspace = workspace;
+        state.activeClass.diagnosticWordCapacity = workspace.capacity;
+        const complete = workspace.cards.filter(card => card.complete);
         const body = document.querySelector('#teacherLessonContent .lesson-body');
-        body.innerHTML = `<div class="principle-grid"><span class="principle-chip">01 의미 보존</span><span class="principle-chip">02 자연스러움</span><span class="principle-chip">03 보편성</span><span class="principle-chip">04 명확성</span></div><div class="lesson-tools"><div><h3>수집 표현과 설계안</h3><p>1차시 표현과 2차시 사용성 결과가 자동으로 연결됩니다.</p></div><div class="actions"><span class="count">전체 ${workspace.length}개</span><button class="btn btn-results" onclick="openStudentResults('lesson3')">학생 응답 결과</button></div></div><section class="refine-grid">${workspace.length ? workspace.map(item => `<article class="refine-card card"><div class="rating-summary"><p class="eyebrow">원래 표현 · ${badge(item.category)}</p><span class="count">${item.suggestions.length}개 설계안</span></div><h3>${esc(item.word)}</h3>${usabilityProfileHtml(item.usability)}<ul class="suggestion-list">${item.suggestions.length ? item.suggestions.map(suggestion => `<li><span class="suggestion-copy"><strong>${esc(suggestion.suggestedWord)}</strong><span>핵심 특징 · ${esc(suggestion.coreFeature)}</span><span>${esc(suggestion.reason)}</span></span><span>${suggestion.reviewCount?`<span class="score-pill">${formatScore(suggestion.overallScore)}점 · ${suggestion.reviewCount}명</span>`:'<span class="score-pill">평가 전</span>'}<button class="btn icon-danger" onclick="confirmDeleteSuggestion('${attr(suggestion.id)}')">삭제</button></span></li>`).join('') : '<li class="help">학생 활동이 시작되면 리디자인 설계안이 쌓입니다.</li>'}</ul></article>`).join('') : '<div class="empty">1차시에 수집된 표현이 없습니다.</div>'}</section>`;
-      } catch (error) { friendlyError(error); }
+        body.innerHTML = `<section class="capacity-panel card"><div><h3>표현별 최대 선택 인원</h3><p>정원이 차면 학생 목록에서 회색 ‘마감’으로 바뀝니다.</p></div><div class="capacity-control"><input id="diagnosticCapacity" type="number" min="1" max="50" value="${workspace.capacity}" aria-label="표현별 최대 선택 인원"><button class="btn btn-primary" onclick="saveDiagnosticCapacity(this)">설정 저장</button></div></section><div class="lesson-tools"><div><h3>1차시 표현 배정 현황</h3><p class="live-sync">학생 선택 자동 연동</p></div><span class="count">완료 ${complete.length} · 작성 중 ${workspace.cards.length-complete.length}</span></div><section class="diagnostic-word-grid">${workspace.words.length?workspace.words.map(word=>`<article class="diagnostic-word ${word.full?'full':''}"><div class="rating-summary">${badge(word.category)}<span class="badge ${word.full?'badge-pending':'badge-approved'}">${word.full?'마감':word.remainingCount+'자리'}</span></div><strong>${esc(word.word)}</strong><small>${word.selectedCount} / ${workspace.capacity}명 선택</small></article>`).join(''):'<div class="empty">1차시에서 표현을 먼저 수집해 주세요.</div>'}</section><div class="lesson-tools"><div><h3>학생 진단 카드</h3><p class="live-sync">새 카드 자동 표시</p></div><button class="btn btn-results" onclick="openStudentResults('lesson2')">학생 응답 결과</button></div><section class="context-grid" aria-live="polite">${workspace.cards.length?workspace.cards.map(diagnosticTeacherCard).join(''):'<div class="empty">학생이 표현을 선택하면 이곳에 나타납니다.</div>'}</section>`;
+        scheduleTeacherActivitySync('lesson2', version, () => renderTeacherLessonTwo(version, true));
+      } catch (error) { if (!silent) showTeacherFeatureError('lesson2', version, error); }
+    }
+
+    async function saveDiagnosticCapacity(button) {
+      const input = document.getElementById('diagnosticCapacity'); if (!input) return;
+      setButtonBusy(button, true, '저장 중...');
+      try {
+        const result = await api('setDiagnosticCapacity', managerToken(), state.activeClass.id, input.value);
+        state.activeClass.diagnosticWordCapacity = result.capacity;
+        toast(`표현마다 최대 ${result.capacity}명까지 선택할 수 있습니다.`, 'success');
+        await renderTeacherLessonTwo(state.teacherRenderVersion, true);
+      } catch (error) { friendlyError(error); setButtonBusy(button, false); }
+    }
+
+    async function renderTeacherLessonThree(version, silent) {
+      const root = document.getElementById('teacherLessonContent'); if (!root) return;
+      if (!silent) root.innerHTML = `${teacherLessonHero('설계: 진단에서 새 표현으로','학생이 2차시 진단 카드 하나를 골라 새로운 표현을 설계합니다.','wordmaking')}<div class="lesson-body"><div class="empty">진단 카드와 설계안을 불러오는 중...</div></div>`;
+      try {
+        const workspace = await api('getRedesignWorkspace', managerToken(), state.activeClass.id);
+        if (!teacherViewIsCurrent('lesson3', version)) return;
+        if (silent && JSON.stringify(workspace) === JSON.stringify(state.redesignWorkspace)) return;
+        state.redesignWorkspace = workspace;
+        state.wordmakingWorkspace = workspace;
+        const suggestionCount = workspace.reduce((sum, card) => sum + card.suggestions.length, 0);
+        const body = document.querySelector('#teacherLessonContent .lesson-body');
+        body.innerHTML = `<div class="lesson-tools"><div><h3>진단 카드 → 새 표현</h3><p class="live-sync">학생 설계안 자동 연동</p></div><div class="actions"><span class="count">진단 ${workspace.length} · 설계 ${suggestionCount}</span><button class="btn btn-results" onclick="openStudentResults('lesson3')">학생 응답 결과</button></div></div><section class="refine-grid" aria-live="polite">${workspace.length?workspace.map((card,index)=>`<article class="refine-card card"><div class="rating-summary"><p class="eyebrow">DIAGNOSIS ${String(index+1).padStart(2,'0')} · ${badge(card.category)}</p><span class="count">설계 ${card.suggestions.length}</span></div><h3>${esc(card.word)}</h3><div class="diagnostic-summary"><div><b>적절한 경우 · ${card.appropriate.rating}점</b>${esc(card.appropriate.example)}</div><div><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${esc(card.inappropriate.example)}</div></div><ul class="suggestion-list">${card.suggestions.length?card.suggestions.map(item=>`<li><span class="suggestion-copy"><strong>${esc(item.suggestedWord)}</strong><span>${esc(item.meaning)}</span><span>${esc(item.reason)}</span></span><button class="btn icon-danger" onclick="confirmDeleteSuggestion('${attr(item.id)}')">삭제</button></li>`).join(''):'<li class="help">이 진단 카드를 바탕으로 한 설계안을 기다리는 중입니다.</li>'}</ul></article>`).join(''):'<div class="empty">2차시에서 완성된 진단 카드가 없습니다.</div>'}</section>`;
+        scheduleTeacherActivitySync('lesson3', version, () => renderTeacherLessonThree(version, true));
+      } catch (error) { if (!silent) showTeacherFeatureError('lesson3', version, error); }
     }
 
     function confirmDeleteSuggestion(id){confirmModal('리디자인 설계안 삭제','이 설계안과 동료 평가·A/B 검증 기록이 함께 삭제됩니다.',async()=>{try{await api('deleteWordSuggestion',managerToken(),id);closeModal();toast('리디자인 설계안을 삭제했습니다.','success');await reloadManagerDashboard(true);}catch(error){friendlyError(error);}},'삭제');}
 
-    async function renderTeacherLessonFour() {
+    async function renderTeacherLessonFour(version, silent) {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      root.innerHTML = `${teacherLessonHero('검증: 블라인드 테스트 및 출시','원래 표현과 리디자인 표현을 A/B로 검증하고 교사가 최종 사전 등재를 결정합니다.','dictionary')}<div class="lesson-body"><div class="empty">검증 후보를 불러오는 중...</div></div>`;
+      if (!silent) root.innerHTML = `${teacherLessonHero('검증: 기존 표현과 새 표현 1:1 비교','학생 선택이 모이는 즉시 현재 우세 표현을 우리 반 사전에 반영합니다.','dictionary')}<div class="lesson-body"><div class="empty">비교 항목을 불러오는 중...</div></div>`;
       try {
         const workspace = await api('getDictionaryWorkspace', managerToken(), state.activeClass.id);
-        if (state.tab !== 'lesson4' || !document.getElementById('teacherLessonContent')) return;
+        if (!teacherViewIsCurrent('lesson4', version)) return;
+        if (silent && JSON.stringify(workspace) === JSON.stringify(state.dictionaryWorkspace)) return;
         state.dictionaryWorkspace = workspace;
+        const comparisons = workspace.flatMap(item => (item.suggestions || []).filter(candidate => candidate.abTest).map(candidate => ({item,candidate})));
         const body = document.querySelector('#teacherLessonContent .lesson-body');
-        const activeTests = workspace.flatMap(item => item.suggestions || []).filter(candidate => candidate.abTest && candidate.abTest.active).length;
-        body.innerHTML = `<div class="tracking-panel"><span><b>선택 확장 · 실제 사용 기록</b><small class="help">등재 후 학생이 매주 사용 여부와 선택 맥락을 남길 수 있습니다.</small></span><button class="btn ${state.activeClass.usageTrackingEnabled?'btn-primary':'btn-soft'}" onclick="toggleUsageTracking(this)">${state.activeClass.usageTrackingEnabled?'켜짐 · 끄기':'꺼짐 · 켜기'}</button></div><div class="lesson-tools"><div><h3>A/B 검증 후보</h3><p>학생 화면에서는 어느 쪽이 원래 표현인지 강조하지 않습니다. 사전 등재는 교사가 직접 결정합니다.</p></div><div class="actions"><span class="count">활성 검증 ${activeTests}개</span><span class="count">사전 등재 ${workspace.filter(item=>item.entry&&item.entry.approved).length}개</span><button class="btn btn-results" onclick="openStudentResults('lesson4')">학생 응답 결과</button></div></div><section class="launch-grid">${workspace.length?workspace.map(item=>`<article class="refine-card card"><div class="rating-summary"><p class="eyebrow">${badge(item.category)} · 검증 묶음</p>${item.entry&&item.entry.approved?'<span class="badge badge-approved">사전 등재</span>':'<span class="badge badge-pending">선정 대기</span>'}</div><h3>${esc(item.word)}${item.entry&&item.entry.approved?` → <span style="color:var(--accent)">${esc(item.entry.finalWord)}</span>`:''}</h3>${usabilityProfileHtml(item.usability)}<div class="dictionary-choice-list">${item.suggestions.length?item.suggestions.map(candidate=>`<div class="dictionary-choice ${item.entry&&item.entry.suggestionId===candidate.id?'selected':''}"><span><strong>${esc(candidate.suggestedWord)}</strong><small>동료 평가 ${candidate.reviewCount?formatScore(candidate.overallScore)+'점':'대기'} · A/B ${candidate.abTest?candidate.abTest.responseCount+'명':'미등록'} · ${candidate.abTest?'향상 '+(candidate.abTest.improvementScore>0?'+':'')+candidate.abTest.improvementScore+'%':'검증 전'}</small></span><span class="actions">${candidate.abTest?`<button class="btn btn-soft" onclick="toggleAbTest('${attr(candidate.abTest.id)}',${!candidate.abTest.active},this)">${candidate.abTest.active?'검증 중지':'검증 재개'}</button><button class="btn icon-danger" onclick="confirmDeleteAbTest('${attr(candidate.abTest.id)}')">검증 삭제</button>`:`<button class="btn btn-primary" onclick="createAbTest('${attr(candidate.id)}',this)">A/B 검증에 추가</button>`}<button class="btn ${item.entry&&item.entry.suggestionId===candidate.id?'':'btn-primary'}" onclick="approveDictionaryCandidate('${attr(item.id)}','${attr(candidate.id)}',this)">${item.entry&&item.entry.suggestionId===candidate.id?'등재 내용 갱신':'사전에 등재'}</button></span></div>`).join(''):'<span class="help">3차시 리디자인 설계안을 먼저 모아 주세요.</span>'}</div>${item.entry&&item.entry.approved?`<div class="rating-summary"><span class="help">이번 주 실제 사용 ${item.entry.usageCount||0}건</span><button class="btn btn-danger" onclick="unpublishDictionaryEntry('${attr(item.id)}',this)">등재 취소</button></div>`:''}</article>`).join(''):'<div class="empty">3차시 리디자인 설계안을 먼저 모아 주세요.</div>'}</section>`;
-      } catch (error) { friendlyError(error); }
+        body.innerHTML = `<div class="lesson-tools"><div><h3>1:1 검증 현황</h3><p class="live-sync">학생 선택 자동 연동 · 우세 표현 사전 자동 반영</p></div><div class="actions"><span class="count">비교 ${comparisons.length} · 응답 ${comparisons.reduce((sum,row)=>sum+row.candidate.abTest.responseCount,0)}</span><button class="btn btn-results" onclick="openStudentResults('lesson4')">학생 응답 결과</button></div></div><section class="launch-grid" aria-live="polite">${comparisons.length?comparisons.map(({item,candidate})=>{const metric=candidate.abTest.metrics.usage||{};return `<article class="launch-card card"><div class="rating-summary"><p class="eyebrow">${badge(item.category)} · ${candidate.abTest.responseCount}명 선택</p>${item.entry&&item.entry.approved?`<span class="badge badge-approved">현재 사전: ${esc(item.entry.finalWord)}</span>`:'<span class="badge badge-pending">선택 대기</span>'}</div><div class="launch-word-flow"><strong>${esc(item.word)}</strong><i>↔</i><strong>${esc(candidate.suggestedWord)}</strong></div><div class="average-bar"><span>기존 ${metric.a||0}</span><span class="average-track"><i class="average-fill" style="width:${metric.bPercent||0}%"></i></span><b>새 표현 ${metric.b||0}</b></div></article>`;}).join(''):'<div class="empty">3차시에서 새 표현이 등록되면 비교 항목이 자동으로 생깁니다.</div>'}</section>`;
+        scheduleTeacherActivitySync('lesson4', version, () => renderTeacherLessonFour(version, true));
+      } catch (error) { if (!silent) showTeacherFeatureError('lesson4', version, error); }
     }
 
-    async function createAbTest(suggestionId,button){setButtonBusy(button,true,'추가 중...');try{await api('saveAbTest',managerToken(),suggestionId);toast('블라인드 A/B 검증에 추가했습니다.','success');await renderTeacherLessonFour();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
-    async function toggleAbTest(testId,active,button){setButtonBusy(button,true,'저장 중...');try{await api('setAbTestActive',managerToken(),testId,active);toast(active?'검증을 다시 시작했습니다.':'검증을 중지했습니다.','success');await renderTeacherLessonFour();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
-    function confirmDeleteAbTest(testId){confirmModal('A/B 검증 삭제','이 검증과 학생 응답이 함께 삭제됩니다. 리디자인 설계안은 유지됩니다.',async()=>{try{await api('deleteAbTest',managerToken(),testId);closeModal();toast('검증 항목을 삭제했습니다.','success');await renderTeacherLessonFour();}catch(error){friendlyError(error);}},'검증 삭제');}
-    async function toggleUsageTracking(button){setButtonBusy(button,true,'저장 중...');try{const result=await api('setUsageTrackingEnabled',managerToken(),state.activeClass.id,!state.activeClass.usageTrackingEnabled);state.activeClass.usageTrackingEnabled=result.enabled;toast(result.enabled?'실제 사용 기록을 켰습니다.':'실제 사용 기록을 껐습니다.','success');renderTeacherLessonFour();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+    async function renderTeacherClassDictionary(version, silent) {
+      const root = document.getElementById('teacherLessonContent'); if (!root) return;
+      if (!silent) root.innerHTML = `<section class="lesson-hero lesson-hero-dictionary"><span class="lesson-number">${lessonIcon('dictionary')}</span><div class="lesson-copy"><h2>우리 반 우리말 사전</h2><p>4차시 1:1 검증에서 선택된 표제어를 사전 형식으로 모았습니다.</p></div></section><div class="lesson-body"><div class="empty">사전을 불러오는 중...</div></div>`;
+      try {
+        const workspace = await api('getDictionaryWorkspace', managerToken(), state.activeClass.id);
+        if (!teacherViewIsCurrent('classDictionary', version)) return;
+        if (silent && JSON.stringify(workspace) === JSON.stringify(state.dictionaryWorkspace)) return;
+        state.dictionaryWorkspace = workspace;
+        const entries = workspace.filter(item => item.entry && item.entry.approved);
+        const body = document.querySelector('#teacherLessonContent .lesson-body');
+        body.innerHTML = `<div class="lesson-tools"><div><h3>표제어 ${entries.length}개</h3><p class="live-sync">검증 결과 자동 연동</p></div><input id="teacherDictionarySearch" class="dictionary-search" type="search" placeholder="표제어 검색" style="max-width:280px"></div><div id="teacherDictionaryList" class="dictionary-list">${teacherDictionaryEntriesHtml(entries,'')}</div>`;
+        const search = document.getElementById('teacherDictionarySearch');
+        if (search) search.addEventListener('input', event => { const list=document.getElementById('teacherDictionaryList'); if(list)list.innerHTML=teacherDictionaryEntriesHtml(entries,event.target.value); });
+        scheduleTeacherActivitySync('classDictionary', version, () => renderTeacherClassDictionary(version, true));
+      } catch (error) { if (!silent) showTeacherFeatureError('classDictionary', version, error); }
+    }
+
+    function teacherDictionaryEntriesHtml(entries, query) {
+      const needle = String(query||'').trim().toLowerCase();
+      const filtered = entries.filter(item => !needle || item.entry.finalWord.toLowerCase().includes(needle) || item.word.toLowerCase().includes(needle));
+      return filtered.length?filtered.map((item,index)=>`<article class="dictionary-headword card"><span class="pronunciation">표제어 ${String(index+1).padStart(2,'0')} · ${esc(item.category)}</span><h2>${esc(item.entry.finalWord)}</h2>${item.entry.finalWord!==item.word?`<p class="help">기존 표현 · ${esc(item.word)}</p>`:''}<div class="definition"><p><b>1</b>${esc(item.entry.meaning)}</p>${item.entry.exampleSentence?`<p><b>예</b>${esc(item.entry.exampleSentence)}</p>`:''}</div></article>`).join(''):`<div class="empty">${needle?'검색 결과가 없습니다.':'아직 검증을 통과한 표제어가 없습니다.'}</div>`;
+    }
 
     function resultStat(label, value) {
       return `<div class="results-stat"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`;
@@ -1458,21 +1669,17 @@
         overview = resultStat('고유 표현', `${words.length}개`) + resultStat('전체 등록', `${submissions}회`) + resultStat('가장 많이 나온 말', topWord ? topWord.word : '-') + resultStat('최고 빈도', topWord ? `${topWord.submissionCount}회` : '-');
         content = `<section class="simple-panel card"><div class="simple-list">${words.length ? words.map((word, index) => `<div class="simple-row"><div class="simple-word"><span class="eyebrow">RANK ${String(index + 1).padStart(2, '0')}</span>${esc(word.word)}<small>${esc(word.category)}</small></div>${badge(word.category)}<span class="submission-count">${word.submissionCount}회</span></div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
       } else if (step === 'lesson2') {
-        const tests = (state.usabilityWorkspace && state.usabilityWorkspace.tests) || [];
-        const responses = tests.reduce((sum, item) => sum + Number(item.responseCount || 0), 0);
-        const weighted = responses ? tests.reduce((sum, item) => sum + Number(item.averageScore || 0) * Number(item.responseCount || 0), 0) / responses : 0;
-        title = '2차시 진단: 말의 사용성 테스트';
-        overview = resultStat('테스트', `${tests.length}개`) + resultStat('전체 응답', `${responses}건`) + resultStat('활성 테스트', `${tests.filter(item => item.active).length}개`) + resultStat('전체 평균', responses ? `${formatScore(weighted)}점` : '-');
-        content = `<section class="context-grid">${tests.length ? tests.map((test, index) => `<article class="context-card card"><div class="rating-summary"><p class="eyebrow">TEST ${String(index + 1).padStart(2, '0')}</p><span class="score-pill">${test.responseCount ? formatScore(test.averageScore) + '점' : '응답 대기'}</span></div><h3>${esc(test.word)}</h3><div class="test-facts"><div class="test-fact"><b>상황</b>${esc(test.situation)}</div><div class="test-fact"><b>상대</b>${esc(test.audience)}</div><div class="test-fact"><b>목적</b>${esc(test.purpose)}</div></div><div class="average-bar"><span>${test.responseCount}명 응답</span><span class="average-track"><i class="average-fill" style="width:${Number(test.averageScore || 0) * 20}%"></i></span><b>${formatScore(test.averageScore)}</b></div></article>`).join('') : '<div class="empty">아직 만들어진 사용성 테스트가 없습니다.</div>'}</section>`;
+        const workspace = state.diagnosticWorkspace || { words:[], cards:[], capacity:0 };
+        const complete = workspace.cards.filter(card => card.complete);
+        title = '2차시 진단: 맥락과 적절성';
+        overview = resultStat('수집 표현', `${workspace.words.length}개`) + resultStat('선택 학생', `${workspace.cards.length}명`) + resultStat('완료 카드', `${complete.length}개`) + resultStat('표현별 정원', `${workspace.capacity}명`);
+        content = `<section class="context-grid">${workspace.cards.length ? workspace.cards.map(diagnosticTeacherCard).join('') : '<div class="empty">아직 학생 진단 카드가 없습니다.</div>'}</section>`;
       } else if (step === 'lesson3') {
-        const groups = state.wordmakingWorkspace || [];
-        const suggestions = groups.flatMap(group => (group.suggestions || []).map(suggestion => ({ group, suggestion })));
-        const reviews = suggestions.reduce((sum, item) => sum + Number(item.suggestion.reviewCount || 0), 0);
-        const reviewed = suggestions.filter(item => item.suggestion.reviewCount);
-        const averageScore = reviewed.length ? reviewed.reduce((sum, item) => sum + Number(item.suggestion.overallScore || 0), 0) / reviewed.length : 0;
-        title = '3차시 설계: 언어 UX 리디자인 LAB';
-        overview = resultStat('원래 표현', `${groups.length}개`) + resultStat('리디자인 제안', `${suggestions.length}개`) + resultStat('동료 평가', `${reviews}건`) + resultStat('제안 평균', reviewed.length ? `${formatScore(averageScore)}점` : '-');
-        content = `<section class="refine-grid">${suggestions.length ? suggestions.map(({group, suggestion}) => `<article class="refine-card card"><p class="eyebrow">${badge(group.category)} · ${esc(group.word)}</p><h3>${esc(group.word)} → <span style="color:var(--primary)">${esc(suggestion.suggestedWord)}</span></h3>${usabilityProfileHtml(group.usability)}<p class="intent-copy"><b>전달하려는 의미</b>${esc(suggestion.meaning)}</p><p class="intent-copy"><b>핵심 특징</b>${esc(suggestion.coreFeature)}</p><p class="help">${esc(suggestion.reason)}</p><div class="review-progress"><span class="metric-chip">의미 보존성<b>${formatScore(suggestion.meaningScore)}</b></span><span class="metric-chip">자연스러움<b>${formatScore(suggestion.naturalScore)}</b></span><span class="metric-chip">보편성<b>${formatScore(suggestion.universalScore)}</b></span><span class="metric-chip">명확성<b>${formatScore(suggestion.clarityScore)}</b></span></div><div class="rating-summary"><span class="help">${suggestion.reviewCount}명 평가</span><span class="score-pill">평균 ${formatScore(suggestion.overallScore)}점</span></div></article>`).join('') : '<div class="empty">아직 등록된 리디자인 설계안이 없습니다.</div>'}</section>`;
+        const cards = state.redesignWorkspace || [];
+        const suggestions = cards.flatMap(card => (card.suggestions || []).map(suggestion => ({ card, suggestion })));
+        title = '3차시 설계: 진단에서 새 표현으로';
+        overview = resultStat('진단 카드', `${cards.length}개`) + resultStat('새 표현', `${suggestions.length}개`) + resultStat('설계 대기', `${cards.filter(card=>!card.suggestions.length).length}개`) + resultStat('자동 검증', `${suggestions.length}개`);
+        content = `<section class="refine-grid">${suggestions.length ? suggestions.map(({card, suggestion}) => `<article class="refine-card card"><p class="eyebrow">${badge(card.category)} · ${esc(card.word)}</p><h3>${esc(card.word)} → <span style="color:var(--primary)">${esc(suggestion.suggestedWord)}</span></h3><div class="diagnostic-summary"><div><b>새 표현의 뜻</b>${esc(suggestion.meaning)}</div><div><b>바꾼 이유</b>${esc(suggestion.reason)}</div><div><b>새 예문</b>${esc(suggestion.exampleSentence)}</div></div></article>`).join('') : '<div class="empty">아직 등록된 새 표현이 없습니다.</div>'}</section>`;
       } else {
         const groups = state.dictionaryWorkspace || [];
         const candidates = groups.flatMap(group => (group.suggestions || []).map(candidate => ({ group, candidate })));
@@ -1488,8 +1695,8 @@
       openModal(`${room.grade} ${room.className} · ${title}`, `<div class="fullscreen-results"><div class="results-overview">${overview}</div>${content}</div>`, '<button class="btn btn-primary" onclick="closeModal()">결과 화면 닫기</button>', 'fullscreen');
     }
 
-    async function approveDictionaryCandidate(wordId,suggestionId,button){const word=(state.dictionaryWorkspace||[]).find(item=>item.id===wordId);const candidate=word&&(word.suggestions||[]).find(item=>item.id===suggestionId);if(!word||!candidate)return toast('출시 후보를 찾을 수 없습니다.','error');setButtonBusy(button,true,'등재 중...');try{await api('saveDictionaryEntry',managerToken(),{wordId:word.id,suggestionId:candidate.id,originalWord:word.word,category:word.category,finalWord:candidate.suggestedWord,meaning:candidate.meaning,approved:true,caution:'',exampleSentence:''});toast('우리말 사전에 등재했습니다.','success');await renderTeacherLessonFour();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
-    async function unpublishDictionaryEntry(wordId,button){const word=(state.dictionaryWorkspace||[]).find(item=>item.id===wordId);if(!word||!word.entry)return;setButtonBusy(button,true,'취소 중...');try{await api('saveDictionaryEntry',managerToken(),{wordId:word.id,suggestionId:word.entry.suggestionId,originalWord:word.word,category:word.category,finalWord:word.entry.finalWord,meaning:word.entry.meaning,approved:false,caution:'',exampleSentence:''});toast('사전 등재를 취소했습니다.','success');await renderTeacherLessonFour();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+    async function approveDictionaryCandidate(wordId,suggestionId,button){const word=(state.dictionaryWorkspace||[]).find(item=>item.id===wordId);const candidate=word&&(word.suggestions||[]).find(item=>item.id===suggestionId);if(!word||!candidate)return toast('출시 후보를 찾을 수 없습니다.','error');setButtonBusy(button,true,'등재 중...');try{await api('saveDictionaryEntry',managerToken(),{wordId:word.id,suggestionId:candidate.id,originalWord:word.word,category:word.category,finalWord:candidate.suggestedWord,meaning:candidate.meaning,approved:true,caution:'',exampleSentence:''});toast('우리말 사전에 등재했습니다.','success');renderTeacherLessonTab();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+    async function unpublishDictionaryEntry(wordId,button){const word=(state.dictionaryWorkspace||[]).find(item=>item.id===wordId);if(!word||!word.entry)return;setButtonBusy(button,true,'취소 중...');try{await api('saveDictionaryEntry',managerToken(),{wordId:word.id,suggestionId:word.entry.suggestionId,originalWord:word.word,category:word.category,finalWord:word.entry.finalWord,meaning:word.entry.meaning,approved:false,caution:'',exampleSentence:''});toast('사전 등재를 취소했습니다.','success');renderTeacherLessonTab();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
 
     async function reloadManagerDashboard(silent) {
       if (state.activeClass) return loadTeacherClassDashboard(silent);
@@ -1675,7 +1882,7 @@
       }, '삭제');
     }
     async function renderAdminDictionary() {
-      document.getElementById('adminContent').innerHTML = `<section class="hero card"><h2>우리 반 우리말 사전</h2><p>A/B 검증 결과를 살펴보고 최종 추천 표현을 다듬어 사전을 완성합니다.</p><div class="hero-actions">${state.activeClass?`<button class="btn btn-primary btn-lg" onclick="startClassStage('wordmaking')">리디자인 시작</button><button class="btn btn-soft btn-lg" onclick="startClassStage('dictionary')">블라인드 검증 시작</button>`:''}${refreshButton()}</div></section><div id="dictionaryWorkspace"><div class="empty">사전 편집 자료를 불러오는 중...</div></div>`;
+      document.getElementById('adminContent').innerHTML = `<section class="hero card"><h2>우리 반 우리말 사전</h2><p>기존 표현과 새 표현의 1:1 선택 결과를 확인하고 사전 내용을 관리합니다.</p><div class="hero-actions">${state.activeClass?`<button class="btn btn-primary btn-lg" onclick="startClassStage('wordmaking')">새 표현 설계 시작</button><button class="btn btn-soft btn-lg" onclick="startClassStage('dictionary')">1:1 검증 시작</button>`:''}${refreshButton()}</div></section><div id="dictionaryWorkspace"><div class="empty">사전 편집 자료를 불러오는 중...</div></div>`;
       try {
         const workspace = await api('getDictionaryWorkspace', managerToken(), state.activeClass && state.activeClass.id);
         if (state.tab !== 'dictionary') return;
@@ -1801,56 +2008,157 @@
 
     /* ------------------------------ 상황 활동 학생 ------------------------------ */
     async function renderContextView() {
-      setApp(studentHeader('진단: 말의 사용성 테스트', '같은 말도 상황과 상대가 달라지면 얼마나 적절한지 달라질 수 있어요.'));
-      document.getElementById('studentContent').innerHTML = `<div class="empty">활동을 불러오는 중...</div>`;
-      state.usabilityScore=0;state.contextShowRatings=false;
-      try { state.usabilityLesson = await api('getUsabilityLesson', state.anonId, state.classInfo.id); renderUsabilityTask(); }
-      catch (error) { document.getElementById('studentContent').innerHTML = `<div class="empty">${esc(friendlyError(error))}</div>`; }
+      setApp(studentHeader('2차시 · 맥락 진단', '표현을 고르고, 어울리는 경우와 그렇지 않은 경우를 직접 만들어 봐요.'));
+      document.getElementById('studentContent').innerHTML = `<div class="empty">표현 목록을 불러오는 중...</div>`;
+      state.diagnosticDraft = null;
+      try {
+        state.diagnosticLesson = await api('getDiagnosticLesson', state.anonId, state.classInfo.id);
+        const card = state.diagnosticLesson.myCard;
+        state.diagnosticStep = card ? (card.complete ? 4 : 2) : 1;
+        if (card) state.diagnosticDraft = diagnosticDraftFromCard(card);
+        renderDiagnosticFlow();
+      } catch (error) {
+        const root=document.getElementById('studentContent'); if(root)root.innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;
+      }
     }
-    function renderUsabilityTask(){const root=document.getElementById('studentContent');const tests=(state.usabilityLesson&&state.usabilityLesson.tests)||[];if(state.contextShowRatings)return renderUsabilityResults();const pending=tests.find(test=>!test.myScore);const completed=tests.filter(test=>test.myScore).length;if(!tests.length){root.innerHTML='<div class="empty">선생님이 사용성 테스트를 준비하고 있습니다.</div>';return;}if(!pending){root.innerHTML=`<section class="waiting-panel card"><div class="waiting-glyph">✓</div><h2>테스트를 모두 완료했습니다.</h2><p class="help">상황에 따라 같은 표현의 적절성이 어떻게 달라지는지 결과에서 확인해 보세요.</p><button class="btn btn-primary btn-lg" onclick="state.contextShowRatings=true;renderUsabilityTask()">결과 보기</button></section>`;return;}root.innerHTML=`<div class="lesson-tools"><div><h3>${completed+1} / ${tests.length}</h3><p>학생에게는 한 번에 테스트 하나만 표시됩니다.</p></div><button class="btn" onclick="state.contextShowRatings=true;renderUsabilityTask()">결과 보기</button></div><article class="student-card usability-card card"><p class="eyebrow">테스트할 말</p><h2>${esc(pending.word)}</h2>${badge(pending.category)}<div class="test-facts"><div class="test-fact"><b>상황</b>${esc(pending.situation)}</div><div class="test-fact"><b>상대</b>${esc(pending.audience)}</div><div class="test-fact"><b>목적</b>${esc(pending.purpose)}</div></div><h3 style="margin-top:24px">이 상황에서 이 표현을 사용하는 것은 얼마나 적절할까요?</h3><div class="score-scale">${[1,2,3,4,5].map(score=>`<button type="button" class="score-choice" data-usability-score="${score}">${score}</button>`).join('')}</div><div class="scale-labels"><span>1 · 매우 부적절</span><span>5 · 매우 적절</span></div><button id="submitUsabilityBtn" class="btn btn-primary btn-lg btn-block" style="margin-top:22px" disabled>제출하기</button></article>`;root.querySelectorAll('[data-usability-score]').forEach(button=>button.addEventListener('click',()=>{state.usabilityScore=Number(button.dataset.usabilityScore);root.querySelectorAll('[data-usability-score]').forEach(item=>item.classList.toggle('active',item===button));document.getElementById('submitUsabilityBtn').disabled=false;}));document.getElementById('submitUsabilityBtn').addEventListener('click',event=>submitUsabilityScore(pending.id,event.currentTarget));}
-    async function submitUsabilityScore(testId,button){if(!state.usabilityScore)return toast('적절성 점수를 선택해 주세요.','error');setButtonBusy(button,true,'제출 중...');try{await api('saveUsabilityResponse',state.anonId,testId,state.usabilityScore);toast('평가를 제출했습니다.','success');state.usabilityScore=0;state.usabilityLesson=await api('getUsabilityLesson',state.anonId,state.classInfo.id);renderUsabilityTask();window.scrollTo({top:0,behavior:'smooth'});}catch(error){friendlyError(error);setButtonBusy(button,false);}}
-    function renderUsabilityResults(){const root=document.getElementById('studentContent');const tests=(state.usabilityLesson&&state.usabilityLesson.tests)||[];const grouped=tests.reduce((all,test)=>{(all[test.word]||=[]).push(test);return all;},{});root.innerHTML=`<button class="btn btn-block" onclick="state.contextShowRatings=false;renderUsabilityTask()" style="margin-bottom:12px">← 테스트로 돌아가기</button><div class="lesson-tools"><div><h3>우리 반 사용성 진단</h3><p>표현 평균과 상황별 편차를 함께 확인합니다.</p></div><button class="btn" onclick="renderContextView()">↻ 새로고침</button></div>${Object.keys(grouped).length?Object.entries(grouped).map(([word,items])=>`<article class="student-card card"><h2>${esc(word)}</h2>${usabilityProfileHtml(summarizeUsabilityTests(items))}${items.map(test=>`<div class="average-bar"><span>${esc(test.audience)} · ${esc(test.situation)}</span><span class="average-track"><i class="average-fill" style="width:${test.averageScore*20}%"></i></span><b>${test.responseCount?formatScore(test.averageScore):'-'}</b></div>`).join('')}</article>`).join(''):'<div class="empty">아직 표시할 결과가 없습니다.</div>'}`;}
+
+    function diagnosticDraftFromCard(card) {
+      return {
+        dimensions:(card.dimensions||[]).slice(),
+        appropriate:Object.assign({partner:'',place:'',situation:'',example:'',rating:0},card.appropriate||{}),
+        inappropriate:Object.assign({partner:'',place:'',situation:'',example:'',rating:0},card.inappropriate||{}),
+        ratingReason:card.ratingReason||''
+      };
+    }
+
+    function diagnosticStepper(step) {
+      return `<div class="context-stepper"><span class="context-step ${step===1?'active':''}"><b>1</b>표현 선택</span><span class="context-step ${step===2?'active':''}"><b>2</b>맥락·예문</span><span class="context-step ${step>=3?'active':''}"><b>3</b>평가·이유</span></div>`;
+    }
+
+    function renderDiagnosticFlow() {
+      const root=document.getElementById('studentContent'); if(!root||!state.diagnosticLesson)return;
+      const card=state.diagnosticLesson.myCard;
+      if(!card)return renderDiagnosticWordChoice();
+      if(card.complete||state.diagnosticStep===4)return renderCompletedDiagnostic();
+      if(state.diagnosticStep===3)return renderDiagnosticRating();
+      renderDiagnosticContexts();
+    }
+
+    function renderDiagnosticWordChoice() {
+      const root=document.getElementById('studentContent');const lesson=state.diagnosticLesson;
+      root.innerHTML=`${diagnosticStepper(1)}<article class="student-card card"><div class="student-form-heading"><span class="student-hero-icon">${lessonIcon('context')}</span><div><h2>진단할 표현 선택</h2><p>한 번 선택하면 바꿀 수 없습니다.</p></div></div><section class="diagnostic-word-grid">${lesson.words.length?lesson.words.map(word=>`<button type="button" class="diagnostic-word ${word.full?'full':''}" ${word.full?'disabled':''} onclick="confirmDiagnosticWord('${attr(word.id)}',${jsArg(word.word)})"><div class="rating-summary">${badge(word.category)}<span class="badge ${word.full?'badge-pending':'badge-approved'}">${word.full?'마감':word.remainingCount+'자리'}</span></div><strong>${esc(word.word)}</strong><small>${word.selectedCount} / ${lesson.capacity}명</small></button>`).join(''):'<div class="empty">선택할 표현이 아직 없습니다.</div>'}</section></article>`;
+    }
+
+    function confirmDiagnosticWord(wordId, word) {
+      confirmModal('이 표현을 선택할까요?', `‘${word}’의 쓰임을 직접 진단합니다. 선택 후에는 다른 표현으로 바꿀 수 없습니다.`, async()=>{
+        const button=document.getElementById('confirmAction');setButtonBusy(button,true,'선택 중...');
+        try{await api('claimDiagnosticWord',state.anonId,state.classInfo.id,wordId);closeModal();state.diagnosticLesson=await api('getDiagnosticLesson',state.anonId,state.classInfo.id);state.diagnosticStep=2;state.diagnosticDraft=diagnosticDraftFromCard(state.diagnosticLesson.myCard);renderDiagnosticFlow();toast('표현을 선택했습니다.','success');}
+        catch(error){friendlyError(error);setButtonBusy(button,false);}
+      },'이 표현 선택');
+    }
+
+    function diagnosticDimensionField(key,label,placeholder) {
+      const draft=state.diagnosticDraft;
+      if(!draft.dimensions.includes(key))return '';
+      const suffix=key.charAt(0).toUpperCase()+key.slice(1);
+      return `<label class="field-label" for="appropriate${suffix}">${label}</label><input id="appropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${esc(placeholder[0])}" value="${attr(draft.appropriate[key])}"><label class="field-label" for="inappropriate${suffix}">${label}</label><input id="inappropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${esc(placeholder[1])}" value="${attr(draft.inappropriate[key])}">`;
+    }
+
+    function renderDiagnosticContexts() {
+      const root=document.getElementById('studentContent');const card=state.diagnosticLesson.myCard;const draft=state.diagnosticDraft;
+      const labels={partner:'대화 상대',place:'대화 장소',situation:'대화 상황'};
+      root.innerHTML=`${diagnosticStepper(2)}<form id="diagnosticContextForm" class="student-card card"><p class="eyebrow">선택한 표현</p><h2>${esc(card.word)} ${badge(card.category)}</h2><label class="field-label" id="dimensionLabel">비교할 맥락 <span class="help">2개 이상</span></label><div class="dimension-choices" role="group" aria-labelledby="dimensionLabel">${Object.keys(labels).map(key=>`<button type="button" class="dimension-choice ${draft.dimensions.includes(key)?'active':''}" aria-pressed="${draft.dimensions.includes(key)}" onclick="toggleDiagnosticDimension('${key}')">${labels[key]}</button>`).join('')}</div><div class="context-case-grid"><section class="context-case good"><h3>✓ 적절한 경우</h3><div id="appropriateFields"></div><label class="field-label" for="appropriateExample">예문</label><textarea id="appropriateExample" maxlength="800" required placeholder="이 맥락에 맞는 예문">${esc(draft.appropriate.example)}</textarea></section><section class="context-case bad"><h3>△ 그렇지 않은 경우</h3><div id="inappropriateFields"></div><label class="field-label" for="inappropriateExample">예문</label><textarea id="inappropriateExample" maxlength="800" required placeholder="이 맥락에는 어색한 예문">${esc(draft.inappropriate.example)}</textarea></section></div><button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:14px">평가하러 가기 →</button></form>`;
+      const fields={partner:['대화 상대',['예: 친한 친구','예: 처음 만난 어른']],place:['대화 장소',['예: 운동장','예: 교장실']],situation:['대화 상황',['예: 쉬는 시간 장난','예: 공식 발표']]};
+      ['partner','place','situation'].forEach(key=>{if(!draft.dimensions.includes(key))return;const [label,placeholder]=fields[key];const suffix=key.charAt(0).toUpperCase()+key.slice(1);document.getElementById('appropriateFields').insertAdjacentHTML('beforeend',`<label class="field-label" for="appropriate${suffix}">${label}</label><input id="appropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${placeholder[0]}" value="${attr(draft.appropriate[key])}">`);document.getElementById('inappropriateFields').insertAdjacentHTML('beforeend',`<label class="field-label" for="inappropriate${suffix}">${label}</label><input id="inappropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${placeholder[1]}" value="${attr(draft.inappropriate[key])}">`);});
+      document.getElementById('diagnosticContextForm').addEventListener('submit',goDiagnosticRating);
+    }
+
+    function captureDiagnosticContexts() {
+      const draft=state.diagnosticDraft;if(!draft)return;
+      ['partner','place','situation'].forEach(key=>{const suffix=key.charAt(0).toUpperCase()+key.slice(1);const good=document.getElementById('appropriate'+suffix);const bad=document.getElementById('inappropriate'+suffix);if(good)draft.appropriate[key]=good.value;if(bad)draft.inappropriate[key]=bad.value;});
+      const goodExample=document.getElementById('appropriateExample');const badExample=document.getElementById('inappropriateExample');if(goodExample)draft.appropriate.example=goodExample.value;if(badExample)draft.inappropriate.example=badExample.value;
+    }
+
+    function toggleDiagnosticDimension(key) {
+      captureDiagnosticContexts();const selected=state.diagnosticDraft.dimensions;const index=selected.indexOf(key);if(index>=0)selected.splice(index,1);else selected.push(key);renderDiagnosticContexts();
+    }
+
+    function goDiagnosticRating(event) {
+      event.preventDefault();captureDiagnosticContexts();
+      if(state.diagnosticDraft.dimensions.length<2)return toast('대화 상대, 장소, 상황 중 두 가지 이상을 선택해 주세요.','error');
+      if(!event.currentTarget.reportValidity())return;
+      state.diagnosticStep=3;renderDiagnosticRating();window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function starChoices(kind,score) {
+      return `<div class="star-choice-row" aria-label="${kind==='appropriate'?'적절한':'그렇지 않은'} 경우 별점">${[1,2,3,4,5].map(value=>`<button type="button" class="star-choice ${value===score?'active':''}" onclick="setDiagnosticRating('${kind}',${value})" aria-label="${value}점">★</button>`).join('')}</div><div class="scale-labels"><span>1점</span><span>5점</span></div>`;
+    }
+
+    function renderDiagnosticRating() {
+      const root=document.getElementById('studentContent');const card=state.diagnosticLesson.myCard;const draft=state.diagnosticDraft;
+      root.innerHTML=`${diagnosticStepper(3)}<article class="student-card card"><p class="eyebrow">${badge(card.category)} · ${esc(card.word)}</p><h2>적절성을 평가해요</h2><section class="context-case good"><h3>✓ 적절한 경우</h3><p>${esc(draft.appropriate.example)}</p>${starChoices('appropriate',draft.appropriate.rating)}</section><section class="context-case bad" style="margin-top:10px"><h3>△ 그렇지 않은 경우</h3><p>${esc(draft.inappropriate.example)}</p>${starChoices('inappropriate',draft.inappropriate.rating)}</section><label class="field-label" for="diagnosticReason">왜 그렇게 평가했나요?</label><textarea id="diagnosticReason" maxlength="800" required placeholder="상대·장소·상황을 근거로 설명해 주세요.">${esc(draft.ratingReason)}</textarea><div class="card-actions"><button class="btn" type="button" onclick="backToDiagnosticContexts()">← 맥락 수정</button><button id="saveDiagnosticBtn" class="btn btn-primary" type="button" onclick="submitDiagnosticCard(this)">진단 카드 완성</button></div></article>`;
+    }
+
+    function setDiagnosticRating(kind,score){state.diagnosticDraft[kind].rating=score;const reason=document.getElementById('diagnosticReason');if(reason)state.diagnosticDraft.ratingReason=reason.value;renderDiagnosticRating();}
+    function backToDiagnosticContexts(){const reason=document.getElementById('diagnosticReason');if(reason)state.diagnosticDraft.ratingReason=reason.value;state.diagnosticStep=2;renderDiagnosticContexts();}
+
+    async function submitDiagnosticCard(button){
+      const reason=document.getElementById('diagnosticReason');state.diagnosticDraft.ratingReason=reason?reason.value:'';
+      if(!state.diagnosticDraft.appropriate.rating||!state.diagnosticDraft.inappropriate.rating)return toast('두 경우의 별점을 모두 선택해 주세요.','error');
+      if(!state.diagnosticDraft.ratingReason.trim())return toast('별점을 준 이유를 적어 주세요.','error');
+      setButtonBusy(button,true,'저장 중...');
+      try{await api('saveDiagnosticCard',state.anonId,Object.assign({cardId:state.diagnosticLesson.myCard.id},state.diagnosticDraft));state.diagnosticLesson=await api('getDiagnosticLesson',state.anonId,state.classInfo.id);state.diagnosticStep=4;toast('진단 카드를 완성했습니다.','success');renderCompletedDiagnostic();window.scrollTo({top:0,behavior:'smooth'});}
+      catch(error){friendlyError(error);setButtonBusy(button,false);}
+    }
+
+    function renderCompletedDiagnostic(){
+      const root=document.getElementById('studentContent');const own=state.diagnosticLesson.myCard;const cards=state.diagnosticLesson.cards.filter(card=>card.complete);
+      root.innerHTML=`${diagnosticStepper(4)}<section class="waiting-panel card"><div class="waiting-glyph">✓</div><h2>진단 완료</h2><p class="help">3차시에서 아래 진단 카드 중 하나를 골라 새 표현을 설계합니다.</p></section><div class="lesson-tools"><div><h3>우리 반 진단 카드 · ${cards.length}</h3><p>목록은 자동으로 갱신됩니다.</p></div><button class="btn" onclick="renderContextView()" aria-label="진단 목록 새로고침">↻</button></div><section class="context-grid">${cards.map((card,index)=>`<article class="student-card card"><p class="eyebrow">${card.id===own.id?'내 카드 · ':''}${badge(card.category)}</p><h2>${esc(card.word)}</h2><div class="diagnostic-summary"><div><b>적절한 경우 · ${card.appropriate.rating}점</b>${esc(card.appropriate.example)}</div><div><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${esc(card.inappropriate.example)}</div></div><p class="help">${esc(card.ratingReason)}</p></article>`).join('')}</section>`;
+    }
 
     /* ------------------------------ 우리말 만들기 학생 ------------------------------ */
     async function renderWordmakingView() {
-      setApp(studentHeader('설계: 언어 UX 리디자인 LAB', '진단 결과를 근거로 의미는 살리고 더 잘 통하는 표현을 설계해요.'));
-      document.getElementById('studentContent').innerHTML='<div class="empty">표현 목록을 불러오는 중...</div>';
-      state.redesignReviewId='';state.redesignReviewScores={};
-      try { state.makingWords=await api('getWordmakingWords',state.anonId,state.classInfo.id); renderMakingContent(); }
+      setApp(studentHeader('3차시 · 새 표현 설계', '2차시 진단 카드 하나를 골라 더 잘 어울리는 표현을 만들어 봐요.'));
+      document.getElementById('studentContent').innerHTML='<div class="empty">진단 카드를 불러오는 중...</div>';
+      state.selectedDiagnosticId='';
+      try { state.redesignCards=await api('getRedesignLesson',state.anonId,state.classInfo.id); state.makingWords=state.redesignCards; renderMakingContent(); }
       catch(error){document.getElementById('studentContent').innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;}
     }
     function renderMakingContent(){
       const root=document.getElementById('studentContent');
-      if(state.redesignReviewId)return renderRedesignReview();
-      const available=state.makingWords.filter(item=>!item.submitted);const reviewable=getReviewableRedesigns();
-      root.innerHTML=`<div class="principle-grid"><span class="principle-chip">의미 보존</span><span class="principle-chip">자연스러움</span><span class="principle-chip">보편성</span><span class="principle-chip">명확성</span></div>${available.length?`<form id="suggestionForm" class="student-card card"><label class="field-label" for="redesignWord">기존 표현 선택</label><select id="redesignWord" required><option value="">표현을 선택하세요</option>${available.map(word=>`<option value="${attr(word.id)}">${esc(word.word)} · ${esc(word.category)}</option>`).join('')}</select><div id="selectedUsabilityProfile"></div><label class="field-label" for="redesignMeaning">1. 이 말이 전달하려는 의미</label><textarea id="redesignMeaning" maxlength="600" required placeholder="표현이 전하는 뜻과 느낌을 적어 보세요."></textarea><label class="field-label" for="redesignCoreFeature">2. 새 표현이 갖춰야 할 핵심 특징</label><textarea id="redesignCoreFeature" maxlength="600" required placeholder="예: 친구와 선생님 모두에게 자연스럽고 뜻이 바로 이해되어야 함"></textarea><label class="field-label" for="suggestedWord">3. 리디자인 표현</label><input id="suggestedWord" maxlength="120" required placeholder="기존 우리말이나 새롭게 만든 표현"><label class="field-label" for="suggestionReason">4. 이 표현을 제안한 이유</label><textarea id="suggestionReason" maxlength="600" required placeholder="네 가지 설계 원칙을 근거로 설명해 보세요."></textarea><button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:18px">설계안 등록</button></form>`:'<div class="empty">선택 가능한 모든 표현에 리디자인 설계안을 등록했습니다.</div>'}<button class="btn btn-soft btn-lg btn-block" style="margin-top:12px" onclick="openRedesignReview()">다른 설계안 평가하기${reviewable.length?' · '+reviewable.length+'개':' '}</button>`;
-      const form=document.getElementById('suggestionForm');if(form){form.addEventListener('submit',submitSuggestion);document.getElementById('redesignWord').addEventListener('change',renderSelectedUsabilityProfile);}
+      const cards=state.redesignCards||[];const available=cards.filter(card=>!card.submitted);const selected=available.find(card=>card.id===state.selectedDiagnosticId);
+      if(selected){root.innerHTML=redesignFormHtml(selected);document.getElementById('suggestionForm').addEventListener('submit',submitSuggestion);return;}
+      const myDesigns=cards.flatMap(card=>(card.suggestions||[]).filter(item=>item.mine).map(item=>({card,item})));
+      root.innerHTML=`<div class="student-form-heading"><span class="student-hero-icon">${lessonIcon('wordmaking')}</span><div><h2>진단 카드 선택</h2><p>맥락과 평가 내용을 먼저 확인하세요.</p></div></div>${available.length?`<section class="context-grid">${available.map(card=>`<button type="button" class="diagnostic-word" onclick="selectDiagnosticForRedesign('${attr(card.id)}')"><div class="rating-summary">${badge(card.category)}<span class="badge badge-approved">선택</span></div><strong>${esc(card.word)}</strong><small>${esc(card.appropriate.example)}</small></button>`).join('')}</section>`:'<div class="empty">설계할 수 있는 진단 카드가 없습니다.</div>'}${myDesigns.length?`<div class="lesson-tools"><div><h3>내가 설계한 표현</h3><p>4차시 비교 항목으로 자동 연결됩니다.</p></div></div>${myDesigns.map(({card,item})=>`<article class="student-card card"><p class="eyebrow">${esc(card.word)} → 새 표현</p><h2>${esc(item.suggestedWord)}</h2><p>${esc(item.meaning)}</p></article>`).join('')}`:''}`;
     }
-    function renderSelectedUsabilityProfile(){const root=document.getElementById('selectedUsabilityProfile');const select=document.getElementById('redesignWord');if(!root||!select)return;const word=state.makingWords.find(item=>item.id===select.value);root.innerHTML=word?`<p class="eyebrow" style="margin-top:12px">2차시 사용성 진단</p>${usabilityProfileHtml(word.usability)}`:'';}
+
+    function selectDiagnosticForRedesign(cardId){state.selectedDiagnosticId=cardId;renderMakingContent();window.scrollTo({top:0,behavior:'smooth'});}
+    function redesignFormHtml(card){return `<button class="btn btn-block" type="button" onclick="state.selectedDiagnosticId='';renderMakingContent()" style="margin-bottom:9px">← 진단 카드 다시 선택</button><form id="suggestionForm" class="student-card card"><p class="eyebrow">${badge(card.category)} · 선택한 진단</p><h2>${esc(card.word)}</h2><div class="diagnostic-summary"><div><b>적절한 경우 · ${card.appropriate.rating}점</b>${esc(card.appropriate.example)}</div><div><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${esc(card.inappropriate.example)}</div><div><b>평가 이유</b>${esc(card.ratingReason)}</div></div><label class="field-label" for="suggestedWord">새 표현</label><input id="suggestedWord" maxlength="120" required placeholder="더 잘 어울리는 표현"><label class="field-label" for="redesignMeaning">새 표현의 뜻</label><textarea id="redesignMeaning" maxlength="600" required placeholder="누구나 이해할 수 있게 간단히 설명해 주세요."></textarea><label class="field-label" for="suggestionReason">바꾼 이유</label><textarea id="suggestionReason" maxlength="600" required placeholder="진단한 상대·장소·상황과 연결해 설명해 주세요."></textarea><label class="field-label" for="redesignExample">새 예문</label><textarea id="redesignExample" maxlength="800" required placeholder="새 표현이 자연스럽게 쓰인 문장"></textarea><button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:14px">새 표현 등록</button></form>`;}
+
+    function renderSelectedUsabilityProfile(){}
     function getReviewableRedesigns(){return state.makingWords.flatMap(word=>(word.suggestions||[]).map(item=>Object.assign({wordId:word.id,word:word.word},item))).filter(item=>!item.mine&&!item.reviewed);}
     function openRedesignReview(){const next=getReviewableRedesigns()[0];if(!next)return toast('현재 평가할 다른 제안이 없습니다.','error');state.redesignReviewId=next.id;state.redesignReviewScores={};renderMakingContent();window.scrollTo({top:0,behavior:'smooth'});}
     function renderRedesignReview(){const candidate=state.makingWords.flatMap(word=>(word.suggestions||[]).map(item=>Object.assign({word:word.word},item))).find(item=>item.id===state.redesignReviewId);if(!candidate){state.redesignReviewId='';return renderMakingContent();}const metrics=[['meaningScore','의미 보존성','원래 표현의 의미가 잘 살아 있는가?'],['naturalScore','자연스러움','실제로 말할 때 자연스러운가?'],['universalScore','보편성','다양한 사람과 상황에서 두루 사용할 수 있는가?'],['clarityScore','명확성','뜻과 쓰임을 바로 이해할 수 있는가?']];document.getElementById('studentContent').innerHTML=`<button class="btn btn-block" onclick="state.redesignReviewId='';renderMakingContent()" style="margin-bottom:12px">← 설계안 등록으로 돌아가기</button><article class="student-card card"><p class="eyebrow">블라인드 동료 검토</p><h2>${esc(candidate.word)} → <span style="color:var(--accent)">${esc(candidate.suggestedWord)}</span></h2><p class="intent-copy"><b>전달하려는 의미</b>${esc(candidate.meaning)}</p><p class="intent-copy"><b>핵심 특징</b>${esc(candidate.coreFeature)}</p><p class="intent-copy"><b>제안 이유</b>${esc(candidate.reason)}</p>${metrics.map(([key,title,question])=>`<div class="review-metric" data-review-metric="${key}"><h3>${title}</h3><p>${question}</p><div class="score-scale">${[1,2,3,4,5].map(score=>`<button class="score-choice" type="button" onclick="selectReviewScore('${key}',${score},this)">${score}</button>`).join('')}</div></div>`).join('')}<button id="completeReviewBtn" class="btn btn-primary btn-lg btn-block" onclick="submitRedesignReview('${attr(candidate.id)}',this)" disabled>평가 완료</button></article>`;}
     function selectReviewScore(key,score,button){state.redesignReviewScores[key]=score;button.closest('[data-review-metric]').querySelectorAll('.score-choice').forEach(item=>item.classList.toggle('active',item===button));document.getElementById('completeReviewBtn').disabled=Object.keys(state.redesignReviewScores).length<4;}
-    async function submitSuggestion(event){event.preventDefault();const button=event.submitter;setButtonBusy(button,true,'저장 중...');const payload={wordId:document.getElementById('redesignWord').value,suggestionType:'새로운 말 만들기',meaning:document.getElementById('redesignMeaning').value,coreFeature:document.getElementById('redesignCoreFeature').value,suggestedWord:document.getElementById('suggestedWord').value,reason:document.getElementById('suggestionReason').value};try{await api('submitWordSuggestion',state.anonId,payload);toast('리디자인 설계안을 등록했습니다.','success');state.makingWords=await api('getWordmakingWords',state.anonId,state.classInfo.id);renderMakingContent();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+    async function submitSuggestion(event){event.preventDefault();const button=event.submitter;const payload={diagnosticCardId:state.selectedDiagnosticId,meaning:document.getElementById('redesignMeaning').value,suggestedWord:document.getElementById('suggestedWord').value,reason:document.getElementById('suggestionReason').value,exampleSentence:document.getElementById('redesignExample').value};setButtonBusy(button,true,'저장 중...');try{await api('submitDiagnosticRedesign',state.anonId,payload);toast('새 표현을 등록했습니다. 4차시 비교에도 연결됩니다.','success');state.redesignCards=await api('getRedesignLesson',state.anonId,state.classInfo.id);state.makingWords=state.redesignCards;state.selectedDiagnosticId='';renderMakingContent();window.scrollTo({top:0,behavior:'smooth'});}catch(error){friendlyError(error);setButtonBusy(button,false);}}
     async function submitRedesignReview(id,button){if(Object.keys(state.redesignReviewScores).length<4)return toast('네 가지 항목을 모두 평가해 주세요.','error');setButtonBusy(button,true,'저장 중...');try{await api('saveSuggestionReview',state.anonId,id,state.redesignReviewScores);toast('평가를 완료했습니다.','success');state.makingWords=await api('getWordmakingWords',state.anonId,state.classInfo.id);state.redesignReviewId='';state.redesignReviewScores={};const next=getReviewableRedesigns()[0];if(next)state.redesignReviewId=next.id;renderMakingContent();window.scrollTo({top:0,behavior:'smooth'});}catch(error){friendlyError(error);setButtonBusy(button,false);}}
 
     /* ------------------------------ 블라인드 검증 · 공개 사전 ------------------------------ */
     async function renderDictionaryView(){
-      setApp(studentHeader('검증: 블라인드 테스트 및 출시','두 표현을 비교해 더 잘 통하는 말을 검증하고, 우리 반 사전을 확인해요.'));
+      setApp(studentHeader('4차시 · 1:1 검증','기존 표현과 새 표현 중 이 상황에 더 잘 어울리는 말을 골라요.'));
       document.getElementById('studentContent').innerHTML='<div class="empty">검증 항목을 불러오는 중...</div>';
-      state.abAnswers={};
+      state.abAnswers={choice:''};
       try{[state.abLesson,state.publishedDictionary]=await Promise.all([api('getAbTestLesson',state.anonId,state.classInfo.id),api('getPublishedDictionary',state.anonId,state.classInfo.id)]);renderVerificationView();}catch(error){document.getElementById('studentContent').innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;}
     }
-    function getAbOrder(testId){if(typeof state.abOrders[testId]!=='boolean')state.abOrders[testId]=Math.random()<.5;return state.abOrders[testId];}
     function renderVerificationView(){
       const root=document.getElementById('studentContent');const tests=(state.abLesson&&state.abLesson.tests)||[];const pending=tests.find(test=>!test.myResponse);const completed=tests.filter(test=>test.myResponse).length;
-      if(pending){const swapped=getAbOrder(pending.id);const left=swapped?pending.redesignedWord:pending.originalWord;const right=swapped?pending.originalWord:pending.redesignedWord;const questions=[['clarity','어느 쪽이 뜻을 더 쉽게 이해할 수 있나요?'],['natural','어느 쪽이 실제 대화에서 더 자연스러운가요?'],['universal','어느 쪽을 더 다양한 사람이 사용할 수 있나요?'],['usage','나라면 어느 쪽을 실제로 사용하겠나요?']];root.innerHTML=`<div class="lesson-tools"><div><h3>${completed+1} / ${tests.length} · 블라인드 비교</h3><p>어느 쪽이 원래 표현인지는 공개하지 않습니다.</p></div><button class="btn" onclick="renderDictionaryView()">↻ 새로고침</button></div><article class="student-card card"><div class="ab-pair"><div class="ab-option"><small>표현 A</small><strong>${esc(left)}</strong></div><span class="ab-vs">VS</span><div class="ab-option"><small>표현 B</small><strong>${esc(right)}</strong></div></div>${questions.map(([key,question])=>`<div class="review-metric" data-ab-question="${key}"><h3>${question}</h3><div class="ab-choices"><button type="button" class="ab-choice" onclick="selectAbChoice('${key}','A',this)">A</button><button type="button" class="ab-choice" onclick="selectAbChoice('${key}','SAME',this)">둘 다 비슷함</button><button type="button" class="ab-choice" onclick="selectAbChoice('${key}','B',this)">B</button></div></div>`).join('')}<button id="submitAbBtn" class="btn btn-primary btn-lg btn-block" onclick="submitAbTest('${attr(pending.id)}',this)" disabled>비교 결과 제출</button></article>`;return;}
-      const results=tests.length?`<div class="lesson-tools"><div><h3>검증 결과</h3><p>A는 원래 표현, B는 리디자인 표현 기준으로 환산한 학급 결과입니다.</p></div><button class="btn" onclick="renderDictionaryView()">↻ 새로고침</button></div><section class="launch-grid">${tests.map(test=>`<article class="launch-card card"><div class="rating-summary"><span class="help">${test.responseCount}명 응답</span><span class="improvement-pill">사용성 향상 ${test.improvementScore>0?'+':''}${test.improvementScore}%</span></div><h3>${esc(test.originalWord)} → <span style="color:var(--primary)">${esc(test.redesignedWord)}</span></h3>${abResultHtml(test)}</article>`).join('')}</section>`:'<div class="empty">선생님이 블라인드 검증 항목을 준비하고 있습니다.</div>';
-      root.innerHTML=results+`<div class="lesson-tools" style="margin-top:28px"><div><h3>우리 반 우리말 사전</h3><p>교사가 최종 등재한 표현만 검색됩니다.</p></div></div><input id="dictionarySearch" class="dictionary-search" type="search" placeholder="원래 표현 또는 새 표현 검색" value="${attr(state.dictionarySearch||'')}"><div id="dictionaryList" class="dictionary-list"></div>`;const search=document.getElementById('dictionarySearch');if(search)search.addEventListener('input',event=>{state.dictionarySearch=event.target.value;renderDictionaryList();});renderDictionaryList();
+      if(pending){root.innerHTML=`<div class="lesson-tools"><div><h3>${completed+1} / ${tests.length} · 표현 비교</h3><p>더 적합한 표현 하나를 선택하세요.</p></div><span class="count">${completed}개 완료</span></div><article class="student-card card"><p class="eyebrow">이 상황에서 더 잘 어울리는 말은?</p><div class="ab-pair"><button type="button" class="ab-option ab-choice" onclick="selectComparisonChoice('A',this)"><small>기존 표현</small><strong>${esc(pending.originalWord)}</strong></button><span class="ab-vs">VS</span><button type="button" class="ab-option ab-choice" onclick="selectComparisonChoice('B',this)"><small>새 표현</small><strong>${esc(pending.redesignedWord)}</strong></button></div><p class="help">선택 결과는 우리 반 우리말 사전에 바로 반영됩니다.</p><button id="submitAbBtn" class="btn btn-primary btn-lg btn-block" onclick="submitComparisonVote('${attr(pending.id)}',this)" disabled>이 표현 선택</button></article>`;return;}
+      const results=tests.length?`<section class="waiting-panel card"><div class="waiting-glyph">✓</div><h2>검증 완료</h2><p class="help">우리 반이 선택한 표제어를 아래 사전에서 확인해요.</p></section>`:'<div class="empty">3차시에서 새 표현이 등록되면 비교가 시작됩니다.</div>';
+      root.innerHTML=results+`<div class="lesson-tools" style="margin-top:20px"><div><h3>우리 반 우리말 사전</h3><p>학급 선택 결과가 반영된 표제어입니다.</p></div><button class="btn" onclick="renderDictionaryView()" aria-label="새로고침">↻</button></div><input id="dictionarySearch" class="dictionary-search" type="search" placeholder="표제어 검색" value="${attr(state.dictionarySearch||'')}"><div id="dictionaryList" class="dictionary-list"></div>`;const search=document.getElementById('dictionarySearch');if(search)search.addEventListener('input',event=>{state.dictionarySearch=event.target.value;renderDictionaryList();});renderDictionaryList();
     }
-    function selectAbChoice(key,choice,button){state.abAnswers[key]=choice;button.closest('[data-ab-question]').querySelectorAll('.ab-choice').forEach(item=>item.classList.toggle('active',item===button));const submit=document.getElementById('submitAbBtn');if(submit)submit.disabled=Object.keys(state.abAnswers).length<4;}
-    async function submitAbTest(testId,button){if(Object.keys(state.abAnswers).length<4)return toast('네 가지 비교 항목을 모두 선택해 주세요.','error');const swapped=getAbOrder(testId);const answers={};Object.keys(state.abAnswers).forEach(key=>{const value=state.abAnswers[key];answers[key]=swapped?(value==='A'?'B':value==='B'?'A':value):value;});setButtonBusy(button,true,'제출 중...');try{await api('saveAbResponse',state.anonId,testId,answers);toast('블라인드 비교를 제출했습니다.','success');state.abAnswers={};state.abLesson=await api('getAbTestLesson',state.anonId,state.classInfo.id);renderVerificationView();window.scrollTo({top:0,behavior:'smooth'});}catch(error){friendlyError(error);setButtonBusy(button,false);}}
-    function renderDictionaryList(){const root=document.getElementById('dictionaryList');if(!root)return;const query=String(state.dictionarySearch||'').trim().toLowerCase();const data=state.publishedDictionary||{};const list=(data.entries||[]).filter(item=>!query||item.originalWord.toLowerCase().includes(query)||item.finalWord.toLowerCase().includes(query));root.innerHTML=list.length?list.map(item=>`<article class="dictionary-card card"><p class="eyebrow">우리 반 채택 표현</p><h2>${esc(item.originalWord)} → <span style="color:var(--accent)">${esc(item.finalWord)}</span></h2><div class="definition"><div><b>의미</b>${esc(item.meaning)}</div></div>${data.usageTrackingEnabled?`<button class="btn ${item.usedThisWeek?'btn-soft':'btn-primary'} btn-block" ${item.usedThisWeek?'disabled':''} onclick="openDictionaryUsage('${attr(item.id)}',${jsArg(item.finalWord)})">${item.usedThisWeek?'✓ 이번 주 사용 기록 완료':'이번 주에 사용해 봤어요'}</button>`:''}</article>`).join(''):`<div class="empty">${query?'검색 결과가 없습니다.':'교사가 최종 표현을 선정하는 중입니다.'}</div>`;}
+    function selectComparisonChoice(choice,button){state.abAnswers={choice};document.querySelectorAll('.ab-pair .ab-choice').forEach(item=>item.classList.toggle('active',item===button));const submit=document.getElementById('submitAbBtn');if(submit)submit.disabled=false;}
+    async function submitComparisonVote(testId,button){const choice=state.abAnswers&&state.abAnswers.choice;if(!choice)return toast('두 표현 중 하나를 선택해 주세요.','error');setButtonBusy(button,true,'반영 중...');try{const result=await api('saveComparisonVote',state.anonId,testId,choice);toast(result.winner==='동점'?'현재 선택 결과가 동점입니다.':'우리 반 사전에 ‘'+result.winner+'’이(가) 반영되었습니다.','success');state.abAnswers={choice:''};[state.abLesson,state.publishedDictionary]=await Promise.all([api('getAbTestLesson',state.anonId,state.classInfo.id),api('getPublishedDictionary',state.anonId,state.classInfo.id)]);renderVerificationView();window.scrollTo({top:0,behavior:'smooth'});}catch(error){friendlyError(error);setButtonBusy(button,false);}}
+    function renderDictionaryList(){const root=document.getElementById('dictionaryList');if(!root)return;const query=String(state.dictionarySearch||'').trim().toLowerCase();const data=state.publishedDictionary||{};const list=(data.entries||[]).filter(item=>!query||item.originalWord.toLowerCase().includes(query)||item.finalWord.toLowerCase().includes(query));root.innerHTML=list.length?list.map((item,index)=>`<article class="dictionary-headword card"><span class="pronunciation">표제어 ${String(index+1).padStart(2,'0')} · ${esc(item.category)}</span><h2>${esc(item.finalWord)}</h2>${item.finalWord!==item.originalWord?`<p class="help">기존 표현 · ${esc(item.originalWord)}</p>`:''}<div class="definition"><p><b>1</b>${esc(item.meaning)}</p>${item.exampleSentence?`<p><b>예</b>${esc(item.exampleSentence)}</p>`:''}</div></article>`).join(''):`<div class="empty">${query?'검색 결과가 없습니다.':'검증 선택이 모이면 표제어가 나타납니다.'}</div>`;}
     function openDictionaryUsage(dictionaryId,word){openModal('실제 사용 기록',`<form id="dictionaryUsageForm"><p><b>${esc(word)}</b>을(를) 이번 주에 사용했군요.</p><label class="field-label" for="usageContext">어떤 상황에서 사용했나요? <span class="help">(선택)</span></label><textarea id="usageContext" maxlength="400" placeholder="예: 친구와 수행평가 이야기를 할 때"></textarea></form>`,`<button class="btn" onclick="closeModal()">취소</button><button id="saveUsageBtn" class="btn btn-primary" onclick="saveDictionaryUsage('${attr(dictionaryId)}')">기록하기</button>`);}
     async function saveDictionaryUsage(dictionaryId){const button=document.getElementById('saveUsageBtn');setButtonBusy(button,true,'저장 중...');try{await api('saveDictionaryUsage',state.anonId,dictionaryId,document.getElementById('usageContext').value);closeModal();toast('이번 주 실제 사용을 기록했습니다.','success');state.publishedDictionary=await api('getPublishedDictionary',state.anonId,state.classInfo.id);renderDictionaryList();}catch(error){friendlyError(error);setButtonBusy(button,false);}}
 
