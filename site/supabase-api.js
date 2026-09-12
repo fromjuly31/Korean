@@ -6,6 +6,9 @@
   const PAGE_SIZE = 1000;
   let client = null;
   let initialized = false;
+  let apiUrl = '';
+  let apiKey = '';
+  let accessToken = '';
 
   function message(error) {
     const raw = error && error.message ? error.message : String(error || '요청을 처리하지 못했습니다.');
@@ -301,6 +304,8 @@
       throw new Error('앱의 데이터 저장소가 아직 연결되지 않았습니다. 관리자가 site/config.js에 Supabase 프로젝트 URL과 publishable 키를 설정해야 합니다.');
     }
     if (!global.supabase || !global.supabase.createClient) throw new Error('Supabase 라이브러리를 불러오지 못했습니다.');
+    apiUrl = url;
+    apiKey = key;
     client = global.supabase.createClient(url, key, {
       auth: {
         persistSession: true,
@@ -310,10 +315,18 @@
       }
     });
     initialized = true;
+    client.auth.onAuthStateChange((_event, session) => {
+      accessToken = session && session.access_token ? session.access_token : '';
+    });
     if (['teacher', 'student', 'submit', 'rate', 'context', 'wordmaking', 'dictionary'].includes(view)) {
-      const session = await client.auth.getSession();
-      if (session.error) fail(session.error);
-      if (!session.data.session) check(await client.auth.signInAnonymously());
+      const sessionResult = await client.auth.getSession();
+      if (sessionResult.error) fail(sessionResult.error);
+      let session = sessionResult.data.session;
+      if (!session) {
+        const signIn = check(await client.auth.signInAnonymously());
+        session = signIn && signIn.session;
+      }
+      accessToken = session && session.access_token ? session.access_token : '';
     }
   }
 
@@ -532,17 +545,50 @@
   }
 
   async function submitWord(_anonId, word, category, classId) {
-    await currentUser();
+    const user = await currentUser();
     const targetClassId = requiredText(classId, '클래스', 80);
     assertCategory(category);
     const original = requiredText(word, '단어 또는 표현', 80);
     const normalized = normalizeWord(original);
     if (!normalized || !/[\p{L}\p{N}]/u.test(normalized)) throw new Error('문자나 숫자가 포함된 표현을 입력해 주세요.');
-    const rows = check(await client.rpc('submit_word', {
+    const rpcResult = await client.rpc('submit_word', {
       p_class_id: targetClassId,
       p_word: original,
       p_category: category
-    }));
+    });
+    let rows;
+    if (!rpcResult.error) {
+      rows = rpcResult.data;
+    } else {
+      const raw = String(rpcResult.error.message || '');
+      const missingRpc = rpcResult.error.code === 'PGRST202'
+        || /submit_word.*schema cache|could not find.*submit_word/i.test(raw);
+      if (!missingRpc) fail(rpcResult.error);
+
+      // 구버전 DB와의 호환 경로입니다. 최신 permissions-update.sql을 적용하면
+      // 원자적 중복 병합 RPC가 사용되고, 적용 전에도 학생 등록은 막히지 않습니다.
+      const cutoff = new Date(Date.now() - 15000).toISOString();
+      const recentResult = await client.from('words').select('id').eq('owner_id', user.id)
+        .eq('class_id', targetClassId).eq('normalized_word', normalized).eq('category', category)
+        .gte('created_at', cutoff).limit(1).maybeSingle();
+      if (recentResult.error) fail(recentResult.error);
+      if (recentResult.data) return { ok: true, duplicatePrevented: true, id: recentResult.data.id };
+      const fallbackResult = await client.from('words').insert({
+        owner_id: user.id,
+        class_id: targetClassId,
+        word: original,
+        normalized_word: normalized,
+        category,
+        approved: false
+      }).select('id').single();
+      if (fallbackResult.error) {
+        if (/row-level security|permission denied/i.test(String(fallbackResult.error.message || ''))) {
+          throw new Error('학생 표현 저장 설정을 업데이트해야 합니다. 선생님께 알려 주세요.');
+        }
+        fail(fallbackResult.error);
+      }
+      return { ok: true, id: fallbackResult.data.id, compatibilityMode: true };
+    }
     const saved = rows && rows[0];
     if (!saved) throw new Error('저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
     return { ok: true, id: saved.id, submissionCount: saved.submit_count, merged: Boolean(saved.duplicate) };
@@ -1420,10 +1466,27 @@
     init,
     getAdminToken,
     getTeacherToken,
+    deactivateClassOnUnload(classId) {
+      const id = String(classId || '').trim();
+      if (!apiUrl || !apiKey || !accessToken || !/^[0-9a-f-]{36}$/i.test(id)) return false;
+      global.fetch(apiUrl + '/rest/v1/classes?id=eq.' + encodeURIComponent(id), {
+        method: 'PATCH',
+        headers: {
+          apikey: apiKey,
+          Authorization: 'Bearer ' + accessToken,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({ current_stage: 'waiting', current_task_id: null }),
+        keepalive: true
+      }).catch(() => {});
+      return true;
+    },
     async signOut() {
       if (!client) return;
       const result = await client.auth.signOut();
       if (result.error) fail(result.error);
+      accessToken = '';
     },
     async call(name, ...args) {
       if (!initialized) throw new Error('Supabase 연결이 초기화되지 않았습니다.');

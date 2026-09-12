@@ -50,6 +50,7 @@
     button { cursor: pointer; }
     button:disabled { cursor: wait; opacity: .62; }
     .hidden { display: none !important; }
+    .sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important; }
     .shell { width: min(1240px, calc(100% - 36px)); margin: 0 auto; padding: 30px 0 60px; }
     .app-header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
     .header-actions { margin-left: auto; }
@@ -529,8 +530,22 @@
     .student-lesson-tab.active { border-color:var(--student-tab-color); background:var(--student-tab-color); color:#fff; box-shadow:0 8px 20px rgba(49,95,91,.14); }
     .student-lesson-tab.active .student-tab-icon { background:rgba(255,255,255,.16); color:#fff; }
     .category-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 16px; }
-    .category-choice { min-height:50px; border:1px solid #d8dddc; border-radius:12px; background:#fff; color:#5e6b68; font-weight:850; }
+    .category-choice { display:flex; align-items:center; justify-content:center; gap:8px; min-width:0; min-height:50px; padding:8px 10px; border:1px solid #d8dddc; border-radius:12px; background:#fff; color:#5e6b68; font-weight:850; white-space:nowrap; }
     .category-choice.active { border-color:var(--primary); background:var(--primary-soft); color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
+    .category-choice-icon { display:grid; place-items:center; flex:0 0 24px; width:24px; height:24px; border-radius:8px; background:#f1f5f3; color:currentColor; }
+    .category-choice-icon svg { width:15px; height:15px; }
+    .category-choice.active .category-choice-icon { background:rgba(49,95,91,.12); }
+    .student-form-heading { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .student-form-heading .student-hero-icon { flex-basis:40px; width:40px; height:40px; border-radius:12px 12px 12px 5px; }
+    .student-form-heading h2 { margin:0; font-size:20px; }
+    .student-form-heading p { margin:2px 0 0; color:var(--muted); font-size:13px; }
+    .student-list-toggle { gap:8px; }
+    .student-list-toggle svg { width:18px; height:18px; }
+    .participation-warning { display:grid; grid-template-columns:auto minmax(0,1fr); gap:14px; align-items:start; }
+    .participation-warning-icon { display:grid; place-items:center; width:46px; height:46px; border-radius:14px; background:var(--accent-soft); color:var(--accent); }
+    .participation-warning-icon svg { width:25px; height:25px; }
+    .participation-warning h3 { margin:0 0 5px; font-size:20px; }
+    .participation-warning p { margin:0; color:var(--muted); }
     .result-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; align-items:center; padding:15px 16px; border-bottom:1px solid #ecefeb; }
     .result-row:last-child { border-bottom:0; }
     .result-row strong { display:block; font-size:18px; }
@@ -650,12 +665,42 @@
       .choice-grid { grid-template-columns: 1fr; }
       .student-shell { width: min(100% - 20px, 100%); padding-top: 10px; }
       .student-card, .student-hero { padding: 19px; }
-      .student-lesson-tab { min-height:51px; padding:7px 3px; font-size:10px; }
-      .lab-workspace .student-tab-copy small { font-size:9px; }
-      .lab-workspace .student-tab-copy b { font-size:12px; }
-      .lab-workspace .student-hero { padding:15px 17px; }
-      .lab-workspace .lesson-tabs { display:flex; overflow-x:auto; padding-bottom:2px; scroll-snap-type:x proximity; }
-      .lab-workspace .lesson-tab { flex:0 0 min(200px,70vw); scroll-snap-align:start; }
+      .lab-workspace .student-shell { width:calc(100% - 16px); padding:8px 0 24px; font-size:16px; }
+      .lab-workspace .student-shell .class-summary { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:7px; padding:9px 10px; margin-bottom:7px !important; border-radius:13px; }
+      .student-shell .class-summary .eyebrow { display:none; }
+      .student-shell .class-summary strong { display:block; overflow:hidden; font-size:14px; line-height:1.35; text-overflow:ellipsis; white-space:nowrap; }
+      .student-shell .class-code-badge { padding:5px 7px; font-size:11px; letter-spacing:.08em; white-space:nowrap; }
+      .student-shell .class-summary .header-actions { margin:0; }
+      .student-shell .class-summary .btn { min-height:34px; padding:5px 9px; font-size:12px; white-space:nowrap; }
+      .student-lesson-tabs { display:none !important; }
+      .lab-workspace .student-hero { padding:12px 14px; margin-bottom:8px; border-radius:15px; }
+      .student-hero > .eyebrow { display:none; }
+      .student-hero-heading { gap:9px; }
+      .student-hero-icon { flex-basis:38px; width:38px; height:38px; border-radius:11px 11px 11px 5px; }
+      .student-hero-icon svg { width:21px; height:21px; }
+      .lab-workspace .student-hero h1 { margin:0; font-size:21px; line-height:1.25; }
+      .lab-workspace .student-hero p { display:none; }
+      .lab-workspace .student-card { padding:15px; margin-bottom:8px; border-radius:16px; }
+      .student-form-heading { gap:9px; margin-bottom:10px; }
+      .student-form-heading .student-hero-icon { flex-basis:34px; width:34px; height:34px; }
+      .student-form-heading h2 { font-size:18px; }
+      .student-form-heading p { display:none; }
+      .student-card label.field-label { margin:11px 0 5px; font-size:13px; }
+      #studentWord { min-height:52px; padding:11px 12px; font-size:16px; }
+      .category-choices { gap:6px; margin:9px 0 13px; }
+      .category-choice { flex-direction:column; gap:3px; min-height:58px; padding:6px 2px; font-size:12px; }
+      .category-choice-icon { flex-basis:22px; width:22px; height:22px; border-radius:7px; }
+      .student-list-toggle { min-height:48px; margin-top:8px !important; }
+      .student-shell .lesson-tools { align-items:center; margin:12px 1px 7px; }
+      .student-shell .lesson-tools h3 { font-size:17px; }
+      .student-shell .lesson-tools p { display:none; }
+      .student-shell .lesson-tools .btn { width:auto; min-height:38px; padding:6px 10px; font-size:12px; white-space:nowrap; }
+      .student-shell .filter-group { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; }
+      .student-shell .filter-btn { min-width:0; min-height:36px; padding:5px 2px; font-size:11px; white-space:nowrap; }
+      .student-shell .result-row { gap:8px; padding:11px 12px; }
+      .student-shell .result-row strong { font-size:16px; }
+      .student-shell .result-row small { font-size:12px; }
+      .student-shell .submission-count { font-size:14px; white-space:nowrap; }
       .lab-workspace .lesson-hero { padding:17px; }
       .lab-workspace .simple-panel,.lab-workspace .context-grid,.lab-workspace .refine-grid,.lab-workspace .launch-grid { max-height:none; }
       .results-overview { grid-template-columns:repeat(2,minmax(0,1fr)); }
@@ -671,6 +716,8 @@
       .modal-foot { padding: 12px 17px 17px; flex-direction: column-reverse; }
       .modal-foot .btn { width: 100%; }
       .qr-box { min-height: 280px; }
+      .participation-warning { grid-template-columns:1fr; gap:10px; }
+      .participation-warning-icon { width:40px; height:40px; }
     }
     @media (max-width: 420px) {
       .lab-home-copy h1 { font-size:clamp(43px,12.5vw,48px); }
@@ -747,10 +794,13 @@
       publishedDictionary: { entries: [], usageTrackingEnabled: false },
       abLesson: null,
       abAnswers: {},
-      abOrders: {}
+      abOrders: {},
+      unloadParticipationEnded: false
     };
 
     document.addEventListener('DOMContentLoaded', boot);
+    window.addEventListener('beforeunload', endActiveParticipationOnUnload);
+    window.addEventListener('pagehide', endActiveParticipationOnUnload);
     document.addEventListener('fullscreenchange', () => {
       if (!document.fullscreenElement) {
         const layer = document.querySelector('.modal-layer');
@@ -774,6 +824,7 @@
           if (savedToken) {
             state.teacherToken = savedToken;
             sessionStorage.setItem('koreanClassTeacherToken', savedToken);
+            await closeParticipationRememberedBeforeReload();
             return loadTeacherPortal();
           }
           return renderTeacherEntry();
@@ -866,6 +917,42 @@
         dictionary: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/><path d="m15.3 9.2 1.3 1.3 2.2-2.5"/>'
       };
       return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[stage]||paths.submit}</svg>`;
+    }
+
+    function categoryIcon(category) {
+      const paths = {
+        '비속어': '<path d="M12 3 2.8 19h18.4L12 3Z"/><path d="M12 9v4M12 16h.01"/>',
+        '유행어': '<path d="m4 15 5-5 4 4 7-8"/><path d="M15 6h5v5"/>',
+        '외래어': '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3C9.6 5.5 8.4 8.5 8.4 12S9.6 18.5 12 21"/>'
+      };
+      return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[category]||paths['유행어']}</svg>`;
+    }
+
+    function endActiveParticipationOnUnload() {
+      if (CONFIG.view !== 'teacher' || state.unloadParticipationEnded || !state.activeClass || state.activeClass.currentStage === 'waiting') return;
+      state.unloadParticipationEnded = true;
+      AppApi.deactivateClassOnUnload(state.activeClass.id);
+      state.activeClass.currentStage = 'waiting';
+      state.activeClass.currentTaskId = '';
+    }
+
+    function rememberParticipation(stage, classId) {
+      if (stage === 'waiting') sessionStorage.removeItem('koreanActiveParticipationClass');
+      else sessionStorage.setItem('koreanActiveParticipationClass', String(classId || ''));
+    }
+
+    async function closeParticipationRememberedBeforeReload() {
+      const classId = sessionStorage.getItem('koreanActiveParticipationClass') || '';
+      if (!/^[0-9a-f-]{36}$/i.test(classId)) {
+        sessionStorage.removeItem('koreanActiveParticipationClass');
+        return;
+      }
+      try {
+        await api('setClassStage', state.teacherToken, classId, 'waiting', '');
+        sessionStorage.removeItem('koreanActiveParticipationClass');
+      } catch (_) {
+        // 이탈 시 keepalive 종료 요청이 먼저 처리될 수 있습니다. 다음 입장에서 다시 확인합니다.
+      }
     }
 
     function studentHeader(title, description) {
@@ -1042,25 +1129,74 @@
       }
       setApp(`<div class="shell teacher-workspace">
         <header class="teacher-top no-print"><span class="mini-mark">LAB</span><div><h1>${esc(room.school)} ${esc(room.grade)} ${esc(room.className)}</h1><p>${esc(room.region)} · 디지털 언어 연구실</p></div>
-          <div class="teacher-top-actions"><button class="btn code-button" onclick="copyUrl('${attr(room.classCode)}','클래스 코드를')">${esc(room.classCode)}</button><button class="btn" onclick="loadTeacherClassDashboard()">새로고침</button><button class="btn btn-danger" onclick="confirmResetClass()">결과 초기화</button><button class="btn" onclick="leaveTeacherClass()">클래스 목록</button></div></header>
+          <div class="teacher-top-actions"><button class="btn code-button" onclick="copyUrl('${attr(room.classCode)}','클래스 코드를')">${esc(room.classCode)}</button><button class="btn" onclick="refreshTeacherDashboard()">새로고침</button><button class="btn btn-danger" onclick="confirmResetClass()">결과 초기화</button><button class="btn" onclick="leaveTeacherClass()">메인 화면</button></div></header>
         <nav class="lesson-tabs no-print" aria-label="차시 선택">
           <button class="lesson-tab ${state.tab==='lesson1'?'active':''}" data-lesson="lesson1"><span class="lesson-tab-icon">${lessonIcon('submit')}</span><span class="lesson-tab-copy"><small>1차시</small><b>발견</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson2'?'active':''}" data-lesson="lesson2"><span class="lesson-tab-icon">${lessonIcon('context')}</span><span class="lesson-tab-copy"><small>2차시</small><b>진단</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson3'?'active':''}" data-lesson="lesson3"><span class="lesson-tab-icon">${lessonIcon('wordmaking')}</span><span class="lesson-tab-copy"><small>3차시</small><b>설계</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson4'?'active':''}" data-lesson="lesson4"><span class="lesson-tab-icon">${lessonIcon('dictionary')}</span><span class="lesson-tab-copy"><small>4차시</small><b>검증</b></span></button>
         </nav><main id="teacherLessonContent"></main></div>`);
-      document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => { state.tab = button.dataset.lesson; renderTeacherClassShell(); }));
+      document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => requestTeacherTab(button.dataset.lesson)));
       renderTeacherLessonTab();
     }
 
     function leaveTeacherClass() {
-      state.activeClass = null; state.dashboard = null; state.tab = 'lesson1'; renderTeacherChoice();
+      const leave = () => { state.activeClass = null; state.dashboard = null; state.tab = 'lesson1'; renderTeacherChoice(); };
+      if (!isParticipationOpen()) return leave();
+      confirmParticipationClose('메인 화면으로 이동하면 현재 학생 참여 링크와 QR이 비활성화됩니다.', leave, 'QR 종료 후 이동');
+    }
+
+    function isParticipationOpen() {
+      return Boolean(state.activeClass && state.activeClass.currentStage !== 'waiting');
+    }
+
+    async function closeStudentParticipation() {
+      if (!isParticipationOpen()) return;
+      state.activeClass = await api('setClassStage', state.teacherToken, state.activeClass.id, 'waiting', '');
+      rememberParticipation('waiting');
+      state.unloadParticipationEnded = false;
+    }
+
+    function confirmParticipationClose(message, onContinue, confirmLabel) {
+      openModal('학생 참여 QR 비활성화', `<div class="participation-warning"><span class="participation-warning-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/><path d="m8 8 8 8M16 8l-8 8"/></svg></span><div><h3>학생 참여가 종료됩니다</h3><p>${esc(message)}</p></div></div>`, `<button class="btn" onclick="closeModal()">취소</button><button id="confirmParticipationClose" class="btn btn-primary">${esc(confirmLabel || 'QR 비활성화')}</button>`);
+      document.getElementById('confirmParticipationClose').addEventListener('click', async event => {
+        const button = event.currentTarget;
+        setButtonBusy(button, true, '종료 중...');
+        try {
+          await closeStudentParticipation();
+          closeModal();
+          toast('학생 참여 QR이 비활성화되었습니다.', 'success');
+          onContinue();
+        } catch (error) {
+          friendlyError(error);
+          setButtonBusy(button, false);
+        }
+      });
+    }
+
+    function requestTeacherTab(nextTab) {
+      if (nextTab === state.tab) return;
+      const move = () => { state.tab = nextTab; renderTeacherClassShell(); };
+      if (!isParticipationOpen()) return move();
+      confirmParticipationClose('다른 차시 탭으로 이동하면 현재 학생 참여 링크와 QR이 비활성화됩니다.', move, 'QR 종료 후 이동');
+    }
+
+    async function refreshTeacherDashboard() {
+      if (!isParticipationOpen()) return loadTeacherClassDashboard();
+      showLoading('학생 참여를 종료하고 새로고침하는 중...');
+      try {
+        await closeStudentParticipation();
+        state.dashboard = await api('getClassDashboard', state.teacherToken, state.activeClass.id);
+        renderTeacherClassShell();
+        toast('학생 참여 QR을 종료하고 새로고침했습니다.', 'success');
+      } catch (error) { friendlyError(error); }
+      finally { hideLoading(); }
     }
 
     function confirmResetClass() {
       confirmModal('수업 결과 초기화', '수집 표현과 사용성 테스트, 리디자인, A/B 검증, 사전 결과가 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.', async () => {
         const button = document.getElementById('confirmAction'); setButtonBusy(button, true, '초기화 중...');
-        try { await api('resetClassResults', state.teacherToken, state.activeClass.id); closeModal(); toast('수업 결과를 초기화했습니다.', 'success'); state.activeClass.currentStage='waiting'; await loadTeacherClassDashboard(true); }
+        try { await api('resetClassResults', state.teacherToken, state.activeClass.id); rememberParticipation('waiting'); closeModal(); toast('수업 결과를 초기화했습니다.', 'success'); state.activeClass.currentStage='waiting'; await loadTeacherClassDashboard(true); }
         catch (error) { friendlyError(error); setButtonBusy(button, false); }
       }, '모든 결과 초기화');
     }
@@ -1102,6 +1238,8 @@
       showLoading('학생 화면을 전환하는 중...');
       try {
         state.activeClass = await api('setClassStage', state.teacherToken, state.activeClass.id, stage, taskId || '');
+        rememberParticipation(stage, state.activeClass.id);
+        state.unloadParticipationEnded = false;
         toast('학생 화면이 전환되었습니다.', 'success'); renderTeacherClassShell();
         if (showQr && stage !== 'waiting') openLessonQr(stage);
       } catch (error) { friendlyError(error); }
@@ -1513,12 +1651,13 @@
 
     /* ------------------------------ 학생 제출 ------------------------------ */
     async function renderSubmitView() {
-      setApp(studentHeader('발견: 우리 반 언어 데이터 수집', '평소 실제로 쓰거나 주변에서 자주 듣는 표현을 수집해요.'));
+      setApp(studentHeader('표현 수집', '표현과 유형만 선택하면 바로 등록됩니다.'));
       document.getElementById('studentContent').innerHTML = `<form id="submitWordForm" class="student-card card">
-        <label class="field-label" for="studentWord">수집할 표현</label><input id="studentWord" type="text" maxlength="80" required autocomplete="off" placeholder="평소 자주 쓰거나 주변에서 자주 듣는 말을 입력하세요."><label class="field-label">표현 유형</label><div class="category-choices">${CATEGORIES.map(category=>`<button class="category-choice" type="button" data-student-category="${attr(category)}">${esc(category)}</button>`).join('')}</div><button class="btn btn-primary btn-lg btn-block" type="submit">등록하기</button>
-      </form><button id="showWordResults" class="btn btn-soft btn-lg btn-block" type="button" style="margin-top:12px">우리 반 결과 보기</button><div id="lessonOneStudentList" class="hidden"></div>`;
+        <div class="student-form-heading"><span class="student-hero-icon" aria-hidden="true">${lessonIcon('submit')}</span><div><h2>수집할 표현</h2><p>자주 쓰거나 들은 말을 적어 주세요.</p></div></div>
+        <label class="sr-only" for="studentWord">수집할 표현</label><input id="studentWord" type="text" maxlength="80" required autocomplete="off" enterkeyhint="done" placeholder="표현 입력"><label class="field-label" id="categoryLabel">유형 선택</label><div class="category-choices" role="group" aria-labelledby="categoryLabel">${CATEGORIES.map(category=>`<button class="category-choice" type="button" data-student-category="${attr(category)}" aria-pressed="false"><span class="category-choice-icon">${categoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div><button class="btn btn-primary btn-lg btn-block" type="submit">표현 등록</button>
+      </form><button id="showWordResults" class="btn btn-soft btn-lg btn-block student-list-toggle" type="button" aria-expanded="false" aria-controls="lessonOneStudentList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg><span>수집 목록 보기</span></button><div id="lessonOneStudentList" class="hidden"></div>`;
       let selectedCategory='';
-      document.querySelectorAll('[data-student-category]').forEach(button=>button.addEventListener('click',()=>{selectedCategory=button.dataset.studentCategory;document.querySelectorAll('[data-student-category]').forEach(item=>item.classList.toggle('active',item===button));}));
+      document.querySelectorAll('[data-student-category]').forEach(button=>button.addEventListener('click',()=>{selectedCategory=button.dataset.studentCategory;document.querySelectorAll('[data-student-category]').forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active));});}));
       document.getElementById('submitWordForm').addEventListener('submit', async event => {
         event.preventDefault(); const word = document.getElementById('studentWord');
         if(!selectedCategory)return toast('표현 유형을 선택해 주세요.','error');
@@ -1526,7 +1665,7 @@
         try { await api('submitWord', state.anonId, word.value, selectedCategory, state.classInfo.id); word.value = ''; word.focus(); toast('등록되었습니다.', 'success'); if(!document.getElementById('lessonOneStudentList').classList.contains('hidden'))await loadLessonOneStudentWords(); }
         catch (error) { friendlyError(error); } finally { setButtonBusy(button, false); }
       });
-      document.getElementById('showWordResults').addEventListener('click',async()=>{const root=document.getElementById('lessonOneStudentList');root.classList.toggle('hidden');document.getElementById('showWordResults').textContent=root.classList.contains('hidden')?'우리 반 결과 보기':'결과 접기';if(!root.classList.contains('hidden'))await loadLessonOneStudentWords();});
+      document.getElementById('showWordResults').addEventListener('click',async event=>{const root=document.getElementById('lessonOneStudentList');root.classList.toggle('hidden');const expanded=!root.classList.contains('hidden');event.currentTarget.setAttribute('aria-expanded',String(expanded));document.querySelector('#showWordResults span').textContent=expanded?'목록 접기':'수집 목록 보기';if(expanded)await loadLessonOneStudentWords();});
     }
 
     async function loadLessonOneStudentWords() {
@@ -1538,7 +1677,7 @@
       } catch (error) { root.innerHTML = `<div class="empty">${esc(friendlyError(error))}</div>`; }
     }
 
-    function renderStudentWordResults(){const root=document.getElementById('lessonOneStudentList');if(!root)return;const filter=state.studentWordFilter||'전체';const words=(state.studentWordResults||[]).filter(word=>filter==='전체'||word.category===filter);root.innerHTML=`<div class="lesson-tools"><div><h3>우리 반 결과</h3><p>등록 횟수가 많은 순서입니다.</p></div><button class="btn" onclick="loadLessonOneStudentWords()">↻ 새로고침</button></div>${filterButtons('student-word',filter)}<section class="simple-panel card" style="margin-top:10px">${words.length?words.map(word=>`<div class="result-row"><div><strong>${esc(word.word)}</strong><small>${esc(word.category)}</small></div><span class="submission-count">${word.submissionCount}회</span></div>`).join(''):'<div class="empty">해당 유형의 표현이 없습니다.</div>'}</section>`;root.querySelectorAll('[data-student-word-filter]').forEach(button=>button.addEventListener('click',()=>{state.studentWordFilter=button.dataset.studentWordFilter;renderStudentWordResults();}));}
+    function renderStudentWordResults(){const root=document.getElementById('lessonOneStudentList');if(!root)return;const filter=state.studentWordFilter||'전체';const words=(state.studentWordResults||[]).filter(word=>filter==='전체'||word.category===filter);root.innerHTML=`<div class="lesson-tools"><div><h3>수집 목록 · ${words.length}</h3><p>등록 횟수가 많은 순서입니다.</p></div><button class="btn" onclick="loadLessonOneStudentWords()" aria-label="목록 새로고침">↻ 새로고침</button></div>${filterButtons('student-word',filter)}<section class="simple-panel card" style="margin-top:8px">${words.length?words.map(word=>`<div class="result-row"><div><strong>${esc(word.word)}</strong><small>${esc(word.category)}</small></div><span class="submission-count">${word.submissionCount}회</span></div>`).join(''):'<div class="empty">표현이 아직 없습니다.</div>'}</section>`;root.querySelectorAll('[data-student-word-filter]').forEach(button=>button.addEventListener('click',()=>{state.studentWordFilter=button.dataset.studentWordFilter;renderStudentWordResults();}));}
 
     function renderRateView() { return renderSubmitView(); }
 
