@@ -323,6 +323,8 @@
     .simple-list { display: grid; gap: 7px; }
     .simple-row { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; align-items: center; min-height: 67px; padding: 11px 12px 11px 17px; border: 1px solid #ebece6; border-radius: 16px; background: #fff; }
     .simple-row:hover { border-color: #d6dfda; background: #fffefc; }
+    .simple-row.live-updated { animation: live-word-in 1.8s ease-out; }
+    @keyframes live-word-in { 0% { background:#ddf7ef; box-shadow:inset 4px 0 0 var(--success); } 100% { background:#fff; box-shadow:inset 4px 0 0 transparent; } }
     .simple-word { min-width: 0; font-size: 18px; font-weight: 850; letter-spacing: -.025em; }
     .simple-word small { display: block; margin-top: 1px; color: var(--muted); font-size: 12px; font-weight: 650; }
     .score-pill { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; min-height: 34px; padding: 6px 10px; border-radius: 99px; background: #fff7df; color: #9b6a14; font-size: 13px; font-weight: 900; }
@@ -333,6 +335,9 @@
     .lesson-tools { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 18px 2px 10px; }
     .lesson-tools h3 { margin: 0; font-size: 18px; }
     .lesson-tools p { margin: 1px 0 0; color: var(--muted); font-size: 13px; }
+    .live-sync { display:inline-flex; align-items:center; gap:6px; color:var(--success); font-size:12px; font-weight:850; }
+    .live-sync::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 0 4px rgba(36,113,93,.12); animation:live-sync-pulse 1.8s ease-in-out infinite; }
+    @keyframes live-sync-pulse { 50% { opacity:.5; transform:scale(.8); } }
     .linked-words { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 18px; align-items: center; margin-top: 14px; padding: 16px 18px; }
     .linked-words p { margin: 0 0 2px; }
     .linked-word-chips { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -780,6 +785,13 @@
       activeClass: null,
       classInfo: null,
       stageTimer: null,
+      teacherWordTimer: null,
+      teacherWordUnsubscribe: null,
+      teacherWordHighlightTimer: null,
+      teacherWordSyncClassId: '',
+      teacherWordSyncing: false,
+      teacherWordSyncAgain: false,
+      teacherChangedWordIds: [],
       tab: 'words',
       dashboard: null,
       wordFilter: '전체', wordSearch: '',
@@ -799,6 +811,7 @@
     };
 
     document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) syncTeacherWords(); });
     window.addEventListener('beforeunload', endActiveParticipationOnUnload);
     window.addEventListener('pagehide', endActiveParticipationOnUnload);
     document.addEventListener('fullscreenchange', () => {
@@ -1009,6 +1022,7 @@
 
     /* ------------------------------ 교사 화면 ------------------------------ */
     function renderTeacherEntry() {
+      stopTeacherWordSync();
       setApp(`<form id="teacherLoginForm" class="login card">
         <p class="eyebrow">TEACHER</p><h1>교사 입장</h1><p>수업용 교사 비밀번호를 입력해 주세요.</p>
         <label class="field-label" for="teacherPassword">교사 비밀번호</label><input id="teacherPassword" type="password" autocomplete="off" required>
@@ -1027,6 +1041,7 @@
     }
 
     function renderTeacherChoice() {
+      stopTeacherWordSync();
       setApp(`<div class="teacher-choice">
         <header class="teacher-choice-head card"><p class="eyebrow">교사 공간</p><h1>클래스 관리</h1><p>새 클래스를 만들거나 기존 클래스 코드로 관리 화면에 입장하세요.</p>
           <div class="hero-actions"><button class="btn" onclick="logoutTeacherAccount()">로그아웃</button><a class="btn" href="${attr(CONFIG.baseUrl)}">처음으로</a></div></header>
@@ -1121,6 +1136,98 @@
       finally { if (!silent) hideLoading(); }
     }
 
+    function teacherWordSignature(words) {
+      return JSON.stringify((words || []).map(word => [word.id, word.word, word.category, Number(word.submissionCount || 0)]));
+    }
+
+    function startTeacherWordSync() {
+      if (!state.activeClass || !state.dashboard) return;
+      const classId = state.activeClass.id;
+      if (state.teacherWordSyncClassId === classId && state.teacherWordTimer) return;
+      stopTeacherWordSync();
+      state.teacherWordSyncClassId = classId;
+      try { state.teacherWordUnsubscribe = AppApi.subscribeToClassWords(classId, syncTeacherWords); }
+      catch (_) { state.teacherWordUnsubscribe = null; }
+      state.teacherWordTimer = setInterval(syncTeacherWords, 2500);
+    }
+
+    function stopTeacherWordSync() {
+      if (state.teacherWordTimer) clearInterval(state.teacherWordTimer);
+      if (state.teacherWordUnsubscribe) state.teacherWordUnsubscribe();
+      if (state.teacherWordHighlightTimer) clearTimeout(state.teacherWordHighlightTimer);
+      state.teacherWordTimer = null;
+      state.teacherWordUnsubscribe = null;
+      state.teacherWordHighlightTimer = null;
+      state.teacherWordSyncClassId = '';
+      state.teacherWordSyncing = false;
+      state.teacherWordSyncAgain = false;
+      state.teacherChangedWordIds = [];
+    }
+
+    async function syncTeacherWords() {
+      if (CONFIG.view !== 'teacher' || document.hidden || !state.activeClass || !state.dashboard) return;
+      if (state.teacherWordSyncing) { state.teacherWordSyncAgain = true; return; }
+      const classId = state.activeClass.id;
+      state.teacherWordSyncing = true;
+      try {
+        const words = await api('getClassWords', state.teacherToken, classId);
+        if (!state.activeClass || state.activeClass.id !== classId || !state.dashboard) return;
+        const previous = state.dashboard.words || [];
+        if (teacherWordSignature(previous) === teacherWordSignature(words)) return;
+        const previousById = new Map(previous.map(word => [word.id, word]));
+        state.teacherChangedWordIds = words.filter(word => {
+          const old = previousById.get(word.id);
+          return !old || old.word !== word.word || old.category !== word.category || Number(old.submissionCount) !== Number(word.submissionCount);
+        }).map(word => word.id);
+        state.dashboard.words = words;
+        updateTeacherWordViews();
+        if (state.teacherWordHighlightTimer) clearTimeout(state.teacherWordHighlightTimer);
+        const changedKey = state.teacherChangedWordIds.join('|');
+        state.teacherWordHighlightTimer = setTimeout(() => {
+          if (state.teacherChangedWordIds.join('|') !== changedKey) return;
+          state.teacherChangedWordIds = [];
+          document.querySelectorAll('.simple-row.live-updated').forEach(row => row.classList.remove('live-updated'));
+        }, 2200);
+      } catch (_) {
+        // Realtime이 꺼진 프로젝트도 다음 자동 확인 주기에 다시 동기화합니다.
+      } finally {
+        state.teacherWordSyncing = false;
+        if (state.teacherWordSyncAgain) {
+          state.teacherWordSyncAgain = false;
+          setTimeout(syncTeacherWords, 0);
+        }
+      }
+    }
+
+    function teacherWordRowsHtml(words) {
+      const changed = new Set(state.teacherChangedWordIds || []);
+      const ordered = (words || []).map((word, index) => ({ word, index }))
+        .sort((a, b) => Number(changed.has(b.word.id)) - Number(changed.has(a.word.id)) || a.index - b.index)
+        .map(item => item.word);
+      return ordered.length ? ordered.map(word => `<div class="simple-row ${changed.has(word.id)?'live-updated':''}" data-teacher-word-id="${attr(word.id)}"><div class="simple-word">${esc(word.word)}<small>${word.submissionCount}회 등록</small></div><select class="inline-select" aria-label="${attr(word.word)} 유형 변경" onchange="changeWordCategory('${attr(word.id)}',this)">${CATEGORIES.map(category=>`<option ${category===word.category?'selected':''}>${category}</option>`).join('')}</select><div class="row-actions actions"><button class="btn icon-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></div></div>`).join('') : '<div class="empty">학생이 표현을 입력하면 이곳에 나타납니다.</div>';
+    }
+
+    function linkedWordChipsHtml(words) {
+      return (words || []).length ? words.map(word=>`<span>${esc(word.word)} · ${esc(word.category)}</span>`).join('') : '<span class="help">1차시에서 표현을 먼저 수집해 주세요.</span>';
+    }
+
+    function updateTeacherWordViews() {
+      const words = (state.dashboard && state.dashboard.words) || [];
+      const count = document.getElementById('teacherWordCount');
+      const list = document.getElementById('teacherWordList');
+      const linkedCount = document.getElementById('teacherLinkedWordCount');
+      const linkedChips = document.getElementById('teacherLinkedWordChips');
+      if (count) count.textContent = `${words.length}개 표현`;
+      if (list) list.innerHTML = teacherWordRowsHtml(words);
+      if (linkedCount) linkedCount.textContent = `수집된 표현 ${words.length}개`;
+      if (linkedChips) linkedChips.innerHTML = linkedWordChipsHtml(words);
+      const testWord = document.getElementById('testWord');
+      if (testWord) {
+        const selected = testWord.value;
+        testWord.innerHTML = words.map(word=>`<option value="${attr(word.id)}" ${word.id===selected?'selected':''}>${esc(word.word)} · ${esc(word.category)}</option>`).join('');
+      }
+    }
+
     function renderTeacherClassShell() {
       const room = state.activeClass;
       const tabs = ['lesson1','lesson2','lesson3','lesson4'];
@@ -1138,10 +1245,11 @@
         </nav><main id="teacherLessonContent"></main></div>`);
       document.querySelectorAll('[data-lesson]').forEach(button => button.addEventListener('click', () => requestTeacherTab(button.dataset.lesson)));
       renderTeacherLessonTab();
+      startTeacherWordSync();
     }
 
     function leaveTeacherClass() {
-      const leave = () => { state.activeClass = null; state.dashboard = null; state.tab = 'lesson1'; renderTeacherChoice(); };
+      const leave = () => { stopTeacherWordSync(); state.activeClass = null; state.dashboard = null; state.tab = 'lesson1'; renderTeacherChoice(); };
       if (!isParticipationOpen()) return leave();
       confirmParticipationClose('메인 화면으로 이동하면 현재 학생 참여 링크와 QR이 비활성화됩니다.', leave, 'QR 종료 후 이동');
     }
@@ -1164,6 +1272,7 @@
         setButtonBusy(button, true, '종료 중...');
         try {
           await closeStudentParticipation();
+          await syncTeacherWords();
           closeModal();
           toast('학생 참여 QR이 비활성화되었습니다.', 'success');
           onContinue();
@@ -1250,20 +1359,28 @@
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
       const words = state.dashboard.words || [];
       root.innerHTML = `${teacherLessonHero('발견: 우리 반 언어 데이터 수집','학생들이 실제로 쓰는 표현을 수집하고 빈도와 유형으로 관찰합니다.','submit')}
-        <div class="lesson-tools"><div><h3>수집된 언어</h3><p>‘새로고침’을 누르면 최신 결과를 불러옵니다.</p></div><div class="actions"><span class="count">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">학생 응답 결과</button></div></div>
-        <section class="simple-panel card"><div class="simple-list">${words.length ? words.map(word => `<div class="simple-row"><div class="simple-word">${esc(word.word)}<small>${word.submissionCount}회 등록</small></div><select class="inline-select" aria-label="${attr(word.word)} 유형 변경" onchange="changeWordCategory('${attr(word.id)}',this)">${CATEGORIES.map(category=>`<option ${category===word.category?'selected':''}>${category}</option>`).join('')}</select><div class="row-actions actions"><button class="btn icon-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></div></div>`).join('') : '<div class="empty">학생이 표현을 입력하면 이곳에 나타납니다.</div>'}</div></section>`;
+        <div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">학생 응답 결과</button></div></div>
+        <section class="simple-panel card"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section>`;
     }
 
     async function renderTeacherLessonTwo() {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      const words = state.dashboard.words || [];
+      let words = state.dashboard.words || [];
       root.innerHTML = `${teacherLessonHero('진단: 말의 사용성 테스트','표현이 상황·상대·목적에 따라 얼마나 적절한지 진단합니다.','context')}<div class="lesson-body"><div class="empty">테스트를 불러오는 중...</div></div>`;
       try {
         state.usabilityWorkspace = await api('getUsabilityWorkspace', managerToken(), state.activeClass.id);
         if (state.tab !== 'lesson2' || !document.getElementById('teacherLessonContent')) return;
+        words = state.dashboard.words || [];
         const tests = state.usabilityWorkspace.tests || [];
         const profiles = Object.values(tests.reduce((all,test)=>{(all[test.word]||={word:test.word,items:[]}).items.push(test);return all;},{}));
         document.querySelector('#teacherLessonContent .lesson-body').innerHTML = `<section class="linked-words card"><div><p class="eyebrow">1차시 연동</p><strong>수집된 표현 ${words.length}개</strong></div><div class="linked-word-chips">${words.length?words.map(word=>`<span>${esc(word.word)} · ${esc(word.category)}</span>`).join(''):'<span class="help">1차시에서 표현을 먼저 수집해 주세요.</span>'}</div></section>${profiles.length?`<section class="context-grid">${profiles.map(profile=>`<article class="context-card card"><p class="eyebrow">표현별 진단</p><h3>${esc(profile.word)}</h3>${usabilityProfileHtml(summarizeUsabilityTests(profile.items))}</article>`).join('')}</section>`:''}<div class="lesson-tools"><div><h3>사용성 테스트 세트</h3><p>학생에게는 활성화된 테스트가 한 번에 하나씩 보입니다.</p></div><div class="actions"><span class="count">${tests.length}개</span><button class="btn btn-results" onclick="openStudentResults('lesson2')">학생 응답 결과</button><button class="btn btn-primary" onclick="openUsabilityTestEditor()">+ 테스트 추가</button></div></div><section class="context-grid">${tests.length?tests.map((test,index)=>`<article class="context-card card"><div class="rating-summary"><p class="eyebrow">TEST ${String(index+1).padStart(2,'0')} · ${test.active?'활성':'비활성'}</p><span class="score-pill">${test.responseCount?formatScore(test.averageScore)+'점':'응답 대기'}</span></div><h3>${esc(test.word)}</h3><div class="test-facts"><div class="test-fact"><b>상황</b>${esc(test.situation)}</div><div class="test-fact"><b>상대</b>${esc(test.audience)}</div><div class="test-fact"><b>목적</b>${esc(test.purpose)}</div></div>${test.responseCount?`<div class="average-bar"><span>평균 적절성</span><span class="average-track"><i class="average-fill" style="width:${test.averageScore*20}%"></i></span><b>${formatScore(test.averageScore)}</b></div>`:''}<div class="card-actions"><button class="btn" onclick="openUsabilityTestEditor('${attr(test.id)}')">편집</button><button class="btn btn-soft" onclick="toggleUsabilityTest('${attr(test.id)}',${!test.active},this)">${test.active?'비활성화':'활성화'}</button><button class="btn icon-danger" onclick="confirmDeleteTask('${attr(test.id)}')">삭제</button></div></article>`).join(''):'<div class="empty">첫 사용성 테스트를 만들어 주세요.</div>'}</section>`;
+        const linkedWords = document.querySelector('#teacherLessonContent .linked-words');
+        if (linkedWords) {
+          const linkedCount = linkedWords.querySelector('strong');
+          const linkedChips = linkedWords.querySelector('.linked-word-chips');
+          if (linkedCount) linkedCount.id = 'teacherLinkedWordCount';
+          if (linkedChips) { linkedChips.id = 'teacherLinkedWordChips'; linkedChips.setAttribute('aria-live', 'polite'); }
+        }
       } catch (error) { friendlyError(error); }
     }
 
@@ -1380,6 +1497,7 @@
     }
 
     async function logoutTeacherAccount() {
+      stopTeacherWordSync();
       try { await AppApi.signOut(); } catch (error) { friendlyError(error); }
       sessionStorage.removeItem('koreanClassTeacherToken');
       state.teacherToken = ''; state.activeClass = null; state.dashboard = null;

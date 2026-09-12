@@ -492,6 +492,12 @@
     };
   }
 
+  async function getClassWords(_token, classId) {
+    const id = requiredText(classId, '클래스', 80);
+    const words = await fetchRows('words', '*', query => query.eq('class_id', id).order('created_at'));
+    return buildWordGroups(words, []).map(publicAdminWord);
+  }
+
   async function getAdminDashboard() {
     await assertAdmin();
     const [classes, words, tasks, dictionary, usabilityResponses] = await Promise.all([
@@ -1431,6 +1437,7 @@
     getStudentClassState,
     setClassStage,
     getClassDashboard,
+    getClassWords,
     getAdminDashboard,
     getAdminWords,
     updateWordGroup,
@@ -1466,6 +1473,18 @@
     init,
     getAdminToken,
     getTeacherToken,
+    subscribeToClassWords(classId, onChange) {
+      const id = String(classId || '').trim();
+      if (!client || typeof client.channel !== 'function' || typeof onChange !== 'function' || !/^[0-9a-f-]{36}$/i.test(id)) return () => {};
+      const channel = client.channel('class-words-' + id + '-' + Date.now())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'words', filter: 'class_id=eq.' + id }, onChange)
+        .subscribe();
+      return () => {
+        if (!client || typeof client.removeChannel !== 'function') return;
+        const removal = client.removeChannel(channel);
+        if (removal && typeof removal.catch === 'function') removal.catch(() => {});
+      };
+    },
     deactivateClassOnUnload(classId) {
       const id = String(classId || '').trim();
       if (!apiUrl || !apiKey || !accessToken || !/^[0-9a-f-]{36}$/i.test(id)) return false;
