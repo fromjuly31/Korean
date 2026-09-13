@@ -18,7 +18,12 @@
     if (/failed to fetch|load failed|networkerror/i.test(raw)) return 'Supabase에 연결할 수 없습니다. 인터넷 연결과 프로젝트 설정을 확인해 주세요.';
     if (/row-level security|permission denied/i.test(raw)) return '이 작업을 수행할 권한이 없습니다.';
     if ((error && error.code === '23505') || /duplicate key|unique constraint/i.test(raw)) return '이미 평가한 항목입니다.';
-    if ((error && ['PGRST202', 'PGRST204', 'PGRST205'].includes(error.code)) || /schema cache|could not find the (table|function|column)/i.test(raw)) {
+    const missingSchemaObject = (error && ['PGRST202', 'PGRST204', 'PGRST205'].includes(error.code))
+      || /schema cache|could not find the (table|function|column)/i.test(raw);
+    if (missingSchemaObject && /reset_class_results|usability_responses/i.test(raw)) {
+      return '기존 클래스 기능 업데이트가 필요합니다. Supabase에서 permissions-update.sql을 먼저 실행해 주세요.';
+    }
+    if (missingSchemaObject) {
       return '수업 기능 업데이트가 필요합니다. Supabase에서 lesson-flow-update.sql을 한 번 실행해 주세요.';
     }
     if (error && error.code && !/[가-힣]/.test(raw)) return '저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
@@ -363,6 +368,7 @@
       classCode: row.class_code,
       currentStage: row.current_stage,
       currentTaskId: row.current_task_id || '',
+      discussionTopic: row.discussion_topic || '',
       diagnosticWordCapacity: Math.max(1, Number(row.diagnostic_word_capacity) || 4),
       usageTrackingEnabled: Boolean(row.usage_tracking_enabled),
       isActive: Boolean(row.is_active),
@@ -467,7 +473,7 @@
 
   async function setClassStage(_token, classId, stage, taskId) {
     const id = await assertClassManager(classId);
-    const allowed = ['waiting', 'submit', 'rate', 'context', 'wordmaking', 'dictionary'];
+    const allowed = ['waiting', 'opinion', 'submit', 'rate', 'context', 'wordmaking', 'dictionary'];
     if (!allowed.includes(stage)) throw new Error('수업 단계를 올바르게 선택해 주세요.');
     const update = { current_stage: stage, current_task_id: stage === 'context' ? (taskId || null) : null };
     const row = check(await client.from('classes').update(update).eq('id', id).select('*').single());
@@ -476,9 +482,11 @@
 
   async function getClassDashboard(_token, classId) {
     const id = await assertClassManager(classId);
-    const [words, tasks] = await Promise.all([
+    const [classRow, words, tasks, opinionRows] = await Promise.all([
+      client.from('classes').select('id,discussion_topic').eq('id', id).maybeSingle().then(check),
       fetchRows('words', '*', query => query.eq('class_id', id).order('created_at')),
-      fetchRows('context_tasks', '*', query => query.eq('class_id', id).order('created_at'))
+      fetchRows('context_tasks', '*', query => query.eq('class_id', id).order('created_at')),
+      fetchRows('opinion_responses', '*', query => query.eq('class_id', id).order('created_at'))
     ]);
     const wordIds = words.map(item => item.id);
     const taskIds = tasks.map(item => item.id);
@@ -489,11 +497,81 @@
     const groups = buildWordGroups(words, []);
     return {
       words: groups.map(publicAdminWord),
+      discussion: buildOpinionDiscussion(classRow, opinionRows),
       stats: buildWordStats(groups),
       tasks: usabilityTaskSummaries(tasks, usabilityResponses),
       dictionaryCount: dictionary.filter(item => item.approved).length,
       baseUrl: location.origin + location.pathname
     };
+  }
+
+  function mapOpinionResponse(row) {
+    return {
+      id: row.id,
+      classId: row.class_id,
+      choice: row.choice,
+      reason: row.reason,
+      ownerId: row.owner_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at || row.created_at
+    };
+  }
+
+  function buildOpinionDiscussion(classRow, rows, userId) {
+    const responses = (rows || []).map(mapOpinionResponse);
+    return {
+      topic: classRow && classRow.discussion_topic || '',
+      responses,
+      agreeCount: responses.filter(item => item.choice === 'agree').length,
+      disagreeCount: responses.filter(item => item.choice === 'disagree').length,
+      myResponse: userId ? (responses.find(item => item.ownerId === userId) || null) : null
+    };
+  }
+
+  async function getOpinionWorkspace(_token, classId) {
+    const id = await assertClassManager(classId);
+    const [classRow, rows] = await Promise.all([
+      client.from('classes').select('id,discussion_topic').eq('id', id).maybeSingle().then(check),
+      fetchRows('opinion_responses', '*', query => query.eq('class_id', id).order('created_at'))
+    ]);
+    if (!classRow) throw new Error('클래스를 찾을 수 없습니다.');
+    return buildOpinionDiscussion(classRow, rows);
+  }
+
+  async function getOpinionLesson(_anonId, classId) {
+    const user = await currentUser();
+    const id = requiredText(classId, '클래스', 80);
+    const [classRow, rows] = await Promise.all([
+      client.from('classes').select('id,discussion_topic').eq('id', id).maybeSingle().then(check),
+      fetchRows('opinion_responses', '*', query => query.eq('class_id', id).eq('owner_id', user.id))
+    ]);
+    if (!classRow) throw new Error('클래스를 찾을 수 없습니다.');
+    return buildOpinionDiscussion(classRow, rows, user.id);
+  }
+
+  async function startOpinionDiscussion(_token, classId, topic) {
+    const id = await assertClassManager(classId);
+    const cleanTopic = requiredText(topic, '생각 나누기 주제', 300);
+    check(await client.rpc('start_opinion_discussion', { p_class_id: id, p_topic: cleanTopic }));
+    const [classRow, discussion] = await Promise.all([
+      client.from('classes').select('*').eq('id', id).single().then(check),
+      getOpinionWorkspace(_token, id)
+    ]);
+    return { classInfo: mapClass(classRow), discussion };
+  }
+
+  async function submitOpinionResponse(_anonId, classId, choice, reason) {
+    await currentUser();
+    const id = requiredText(classId, '클래스', 80);
+    const selected = String(choice || '').toLowerCase();
+    if (!['agree', 'disagree'].includes(selected)) throw new Error('찬성 또는 반대를 선택해 주세요.');
+    const cleanReason = requiredText(reason, '선택한 이유', 500);
+    const rows = check(await client.rpc('submit_opinion_response', {
+      p_class_id: id,
+      p_choice: selected,
+      p_reason: cleanReason
+    })) || [];
+    return { ok: true, id: rows[0] ? rows[0].response_id : '' };
   }
 
   async function getClassWords(_token, classId) {
@@ -1632,6 +1710,10 @@
     joinClass,
     getStudentClassState,
     setClassStage,
+    startOpinionDiscussion,
+    submitOpinionResponse,
+    getOpinionWorkspace,
+    getOpinionLesson,
     getClassDashboard,
     getClassWords,
     getAdminDashboard,

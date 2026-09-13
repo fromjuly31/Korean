@@ -572,9 +572,9 @@
     .result-row small { color:var(--muted); }
     .submission-count { color:var(--primary); font-size:18px; font-weight:900; }
     .usability-card h2 { margin:7px 0 15px; font-size:clamp(31px,7vw,43px); }
-    .test-facts { display:grid; gap:8px; margin:15px 0; }
-    .test-fact { padding:12px 14px; border-radius:12px; background:#f3f6f5; }
-    .test-fact b { display:block; color:var(--primary); font-size:11px; letter-spacing:.06em; }
+    .test-facts { display:grid; gap:12px; margin:17px 0; }
+    .test-fact { padding:16px; border:1px solid #e1e8e5; border-radius:14px; background:#f5f8f7; }
+    .test-fact > b { display:block; margin-bottom:10px; color:var(--primary); font-size:13px; letter-spacing:.04em; }
     .score-scale { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin:13px 0; }
     .score-choice { min-height:52px; border:1px solid #d5dcda; border-radius:12px; background:#fff; color:#62706c; font-size:18px; font-weight:900; }
     .score-choice.active { border-color:var(--primary); background:var(--primary); color:#fff; }
@@ -621,6 +621,49 @@
     .capacity-panel h3,.capacity-panel p { margin:0; }.capacity-panel p { color:var(--muted); font-size:13px; }
     .capacity-control { display:flex; align-items:center; gap:8px; }.capacity-control input { width:82px; min-height:42px; text-align:center; }
     .capacity-control .btn { min-height:42px; }
+    .lesson-one-flow { display:grid; gap:18px; }
+    .lesson-phase-card { padding:22px; border:1px solid #dfe6e3; }
+    .lesson-phase-card.active { border-color:#66b8c5; box-shadow:0 14px 32px rgba(8,70,82,.11); }
+    .lesson-phase-card.complete { background:#f8fbfa; }
+    .lesson-phase-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:17px; }
+    .lesson-phase-title { display:flex; gap:13px; align-items:flex-start; min-width:0; }
+    .lesson-phase-number { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; border-radius:13px 13px 13px 5px; background:#0b3347; color:#72efff; font-size:18px; font-weight:950; }
+    .lesson-phase-title h2 { margin:0 0 4px; font-size:22px; }
+    .lesson-phase-title p { margin:0; color:var(--muted); font-size:13px; }
+    .phase-status { flex:0 0 auto; padding:6px 10px; border-radius:99px; background:#edf2f0; color:var(--muted); font-size:12px; font-weight:900; }
+    .phase-status.live { background:#dff4ef; color:#176650; }
+    .opinion-topic-form { display:grid; gap:8px; }
+    .opinion-topic-form .field-label { margin:0; }
+    .opinion-topic-form textarea { min-height:96px; font-size:17px; line-height:1.55; }
+    .opinion-topic-display { margin:0; padding:17px 19px; border-left:5px solid #55c7d6; border-radius:0 13px 13px 0; background:#eef8fa; font-size:20px; font-weight:850; line-height:1.55; overflow-wrap:anywhere; }
+    .opinion-teacher-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
+    .opinion-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin-top:17px; }
+    .opinion-summary-item { padding:13px 14px; border-radius:12px; background:#f2f6f4; }
+    .opinion-summary-item span { display:block; color:var(--muted); font-size:11px; font-weight:850; }
+    .opinion-summary-item strong { display:block; margin-top:3px; color:var(--primary); font-size:23px; }
+    .opinion-balance { display:flex; min-height:34px; overflow:hidden; margin-top:10px; border-radius:10px; background:#edf0ef; }
+    .opinion-balance span { display:grid; place-items:center; min-width:0; color:#fff; font-size:12px; font-weight:900; transition:width .25s ease; }
+    .opinion-balance .agree { background:#287c68; }.opinion-balance .disagree { background:#dc735b; }
+    .opinion-response-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:14px; }
+    .opinion-response { padding:13px 14px; border:1px solid #e0e6e4; border-radius:12px; background:#fff; }
+    .opinion-response b { display:inline-flex; margin-bottom:6px; padding:4px 8px; border-radius:99px; font-size:11px; }
+    .opinion-response.agree b { background:#dff4ed; color:#176650; }.opinion-response.disagree b { background:#ffebe6; color:#a44936; }
+    .opinion-response p { margin:0; font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
+    .phase-connector { display:grid; place-items:center; height:18px; color:#55aebe; font-size:24px; font-weight:900; }
+    .opinion-student-topic { padding:21px; margin-bottom:13px; border:1px solid #d9e8e8; border-radius:17px; background:#f2fbfc; }
+    .opinion-student-topic .eyebrow { color:#147486; }
+    .opinion-student-topic h2 { margin:7px 0 0; font-size:clamp(22px,5vw,31px); line-height:1.45; overflow-wrap:anywhere; }
+    .opinion-choice-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:15px 0; }
+    .opinion-choice { min-height:88px; border:2px solid #dce4e2; border-radius:15px; background:#fff; color:var(--ink); font-size:19px; font-weight:950; }
+    .opinion-choice.agree.active { border-color:#287c68; background:#e6f6f1; color:#176650; }
+    .opinion-choice.disagree.active { border-color:#dc735b; background:#fff0ec; color:#a44936; }
+    .opinion-reason-field { display:grid; gap:7px; }
+    .opinion-reason-field .field-label { margin:0; }
+    .opinion-reason-field textarea { min-height:130px; }
+    .opinion-submitted { text-align:left; }
+    .opinion-submitted .opinion-selected { display:inline-flex; margin:10px 0; padding:7px 12px; border-radius:99px; background:#e4f4f0; color:#176650; font-weight:900; }
+    .opinion-submitted .opinion-selected.disagree { background:#ffebe6; color:#a44936; }
+    .opinion-submitted blockquote { margin:4px 0 17px; padding:15px 17px; border-left:4px solid #55c7d6; background:#f3f7f6; font-size:17px; line-height:1.65; }
     .diagnostic-word-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
     .diagnostic-word { position:relative; min-width:0; padding:16px; border:1px solid #dce3e0; border-radius:15px; background:#fff; }
     button.diagnostic-word { text-align:left; color:var(--ink); }
@@ -635,16 +678,55 @@
     .dimension-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:11px 0 15px; }
     .dimension-choice { min-height:52px; border:1px solid #d8dfdc; border-radius:12px; background:#fff; color:#64716e; font-weight:850; }
     .dimension-choice.active { border-color:var(--primary); background:var(--primary-soft); color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
-    .context-case-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
-    .context-case { padding:15px; border:1px solid #e0e5e2; border-radius:14px; background:#fafbf9; }
+    .diagnostic-context-card { padding:clamp(22px,3vw,30px); }
+    .diagnostic-context-heading { margin-bottom:20px; }
+    .diagnostic-context-heading .eyebrow { margin-bottom:5px; }
+    .diagnostic-context-heading h2 { margin:0; }
+    .context-case-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin-top:20px; }
+    .context-case { padding:20px; border:1px solid #e0e5e2; border-radius:14px; background:#fafbf9; }
     .context-case.good { border-top:4px solid var(--success); }.context-case.bad { border-top:4px solid var(--accent); }
-    .context-case h3 { margin:0 0 8px; font-size:17px; }.context-case textarea { min-height:96px; }
+    .context-case h3 { margin:0 0 14px; font-size:18px; }
+    .context-case textarea { min-height:112px; }
+    .context-fields { display:grid; gap:13px; }
+    .context-field { display:grid; gap:6px; }
+    .context-field .field-label { margin:0; }
+    .context-example-field { margin-top:15px; }
+    .diagnostic-context-submit { margin-top:20px; }
     .diagnostic-summary { display:grid; gap:8px; margin:12px 0; }
     .diagnostic-summary > div { padding:12px 13px; border-radius:11px; background:#f2f6f4; }
     .diagnostic-summary b { display:block; color:var(--primary); font-size:11px; letter-spacing:.05em; }
-    .star-choice-row { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; margin:8px 0; }
-    .star-choice { min-height:48px; border:1px solid #d9dfdc; border-radius:11px; background:#fff; color:#c4a347; font-size:25px; }
+    .diagnostic-rating-card { display:grid; gap:18px; padding:clamp(22px,3vw,30px); }
+    .diagnostic-rating-heading .eyebrow { margin-bottom:5px; }
+    .diagnostic-rating-heading h2 { margin:0; }
+    .diagnostic-rating-grid, .diagnostic-result-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .diagnostic-rating-case { display:flex; flex-direction:column; min-width:0; }
+    .diagnostic-context-review { display:grid; gap:8px; }
+    .diagnostic-context-item { display:grid; grid-template-columns:78px minmax(0,1fr); gap:9px; align-items:start; padding:9px 10px; border-radius:10px; background:#eef3f1; }
+    .diagnostic-context-item span { color:var(--muted); font-size:12px; font-weight:850; }
+    .diagnostic-context-item strong { overflow-wrap:anywhere; font-size:14px; line-height:1.5; }
+    .diagnostic-example-block { margin-top:10px; padding:13px 14px; border:1px solid #dce5e2; border-radius:11px; background:#fff; }
+    .diagnostic-example-block > span { display:block; margin-bottom:5px; color:var(--primary); font-size:12px; font-weight:900; letter-spacing:.04em; }
+    .diagnostic-example-block p { margin:0; color:var(--ink); font-size:17px; font-weight:750; line-height:1.65; overflow-wrap:anywhere; }
+    .diagnostic-rating-choice { margin-top:auto; padding-top:17px; }
+    .diagnostic-rating-prompt { margin:0 0 8px; color:var(--ink); font-size:14px; font-weight:850; }
+    .star-choice-row { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; margin:8px 0; }
+    .star-choice { min-height:50px; border:1px solid #d9dfdc; border-radius:11px; background:#fff; color:#c4a347; font-size:25px; }
     .star-choice.active { border-color:#e0a720; background:#fff7da; color:#d99500; }
+    .rating-choice-meta { display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:center; color:var(--muted); font-size:11px; }
+    .rating-choice-meta span:last-child { text-align:right; }
+    .rating-choice-meta strong { color:var(--primary); font-size:13px; }
+    .diagnostic-reason-field { display:grid; gap:7px; }
+    .diagnostic-reason-field .field-label { margin:0; }
+    .diagnostic-reason-field textarea { min-height:118px; }
+    .diagnostic-result-case { min-width:0; padding:17px; border:1px solid #e1e8e5; border-radius:14px; background:#f5f8f7; }
+    .diagnostic-result-case.good { border-top:4px solid var(--success); }
+    .diagnostic-result-case.bad { border-top:4px solid var(--accent); }
+    .diagnostic-result-title { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:12px; }
+    .diagnostic-result-title b { color:var(--primary); font-size:14px; }
+    .diagnostic-score { flex:0 0 auto; padding:5px 8px; border-radius:99px; background:#fff2c8; color:#8f6400; font-size:12px; font-weight:900; }
+    .diagnostic-reason-note { margin-top:14px; padding:14px 16px; border-left:4px solid var(--primary); border-radius:0 11px 11px 0; background:#eef5f3; }
+    .diagnostic-reason-note b { display:block; margin-bottom:5px; color:var(--primary); font-size:12px; }
+    .diagnostic-reason-note p { margin:0; font-size:15px; line-height:1.65; }
     .dictionary-headword { padding:20px; border-left:5px solid var(--primary); }
     .dictionary-headword h2 { margin:3px 0 4px; font-size:27px; }.dictionary-headword .pronunciation { color:var(--muted); font-size:12px; }
     .dictionary-headword .definition { margin-top:13px; }.dictionary-headword .definition b { display:inline-grid; place-items:center; width:23px; height:23px; margin-right:7px; border-radius:50%; background:var(--primary); color:#fff; font-size:12px; }
@@ -718,6 +800,10 @@
       .context-grid, .refine-grid { grid-template-columns: 1fr; }
       .diagnostic-word-grid { grid-template-columns:1fr 1fr; }
       .context-case-grid { grid-template-columns:1fr; }
+      .diagnostic-rating-grid, .diagnostic-result-grid { grid-template-columns:1fr; }
+      .diagnostic-context-card, .diagnostic-rating-card { padding:18px; }
+      .context-case { padding:16px; }
+      .diagnostic-example-block p { font-size:16px; }
       .section-head { align-items: start; flex-direction: column; }
       .choice-grid { grid-template-columns: 1fr; }
       .student-shell { width: min(100% - 20px, 100%); padding-top: 10px; }
@@ -767,6 +853,17 @@
       .ab-pair { grid-template-columns:1fr; }.ab-vs { justify-self:center; }
       .capacity-panel { align-items:stretch; flex-direction:column; }
       .capacity-control { display:grid; grid-template-columns:72px minmax(0,1fr); }.capacity-control input { width:100%; }
+      .lesson-phase-card { padding:17px; }
+      .lesson-phase-head { flex-direction:column; align-items:flex-start; }
+      .lesson-phase-title { gap:9px; }
+      .lesson-phase-number { flex-basis:36px; width:36px; height:36px; font-size:16px; }
+      .opinion-summary { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+      .opinion-summary-item { padding:10px; }
+      .opinion-summary-item strong { font-size:19px; }
+      .opinion-response-list { grid-template-columns:1fr; }
+      .opinion-teacher-actions { display:grid; grid-template-columns:1fr; }
+      .opinion-choice-grid { grid-template-columns:1fr 1fr; }
+      .opinion-topic-display { padding:14px 15px; font-size:17px; }
       .dimension-choices { gap:5px; }.dimension-choice { min-height:46px; padding:5px; font-size:12px; }
       .context-step { font-size:11px; }.context-step b { display:none; }
       .diagnostic-word { padding:13px; }.diagnostic-word strong { font-size:17px; }
@@ -811,11 +908,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
-  <script src="./supabase-api.js?v=20260912-lesson-flow"></script>
+  <script src="./supabase-api.js?v=20260913-opinion-flow"></script>
   <script>
     'use strict';
     const query = new URLSearchParams(location.search);
-    const studentActivityViews = ['submit', 'rate', 'context', 'wordmaking', 'dictionary'];
+    const studentActivityViews = ['opinion', 'submit', 'rate', 'context', 'wordmaking', 'dictionary'];
     const allowedViews = ['home', 'student', 'teacher', 'admin'];
     const requestedView = query.get('view') || 'home';
     const normalizedView = studentActivityViews.includes(requestedView) ? 'student' : requestedView;
@@ -830,8 +927,9 @@
     const CATEGORIES = ['비속어', '유행어', '외래어'];
     const CLASS_STAGES = [
       { id: 'waiting', label: '수업 대기' },
-      { id: 'submit', label: '1차시 · 발견' },
-      { id: 'rate', label: '1차시 · 발견' },
+      { id: 'opinion', label: '1차시 ① 생각 나누기' },
+      { id: 'submit', label: '1차시 ② 발견' },
+      { id: 'rate', label: '1차시 ② 발견' },
       { id: 'context', label: '2차시 · 진단' },
       { id: 'wordmaking', label: '3차시 · 설계' },
       { id: 'dictionary', label: '4차시 · 검증' }
@@ -856,6 +954,8 @@
       dashboard: null,
       wordFilter: '전체', wordSearch: '',
       contextShowRatings: false,
+      opinionLesson: null,
+      opinionChoice: '',
       usabilityLesson: null,
       usabilityScore: 0,
       diagnosticLesson: null,
@@ -1086,6 +1186,7 @@
 
     function lessonIcon(stage) {
       const paths = {
+        opinion: '<path d="M4 5.5h10a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3H9l-4 3v-3.2a3 3 0 0 1-1-2.3V8.5a3 3 0 0 1 3-3Z"/><path d="M10 9h3M10 12h2"/><path d="M17 9h.5a2.5 2.5 0 0 1 2.5 2.5V18l-3.2-2.4"/>',
         submit: '<circle cx="10" cy="10" r="5.4"/><path d="m14.2 14.2 4.3 4.3M7.7 10h4.6M10 7.7v4.6"/>',
         context: '<rect x="3" y="4" width="18" height="16" rx="4"/><path d="M6.5 12h3l1.6-4 2.5 8 1.8-4h2.1"/>',
         wordmaking: '<path d="m5 17 1.2-4.2L15.8 3.2a1.7 1.7 0 0 1 2.4 0l.6.6a1.7 1.7 0 0 1 0 2.4l-9.6 9.6L5 17Z"/><path d="m13.8 5.2 5 5M4 20h16"/>',
@@ -1133,10 +1234,12 @@
     function studentHeader(title, description) {
       const room = state.classInfo;
       const roomLine = room ? `<div class="class-summary no-print" style="margin-bottom:12px"><div><p class="eyebrow" style="color:#f0b9aa">참여 중인 클래스</p><strong>${esc(room.school)} · ${esc(room.grade)} ${esc(room.className)}</strong></div><span class="class-code-badge">${esc(room.classCode)}</span><div class="header-actions"><button class="btn" onclick="leaveStudentClass()">나가기</button></div></div>` : '';
-      const qrStage = CONFIG.step === '1' ? 'submit' : CONFIG.step === '2' ? 'context' : CONFIG.step === '3' ? 'wordmaking' : CONFIG.step === '4' ? 'dictionary' : '';
-      const current = qrStage || (room && (room.currentStage === 'rate' ? 'submit' : room.currentStage));
-      const showLessonIcon = ['submit','context','wordmaking','dictionary'].includes(current);
-      const tabs = room ? `<nav class="student-lesson-tabs no-print" aria-label="수업 차시"><span class="student-lesson-tab ${current==='submit'?'active':''}"><span class="student-tab-icon">${lessonIcon('submit')}</span><span class="student-tab-copy"><small>1차시</small><b>발견</b></span></span><span class="student-lesson-tab ${current==='context'?'active':''}"><span class="student-tab-icon">${lessonIcon('context')}</span><span class="student-tab-copy"><small>2차시</small><b>진단</b></span></span><span class="student-lesson-tab ${current==='wordmaking'?'active':''}"><span class="student-tab-icon">${lessonIcon('wordmaking')}</span><span class="student-tab-copy"><small>3차시</small><b>설계</b></span></span><span class="student-lesson-tab ${current==='dictionary'?'active':''}"><span class="student-tab-icon">${lessonIcon('dictionary')}</span><span class="student-tab-copy"><small>4차시</small><b>검증</b></span></span></nav>` : '';
+      const qrStage = CONFIG.step === '1' ? 'lesson1' : CONFIG.step === '2' ? 'context' : CONFIG.step === '3' ? 'wordmaking' : CONFIG.step === '4' ? 'dictionary' : '';
+      const roomStage = room && (room.currentStage === 'rate' ? 'submit' : room.currentStage);
+      const current = qrStage === 'lesson1' && ['opinion','submit'].includes(roomStage) ? roomStage : (qrStage || roomStage);
+      const firstLessonActive = ['opinion','submit'].includes(current);
+      const showLessonIcon = ['opinion','submit','context','wordmaking','dictionary'].includes(current);
+      const tabs = room ? `<nav class="student-lesson-tabs no-print" aria-label="수업 차시"><span class="student-lesson-tab ${firstLessonActive?'active':''}"><span class="student-tab-icon">${lessonIcon(current==='opinion'?'opinion':'submit')}</span><span class="student-tab-copy"><small>1차시</small><b>① 생각 · ② 발견</b></span></span><span class="student-lesson-tab ${current==='context'?'active':''}"><span class="student-tab-icon">${lessonIcon('context')}</span><span class="student-tab-copy"><small>2차시</small><b>진단</b></span></span><span class="student-lesson-tab ${current==='wordmaking'?'active':''}"><span class="student-tab-icon">${lessonIcon('wordmaking')}</span><span class="student-tab-copy"><small>3차시</small><b>설계</b></span></span><span class="student-lesson-tab ${current==='dictionary'?'active':''}"><span class="student-tab-icon">${lessonIcon('dictionary')}</span><span class="student-tab-copy"><small>4차시</small><b>검증</b></span></span></nav>` : '';
       return `<div class="student-shell">${roomLine}${tabs}<header class="student-hero card"><p class="eyebrow">말을 다시 디자인하다</p><div class="student-hero-heading">${showLessonIcon?`<span class="student-hero-icon">${lessonIcon(current)}</span>`:''}<div><h1>${esc(title)}</h1><p>${esc(description || '')}</p></div></div></header><div id="studentContent"></div></div>`;
     }
 
@@ -1402,7 +1505,7 @@
         <header class="teacher-top no-print"><span class="mini-mark">LAB</span><div><h1>${esc(room.school)} ${esc(room.grade)} ${esc(room.className)}</h1><p>${esc(room.region)} · 디지털 언어 연구실</p></div>
           <div class="teacher-top-actions"><button class="btn code-button" onclick="copyUrl('${attr(room.classCode)}','클래스 코드를')">${esc(room.classCode)}</button><button class="btn" onclick="refreshTeacherDashboard()">새로고침</button><button class="btn btn-danger" onclick="confirmResetClass()">결과 초기화</button><button class="btn" onclick="leaveTeacherClass()">메인 화면</button></div></header>
         <nav class="lesson-tabs no-print" aria-label="차시 선택">
-          <button class="lesson-tab ${state.tab==='lesson1'?'active':''}" data-lesson="lesson1"><span class="lesson-tab-icon">${lessonIcon('submit')}</span><span class="lesson-tab-copy"><small>1차시</small><b>발견</b></span></button>
+          <button class="lesson-tab ${state.tab==='lesson1'?'active':''}" data-lesson="lesson1"><span class="lesson-tab-icon">${lessonIcon(room.currentStage==='opinion'?'opinion':'submit')}</span><span class="lesson-tab-copy"><small>1차시</small><b>① 생각 · ② 발견</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson2'?'active':''}" data-lesson="lesson2"><span class="lesson-tab-icon">${lessonIcon('context')}</span><span class="lesson-tab-copy"><small>2차시</small><b>진단</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson3'?'active':''}" data-lesson="lesson3"><span class="lesson-tab-icon">${lessonIcon('wordmaking')}</span><span class="lesson-tab-copy"><small>3차시</small><b>설계</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson4'?'active':''}" data-lesson="lesson4"><span class="lesson-tab-icon">${lessonIcon('dictionary')}</span><span class="lesson-tab-copy"><small>4차시</small><b>검증</b></span></button>
@@ -1425,7 +1528,12 @@
 
     async function closeStudentParticipation() {
       if (!isParticipationOpen()) return;
+      const wasOpinion = state.activeClass.currentStage === 'opinion';
       state.activeClass = await api('setClassStage', state.teacherToken, state.activeClass.id, 'waiting', '');
+      if (wasOpinion && state.dashboard) {
+        try { state.dashboard.discussion = await api('getOpinionWorkspace', state.teacherToken, state.activeClass.id); }
+        catch (_) { /* 다음 대시보드 조회에서 최종 응답을 다시 불러옵니다. */ }
+      }
       rememberParticipation('waiting');
       state.unloadParticipationEnded = false;
     }
@@ -1468,7 +1576,7 @@
     }
 
     function confirmResetClass() {
-      confirmModal('수업 결과 초기화', '수집 표현과 사용성 테스트, 리디자인, A/B 검증, 사전 결과가 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.', async () => {
+      confirmModal('수업 결과 초기화', '생각 나누기 응답과 수집 표현, 진단, 리디자인, 검증, 사전 결과가 모두 삭제됩니다. 이 작업은 되돌릴 수 없습니다.', async () => {
         const button = document.getElementById('confirmAction'); setButtonBusy(button, true, '초기화 중...');
         try { await api('resetClassResults', state.teacherToken, state.activeClass.id); rememberParticipation('waiting'); closeModal(); toast('수업 결과를 초기화했습니다.', 'success'); state.activeClass.currentStage='waiting'; await loadTeacherClassDashboard(true); }
         catch (error) { friendlyError(error); setButtonBusy(button, false); }
@@ -1484,11 +1592,11 @@
 
     function lessonQrInfo(tab) {
       return ({
-        lesson1: { step:'1', stage:'submit', label:'1차시 · 발견', title:'우리 반 언어 데이터 수집' },
+        lesson1: { step:'1', stage:'opinion', label:'1차시 ① 생각 나누기 → 1차시 ② 발견', title:'생각을 나눈 뒤 우리 반 언어 수집' },
         lesson2: { step:'2', stage:'context', label:'2차시 · 진단', title:'맥락과 적절성 진단' },
         lesson3: { step:'3', stage:'wordmaking', label:'3차시 · 설계', title:'진단에서 새 표현으로' },
         lesson4: { step:'4', stage:'dictionary', label:'4차시 · 검증', title:'기존 표현과 새 표현 1:1 비교' }
-      })[tab] || { step:'1', stage:'submit', label:'1차시 · 발견', title:'우리 반 언어 데이터 수집' };
+      })[tab] || { step:'1', stage:'opinion', label:'1차시 ① 생각 나누기 → 1차시 ② 발견', title:'생각을 나눈 뒤 우리 반 언어 수집' };
     }
 
     function openLessonQr(stage) {
@@ -1502,7 +1610,7 @@
       if (state.teacherActivityTimer) clearInterval(state.teacherActivityTimer);
       state.teacherActivityTimer = null;
       const version = ++state.teacherRenderVersion;
-      if (state.tab === 'lesson1') return renderTeacherLessonOne();
+      if (state.tab === 'lesson1') return renderTeacherLessonOne(version);
       if (state.tab === 'lesson2') return renderTeacherLessonTwo(version);
       if (state.tab === 'lesson3') return renderTeacherLessonThree(version);
       if (state.tab === 'lesson4') return renderTeacherLessonFour(version);
@@ -1515,7 +1623,12 @@
       if (stage === 'dictionary' && !(state.dictionaryWorkspace || []).some(item => (item.suggestions || []).some(candidate => candidate.abTest && candidate.abTest.active))) { toast('3차시에서 새 표현을 먼저 등록해 주세요.', 'error'); return; }
       showLoading('학생 화면을 전환하는 중...');
       try {
+        const wasOpinion = state.activeClass.currentStage === 'opinion';
         state.activeClass = await api('setClassStage', state.teacherToken, state.activeClass.id, stage, taskId || '');
+        if (wasOpinion && stage !== 'opinion' && state.dashboard) {
+          try { state.dashboard.discussion = await api('getOpinionWorkspace', state.teacherToken, state.activeClass.id); }
+          catch (_) { /* 단계 전환은 유지하고 다음 대시보드 조회에서 보완합니다. */ }
+        }
         rememberParticipation(stage, state.activeClass.id);
         state.unloadParticipationEnded = false;
         toast('학생 화면이 전환되었습니다.', 'success'); renderTeacherClassShell();
@@ -1524,12 +1637,46 @@
       finally { hideLoading(); }
     }
 
-    function renderTeacherLessonOne() {
+    function opinionResponseListHtml(responses) {
+      return responses.length ? responses.map(item=>`<article class="opinion-response ${item.choice}"><b>${item.choice==='agree'?'찬성':'반대'}</b><p>${esc(item.reason)}</p></article>`).join('') : '<div class="empty">학생 응답을 기다리고 있습니다.</div>';
+    }
+
+    function opinionTeacherResultsHtml(discussion) {
+      const total=discussion.responses.length;
+      const agreePercent=total?Math.round(discussion.agreeCount/total*100):0;
+      const disagreePercent=total?100-agreePercent:0;
+      const agreeLabel=agreePercent>=18?`찬성 ${agreePercent}%`:'';
+      const disagreeLabel=disagreePercent>=18?`반대 ${disagreePercent}%`:'';
+      return `<div class="opinion-summary"><div class="opinion-summary-item"><span>전체 응답</span><strong>${total}명</strong></div><div class="opinion-summary-item"><span>찬성</span><strong>${discussion.agreeCount}명</strong></div><div class="opinion-summary-item"><span>반대</span><strong>${discussion.disagreeCount}명</strong></div></div>${total?`<div class="opinion-balance" aria-label="찬성 ${agreePercent}%, 반대 ${disagreePercent}%"><span class="agree" style="width:${agreePercent}%" title="찬성 ${agreePercent}%">${agreeLabel}</span><span class="disagree" style="width:${disagreePercent}%" title="반대 ${disagreePercent}%">${disagreeLabel}</span></div>`:''}<div class="opinion-response-list" aria-live="polite">${opinionResponseListHtml(discussion.responses)}</div>`;
+    }
+
+    async function renderTeacherLessonOne(version, silent) {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      const words = state.dashboard.words || [];
-      root.innerHTML = `${teacherLessonHero('발견: 우리 반 언어 데이터 수집','학생들이 실제로 쓰는 표현을 수집하고 빈도와 유형으로 관찰합니다.','submit')}
-        <div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">학생 응답 결과</button></div></div>
-        <section class="simple-panel card"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section>`;
+      try {
+        if (silent) {
+          const latest=await api('getOpinionWorkspace',managerToken(),state.activeClass.id);
+          if(!teacherViewIsCurrent('lesson1',version))return;
+          if(JSON.stringify(latest)===JSON.stringify(state.dashboard.discussion))return;
+          state.dashboard.discussion=latest;
+        }
+        const room=state.activeClass;
+        const words=state.dashboard.words||[];
+        const discussion=state.dashboard.discussion||{topic:room.discussionTopic||'',responses:[],agreeCount:0,disagreeCount:0};
+        const opinionActive=room.currentStage==='opinion';
+        const discoveryActive=['submit','rate'].includes(room.currentStage);
+        const opinionComplete=['submit','rate','context','wordmaking','dictionary'].includes(room.currentStage);
+        const discoveryComplete=['context','wordmaking','dictionary'].includes(room.currentStage);
+        const canBegin=room.currentStage==='waiting';
+        root.innerHTML=`<div class="lesson-one-flow"><section class="lesson-phase-card card ${opinionActive?'active':opinionComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>주제에 대한 찬성·반대 의견과 짧은 이유를 모읍니다.</p></div></div><span class="phase-status ${opinionActive?'live':''}">${opinionActive?'학생 참여 중':opinionComplete?'완료':canBegin?'시작 전':'대기'}</span></div>${opinionActive||opinionComplete?`<p class="opinion-topic-display">${esc(discussion.topic||room.discussionTopic)}</p>`:`<form class="opinion-topic-form" onsubmit="event.preventDefault();startOpinionSharing(this.querySelector('button'))"><label class="field-label" for="opinionTopic">생각 나누기 주제</label><textarea id="opinionTopic" maxlength="300" required placeholder="예: 수업 시간에 외래어 사용을 줄여야 할까요?">${esc(discussion.topic||room.discussionTopic||'')}</textarea><button class="btn btn-primary btn-lg" type="submit">① 생각 나누기 시작</button></form>`}${opinionActive?`<div class="opinion-teacher-actions"><button class="btn" onclick="openLessonQr('opinion')">참여 QR 다시 띄우기</button><button class="btn btn-primary" onclick="startClassStage('submit','',false)">② 발견으로 넘어가기 →</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}${(opinionActive||opinionComplete||discussion.responses.length)?opinionTeacherResultsHtml(discussion):''}</section><div class="phase-connector" aria-hidden="true">↓</div><section class="lesson-phase-card card ${discoveryActive?'active':discoveryComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견: 우리 반 언어 데이터 수집</h2><p>학생들이 실제로 쓰는 표현을 수집하고 빈도와 유형으로 관찰합니다.</p></div></div><span class="phase-status ${discoveryActive?'live':''}">${discoveryActive?'학생 참여 중':discoveryComplete?'완료':'다음 단계'}</span></div>${discoveryActive?`<div class="opinion-teacher-actions"><button class="btn btn-primary" onclick="openLessonQr('submit')">참여 QR 다시 띄우기</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}<div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">1차시 전체 결과</button></div></div><section class="simple-panel"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section></section></div>`;
+        if(opinionActive)scheduleTeacherActivitySync('lesson1',version,()=>renderTeacherLessonOne(version,true));
+      } catch(error) { if(!silent)showTeacherFeatureError('lesson1',version,error); }
+    }
+
+    async function startOpinionSharing(button) {
+      const input=document.getElementById('opinionTopic');if(!input||!input.reportValidity())return;
+      setButtonBusy(button,true,'시작 중...');
+      try{const result=await api('startOpinionDiscussion',state.teacherToken,state.activeClass.id,input.value);state.activeClass=result.classInfo;state.dashboard.discussion=result.discussion;rememberParticipation('opinion',state.activeClass.id);state.unloadParticipationEnded=false;renderTeacherClassShell();openLessonQr('opinion');toast('① 생각 나누기를 시작했습니다.','success');}
+      catch(error){friendlyError(error);setButtonBusy(button,false);}
     }
 
     function teacherViewIsCurrent(tab, version) {
@@ -1546,8 +1693,9 @@
     function showTeacherFeatureError(tab, version, error) {
       if (!teacherViewIsCurrent(tab, version)) return;
       const body = document.querySelector('#teacherLessonContent .lesson-body');
+      const target = body || document.getElementById('teacherLessonContent');
       const message = error && error.message ? error.message : '자료를 불러오지 못했습니다.';
-      if (body) body.innerHTML = `<div class="empty"><b>자료를 불러오지 못했습니다.</b><br>${esc(message)}</div>`;
+      if (target) target.innerHTML = `<div class="empty"><b>자료를 불러오지 못했습니다.</b><br>${esc(message)}</div>`;
       if (!/lesson-flow-update\.sql/.test(message)) friendlyError(error);
     }
 
@@ -1558,7 +1706,7 @@
     }
 
     function diagnosticTeacherCard(card, index) {
-      return `<article class="context-card card"><div class="rating-summary"><p class="eyebrow">CARD ${String(index + 1).padStart(2,'0')} · ${badge(card.category)}</p><span class="score-pill">${card.complete?'완료':'작성 중'}</span></div><h3>${esc(card.word)}</h3>${card.complete?`<div class="test-facts"><div class="test-fact"><b>적절한 경우 · ${card.appropriate.rating}점</b>${diagnosticContextText(card,'appropriate')}<small>${esc(card.appropriate.example)}</small></div><div class="test-fact"><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${diagnosticContextText(card,'inappropriate')}<small>${esc(card.inappropriate.example)}</small></div></div><p class="help">${esc(card.ratingReason)}</p>`:'<p class="help">학생이 맥락과 예문을 작성하고 있습니다.</p>'}</article>`;
+      return `<article class="context-card card"><div class="rating-summary"><p class="eyebrow">CARD ${String(index + 1).padStart(2,'0')} · ${badge(card.category)}</p><span class="score-pill">${card.complete?'완료':'작성 중'}</span></div><h3>${esc(card.word)}</h3>${card.complete?`<div class="test-facts"><div class="test-fact"><b>적절한 경우 · ${card.appropriate.rating}점</b>${diagnosticCaseDetails(card,'appropriate')}</div><div class="test-fact"><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${diagnosticCaseDetails(card,'inappropriate')}</div></div><div class="diagnostic-reason-note"><b>평가 이유</b><p>${esc(card.ratingReason)}</p></div>`:'<p class="help">학생이 맥락과 예문을 작성하고 있습니다.</p>'}</article>`;
     }
 
     async function renderTeacherLessonTwo(version, silent) {
@@ -1663,11 +1811,12 @@
 
       if (step === 'lesson1') {
         const words = state.dashboard.words || [];
+        const discussion = state.dashboard.discussion || {topic:'',responses:[],agreeCount:0,disagreeCount:0};
         const submissions = words.reduce((sum, item) => sum + Number(item.submissionCount || 0), 0);
         const topWord = words[0];
-        title = '1차시 발견: 우리 반 언어 데이터 수집';
-        overview = resultStat('고유 표현', `${words.length}개`) + resultStat('전체 등록', `${submissions}회`) + resultStat('가장 많이 나온 말', topWord ? topWord.word : '-') + resultStat('최고 빈도', topWord ? `${topWord.submissionCount}회` : '-');
-        content = `<section class="simple-panel card"><div class="simple-list">${words.length ? words.map((word, index) => `<div class="simple-row"><div class="simple-word"><span class="eyebrow">RANK ${String(index + 1).padStart(2, '0')}</span>${esc(word.word)}<small>${esc(word.category)}</small></div>${badge(word.category)}<span class="submission-count">${word.submissionCount}회</span></div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
+        title = '1차시 ① 생각 나누기 · 1차시 ② 발견';
+        overview = resultStat('생각 나누기', `${discussion.responses.length}명`) + resultStat('찬성 / 반대', `${discussion.agreeCount} / ${discussion.disagreeCount}`) + resultStat('고유 표현', `${words.length}개`) + resultStat('전체 등록', `${submissions}회`);
+        content = `<section class="lesson-phase-card card"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>${esc(discussion.topic||'등록된 주제가 없습니다.')}</p></div></div>${opinionTeacherResultsHtml(discussion)}</section><section class="lesson-phase-card card" style="margin-top:14px"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견</h2><p>${topWord?'가장 많이 나온 말: '+esc(topWord.word):'우리 반 언어 데이터 수집'}</p></div></div><div class="simple-list" style="margin-top:14px">${words.length ? words.map((word, index) => `<div class="simple-row"><div class="simple-word"><span class="eyebrow">RANK ${String(index + 1).padStart(2, '0')}</span>${esc(word.word)}<small>${esc(word.category)}</small></div>${badge(word.category)}<span class="submission-count">${word.submissionCount}회</span></div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
       } else if (step === 'lesson2') {
         const workspace = state.diagnosticWorkspace || { words:[], cards:[], capacity:0 };
         const complete = workspace.cards.filter(card => card.complete);
@@ -1951,14 +2100,15 @@
     function renderStudentStage() {
       if (!state.classInfo) return;
       const stage = state.classInfo.currentStage;
-      const requestedStage = CONFIG.step === '1' ? 'submit' : CONFIG.step === '2' ? 'context' : CONFIG.step === '3' ? 'wordmaking' : CONFIG.step === '4' ? 'dictionary' : '';
-      const requestedOpen = !requestedStage || (requestedStage === 'submit' ? ['submit','rate'].includes(stage) : requestedStage === stage);
+      const requestedStage = CONFIG.step === '1' ? 'lesson1' : CONFIG.step === '2' ? 'context' : CONFIG.step === '3' ? 'wordmaking' : CONFIG.step === '4' ? 'dictionary' : '';
+      const requestedOpen = !requestedStage || (requestedStage === 'lesson1' ? ['opinion','submit','rate'].includes(stage) : requestedStage === stage);
       if (!requestedOpen) {
         const info = lessonQrInfo('lesson' + CONFIG.step);
         setApp(studentHeader(`${info.label} 활동을 준비하고 있어요`, `이 QR은 ‘${info.title}’ 전용입니다. 선생님이 이 차시를 시작하면 자동으로 열립니다.`));
         document.getElementById('studentContent').innerHTML = `<section class="waiting-panel card"><div class="waiting-glyph">${esc(CONFIG.step)}</div><h2>지금은 이 차시가 열려 있지 않아요</h2><p class="help">화면을 닫지 않아도 수업이 시작되면 자동으로 활동 화면으로 바뀝니다.</p></section>`;
         return;
       }
+      if (stage === 'opinion') return renderOpinionView();
       if (stage === 'submit' || stage === 'rate') return renderSubmitView();
       if (stage === 'context') return renderContextView();
       if (stage === 'wordmaking') return renderWordmakingView();
@@ -1974,9 +2124,36 @@
       location.href = CONFIG.baseUrl;
     }
 
-    /* ------------------------------ 학생 제출 ------------------------------ */
+    /* ------------------------------ 1차시 ① 생각 나누기 ------------------------------ */
+    async function renderOpinionView() {
+      setApp(studentHeader('1차시 ① 생각 나누기','주제를 읽고 찬성 또는 반대를 고른 뒤 이유를 간단히 적어 주세요.'));
+      document.getElementById('studentContent').innerHTML='<div class="empty">생각 나누기 주제를 불러오는 중...</div>';
+      try{state.opinionLesson=await api('getOpinionLesson',state.anonId,state.classInfo.id);state.opinionChoice=state.opinionLesson.myResponse?state.opinionLesson.myResponse.choice:'';renderOpinionContent(false);}
+      catch(error){const root=document.getElementById('studentContent');if(root)root.innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;}
+    }
+
+    function renderOpinionContent(editing) {
+      const root=document.getElementById('studentContent');if(!root||!state.opinionLesson)return;
+      const response=state.opinionLesson.myResponse;
+      if(response&&!editing){root.innerHTML=`<section class="opinion-student-topic"><p class="eyebrow">오늘의 생각 나누기</p><h2>${esc(state.opinionLesson.topic)}</h2></section><section class="student-card card opinion-submitted"><p class="eyebrow">내가 고른 생각</p><span class="opinion-selected ${response.choice}">${response.choice==='agree'?'찬성':'반대'}</span><blockquote>${esc(response.reason)}</blockquote><button class="btn btn-block" type="button" onclick="renderOpinionContent(true)">응답 수정</button></section><section class="waiting-panel card"><div class="waiting-glyph">✓</div><h2>생각을 나눴어요</h2><p class="help">선생님이 ② 발견으로 넘어가면 같은 화면에서 표현 수집이 시작됩니다.</p></section>`;return;}
+      const reason=response?response.reason:'';
+      root.innerHTML=`<section class="opinion-student-topic"><p class="eyebrow">오늘의 생각 나누기</p><h2>${esc(state.opinionLesson.topic)}</h2></section><form id="opinionResponseForm" class="student-card card"><label class="field-label" id="opinionChoiceLabel">나는 어떻게 생각하나요?</label><div class="opinion-choice-grid" role="group" aria-labelledby="opinionChoiceLabel"><button class="opinion-choice agree ${state.opinionChoice==='agree'?'active':''}" type="button" data-opinion-choice="agree" aria-pressed="${state.opinionChoice==='agree'}">찬성</button><button class="opinion-choice disagree ${state.opinionChoice==='disagree'?'active':''}" type="button" data-opinion-choice="disagree" aria-pressed="${state.opinionChoice==='disagree'}">반대</button></div><div class="opinion-reason-field"><label class="field-label" for="opinionReason">왜 그렇게 생각하나요?</label><textarea id="opinionReason" maxlength="500" required placeholder="찬성 또는 반대하는 이유를 간단하게 적어 주세요.">${esc(reason)}</textarea></div><button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:14px">내 생각 보내기</button></form>`;
+      root.querySelectorAll('[data-opinion-choice]').forEach(button=>button.addEventListener('click',()=>{state.opinionChoice=button.dataset.opinionChoice;root.querySelectorAll('[data-opinion-choice]').forEach(item=>{const active=item.dataset.opinionChoice===state.opinionChoice;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active));});}));
+      document.getElementById('opinionResponseForm').addEventListener('submit',submitOpinionForm);
+    }
+
+    async function submitOpinionForm(event) {
+      event.preventDefault();
+      if(!state.opinionChoice)return toast('찬성 또는 반대를 선택해 주세요.','error');
+      const reason=document.getElementById('opinionReason');if(!reason||!reason.reportValidity())return;
+      const button=event.submitter;setButtonBusy(button,true,'보내는 중...');
+      try{await api('submitOpinionResponse',state.anonId,state.classInfo.id,state.opinionChoice,reason.value);state.opinionLesson=await api('getOpinionLesson',state.anonId,state.classInfo.id);renderOpinionContent(false);toast('생각을 나눴습니다.','success');}
+      catch(error){friendlyError(error);setButtonBusy(button,false);}
+    }
+
+    /* ------------------------------ 1차시 ② 발견 ------------------------------ */
     async function renderSubmitView() {
-      setApp(studentHeader('표현 수집', '표현과 유형만 선택하면 바로 등록됩니다.'));
+      setApp(studentHeader('1차시 ② 발견 · 표현 수집', '생각 나누기에 이어 우리 반이 실제로 쓰는 표현을 모아 봐요.'));
       document.getElementById('studentContent').innerHTML = `<form id="submitWordForm" class="student-card card">
         <div class="student-form-heading"><span class="student-hero-icon" aria-hidden="true">${lessonIcon('submit')}</span><div><h2>수집할 표현</h2><p>자주 쓰거나 들은 말을 적어 주세요.</p></div></div>
         <label class="sr-only" for="studentWord">수집할 표현</label><input id="studentWord" type="text" maxlength="80" required autocomplete="off" enterkeyhint="done" placeholder="표현 입력"><label class="field-label" id="categoryLabel">유형 선택</label><div class="category-choices" role="group" aria-labelledby="categoryLabel">${CATEGORIES.map(category=>`<button class="category-choice" type="button" data-student-category="${attr(category)}" aria-pressed="false"><span class="category-choice-icon">${categoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div><button class="btn btn-primary btn-lg btn-block" type="submit">표현 등록</button>
@@ -2067,9 +2244,9 @@
     function renderDiagnosticContexts() {
       const root=document.getElementById('studentContent');const card=state.diagnosticLesson.myCard;const draft=state.diagnosticDraft;
       const labels={partner:'대화 상대',place:'대화 장소',situation:'대화 상황'};
-      root.innerHTML=`${diagnosticStepper(2)}<form id="diagnosticContextForm" class="student-card card"><p class="eyebrow">선택한 표현</p><h2>${esc(card.word)} ${badge(card.category)}</h2><label class="field-label" id="dimensionLabel">비교할 맥락 <span class="help">2개 이상</span></label><div class="dimension-choices" role="group" aria-labelledby="dimensionLabel">${Object.keys(labels).map(key=>`<button type="button" class="dimension-choice ${draft.dimensions.includes(key)?'active':''}" aria-pressed="${draft.dimensions.includes(key)}" onclick="toggleDiagnosticDimension('${key}')">${labels[key]}</button>`).join('')}</div><div class="context-case-grid"><section class="context-case good"><h3>✓ 적절한 경우</h3><div id="appropriateFields"></div><label class="field-label" for="appropriateExample">예문</label><textarea id="appropriateExample" maxlength="800" required placeholder="이 맥락에 맞는 예문">${esc(draft.appropriate.example)}</textarea></section><section class="context-case bad"><h3>△ 그렇지 않은 경우</h3><div id="inappropriateFields"></div><label class="field-label" for="inappropriateExample">예문</label><textarea id="inappropriateExample" maxlength="800" required placeholder="이 맥락에는 어색한 예문">${esc(draft.inappropriate.example)}</textarea></section></div><button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:14px">평가하러 가기 →</button></form>`;
+      root.innerHTML=`${diagnosticStepper(2)}<form id="diagnosticContextForm" class="student-card card diagnostic-context-card"><div class="diagnostic-context-heading"><p class="eyebrow">선택한 표현</p><h2>${esc(card.word)} ${badge(card.category)}</h2></div><label class="field-label" id="dimensionLabel">비교할 맥락 <span class="help">2개 이상</span></label><div class="dimension-choices" role="group" aria-labelledby="dimensionLabel">${Object.keys(labels).map(key=>`<button type="button" class="dimension-choice ${draft.dimensions.includes(key)?'active':''}" aria-pressed="${draft.dimensions.includes(key)}" onclick="toggleDiagnosticDimension('${key}')">${labels[key]}</button>`).join('')}</div><div class="context-case-grid"><section class="context-case good"><h3>✓ 적절한 경우</h3><div id="appropriateFields" class="context-fields"></div><div class="context-field context-example-field"><label class="field-label" for="appropriateExample">예문</label><textarea id="appropriateExample" maxlength="800" required placeholder="이 맥락에 맞는 예문">${esc(draft.appropriate.example)}</textarea></div></section><section class="context-case bad"><h3>△ 그렇지 않은 경우</h3><div id="inappropriateFields" class="context-fields"></div><div class="context-field context-example-field"><label class="field-label" for="inappropriateExample">예문</label><textarea id="inappropriateExample" maxlength="800" required placeholder="이 맥락에는 어색한 예문">${esc(draft.inappropriate.example)}</textarea></div></section></div><button class="btn btn-primary btn-lg btn-block diagnostic-context-submit" type="submit">평가하러 가기 →</button></form>`;
       const fields={partner:['대화 상대',['예: 친한 친구','예: 처음 만난 어른']],place:['대화 장소',['예: 운동장','예: 교장실']],situation:['대화 상황',['예: 쉬는 시간 장난','예: 공식 발표']]};
-      ['partner','place','situation'].forEach(key=>{if(!draft.dimensions.includes(key))return;const [label,placeholder]=fields[key];const suffix=key.charAt(0).toUpperCase()+key.slice(1);document.getElementById('appropriateFields').insertAdjacentHTML('beforeend',`<label class="field-label" for="appropriate${suffix}">${label}</label><input id="appropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${placeholder[0]}" value="${attr(draft.appropriate[key])}">`);document.getElementById('inappropriateFields').insertAdjacentHTML('beforeend',`<label class="field-label" for="inappropriate${suffix}">${label}</label><input id="inappropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${placeholder[1]}" value="${attr(draft.inappropriate[key])}">`);});
+      ['partner','place','situation'].forEach(key=>{if(!draft.dimensions.includes(key))return;const [label,placeholder]=fields[key];const suffix=key.charAt(0).toUpperCase()+key.slice(1);document.getElementById('appropriateFields').insertAdjacentHTML('beforeend',`<div class="context-field"><label class="field-label" for="appropriate${suffix}">${label}</label><input id="appropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${placeholder[0]}" value="${attr(draft.appropriate[key])}"></div>`);document.getElementById('inappropriateFields').insertAdjacentHTML('beforeend',`<div class="context-field"><label class="field-label" for="inappropriate${suffix}">${label}</label><input id="inappropriate${suffix}" maxlength="${key==='situation'?500:200}" required placeholder="${placeholder[1]}" value="${attr(draft.inappropriate[key])}"></div>`);});
       document.getElementById('diagnosticContextForm').addEventListener('submit',goDiagnosticRating);
     }
 
@@ -2090,13 +2267,20 @@
       state.diagnosticStep=3;renderDiagnosticRating();window.scrollTo({top:0,behavior:'smooth'});
     }
 
+    function diagnosticCaseDetails(source, kind) {
+      const values=source&&source[kind]||{};
+      const labels={partner:'대화 상대',place:'대화 장소',situation:'대화 상황'};
+      const contexts=(source&&source.dimensions||[]).filter(key=>labels[key]&&values[key]).map(key=>`<div class="diagnostic-context-item"><span>${labels[key]}</span><strong>${esc(values[key])}</strong></div>`).join('');
+      return `<div class="diagnostic-context-review">${contexts}</div><div class="diagnostic-example-block"><span>작성한 예문</span><p>${esc(values.example||'')}</p></div>`;
+    }
+
     function starChoices(kind,score) {
-      return `<div class="star-choice-row" aria-label="${kind==='appropriate'?'적절한':'그렇지 않은'} 경우 별점">${[1,2,3,4,5].map(value=>`<button type="button" class="star-choice ${value===score?'active':''}" onclick="setDiagnosticRating('${kind}',${value})" aria-label="${value}점">★</button>`).join('')}</div><div class="scale-labels"><span>1점</span><span>5점</span></div>`;
+      return `<div class="star-choice-row" aria-label="${kind==='appropriate'?'적절한':'그렇지 않은'} 경우 별점">${[1,2,3,4,5].map(value=>`<button type="button" class="star-choice ${value<=score?'active':''}" onclick="setDiagnosticRating('${kind}',${value})" aria-label="${value}점" aria-pressed="${value===score}">★</button>`).join('')}</div><div class="rating-choice-meta"><span>1점 · 낮음</span><strong>${score?score+'점 선택':'별점을 선택해 주세요'}</strong><span>5점 · 높음</span></div>`;
     }
 
     function renderDiagnosticRating() {
       const root=document.getElementById('studentContent');const card=state.diagnosticLesson.myCard;const draft=state.diagnosticDraft;
-      root.innerHTML=`${diagnosticStepper(3)}<article class="student-card card"><p class="eyebrow">${badge(card.category)} · ${esc(card.word)}</p><h2>적절성을 평가해요</h2><section class="context-case good"><h3>✓ 적절한 경우</h3><p>${esc(draft.appropriate.example)}</p>${starChoices('appropriate',draft.appropriate.rating)}</section><section class="context-case bad" style="margin-top:10px"><h3>△ 그렇지 않은 경우</h3><p>${esc(draft.inappropriate.example)}</p>${starChoices('inappropriate',draft.inappropriate.rating)}</section><label class="field-label" for="diagnosticReason">왜 그렇게 평가했나요?</label><textarea id="diagnosticReason" maxlength="800" required placeholder="상대·장소·상황을 근거로 설명해 주세요.">${esc(draft.ratingReason)}</textarea><div class="card-actions"><button class="btn" type="button" onclick="backToDiagnosticContexts()">← 맥락 수정</button><button id="saveDiagnosticBtn" class="btn btn-primary" type="button" onclick="submitDiagnosticCard(this)">진단 카드 완성</button></div></article>`;
+      root.innerHTML=`${diagnosticStepper(3)}<article class="student-card card diagnostic-rating-card"><div class="diagnostic-rating-heading"><p class="eyebrow">${badge(card.category)} · ${esc(card.word)}</p><h2>맥락을 살펴보고 적절성을 평가해요</h2></div><div class="diagnostic-rating-grid"><section class="context-case good diagnostic-rating-case"><h3>✓ 적절한 경우</h3>${diagnosticCaseDetails(draft,'appropriate')}<div class="diagnostic-rating-choice"><p class="diagnostic-rating-prompt">이 맥락에서 표현이 얼마나 적절한가요?</p>${starChoices('appropriate',draft.appropriate.rating)}</div></section><section class="context-case bad diagnostic-rating-case"><h3>△ 그렇지 않은 경우</h3>${diagnosticCaseDetails(draft,'inappropriate')}<div class="diagnostic-rating-choice"><p class="diagnostic-rating-prompt">이 맥락에서 표현이 얼마나 적절한가요?</p>${starChoices('inappropriate',draft.inappropriate.rating)}</div></section></div><div class="diagnostic-reason-field"><label class="field-label" for="diagnosticReason">왜 그렇게 평가했나요?</label><textarea id="diagnosticReason" maxlength="800" required placeholder="위에 표시된 상대·장소·상황을 근거로 설명해 주세요.">${esc(draft.ratingReason)}</textarea></div><div class="card-actions"><button class="btn" type="button" onclick="backToDiagnosticContexts()">← 맥락 수정</button><button id="saveDiagnosticBtn" class="btn btn-primary" type="button" onclick="submitDiagnosticCard(this)">진단 카드 완성</button></div></article>`;
     }
 
     function setDiagnosticRating(kind,score){state.diagnosticDraft[kind].rating=score;const reason=document.getElementById('diagnosticReason');if(reason)state.diagnosticDraft.ratingReason=reason.value;renderDiagnosticRating();}
@@ -2113,7 +2297,7 @@
 
     function renderCompletedDiagnostic(){
       const root=document.getElementById('studentContent');const own=state.diagnosticLesson.myCard;const cards=state.diagnosticLesson.cards.filter(card=>card.complete);
-      root.innerHTML=`${diagnosticStepper(4)}<section class="waiting-panel card"><div class="waiting-glyph">✓</div><h2>진단 완료</h2><p class="help">3차시에서 아래 진단 카드 중 하나를 골라 새 표현을 설계합니다.</p></section><div class="lesson-tools"><div><h3>우리 반 진단 카드 · ${cards.length}</h3><p>목록은 자동으로 갱신됩니다.</p></div><button class="btn" onclick="renderContextView()" aria-label="진단 목록 새로고침">↻</button></div><section class="context-grid">${cards.map((card,index)=>`<article class="student-card card"><p class="eyebrow">${card.id===own.id?'내 카드 · ':''}${badge(card.category)}</p><h2>${esc(card.word)}</h2><div class="diagnostic-summary"><div><b>적절한 경우 · ${card.appropriate.rating}점</b>${esc(card.appropriate.example)}</div><div><b>그렇지 않은 경우 · ${card.inappropriate.rating}점</b>${esc(card.inappropriate.example)}</div></div><p class="help">${esc(card.ratingReason)}</p></article>`).join('')}</section>`;
+      root.innerHTML=`${diagnosticStepper(4)}<section class="waiting-panel card"><div class="waiting-glyph">✓</div><h2>진단 완료</h2><p class="help">3차시에서 아래 진단 카드 중 하나를 골라 새 표현을 설계합니다.</p></section><div class="lesson-tools"><div><h3>우리 반 진단 카드 · ${cards.length}</h3><p>목록은 자동으로 갱신됩니다.</p></div><button class="btn" onclick="renderContextView()" aria-label="진단 목록 새로고침">↻</button></div><section class="context-grid">${cards.map((card,index)=>`<article class="student-card card"><p class="eyebrow">${card.id===own.id?'내 카드 · ':''}${badge(card.category)}</p><h2>${esc(card.word)}</h2><div class="diagnostic-result-grid"><section class="diagnostic-result-case good"><div class="diagnostic-result-title"><b>적절한 경우</b><span class="diagnostic-score">${card.appropriate.rating}점</span></div>${diagnosticCaseDetails(card,'appropriate')}</section><section class="diagnostic-result-case bad"><div class="diagnostic-result-title"><b>그렇지 않은 경우</b><span class="diagnostic-score">${card.inappropriate.rating}점</span></div>${diagnosticCaseDetails(card,'inappropriate')}</section></div><div class="diagnostic-reason-note"><b>평가 이유</b><p>${esc(card.ratingReason)}</p></div></article>`).join('')}</section>`;
     }
 
     /* ------------------------------ 우리말 만들기 학생 ------------------------------ */

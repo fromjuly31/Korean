@@ -6,11 +6,51 @@ alter table public.classes
   add column if not exists diagnostic_word_capacity integer not null default 4;
 alter table public.classes
   add column if not exists usage_tracking_enabled boolean not null default false;
+alter table public.classes
+  add column if not exists discussion_topic text not null default '';
+
+alter table public.classes
+  drop constraint if exists classes_current_stage_check;
+alter table public.classes
+  add constraint classes_current_stage_check
+  check (current_stage in ('waiting', 'opinion', 'submit', 'rate', 'context', 'wordmaking', 'dictionary'));
+alter table public.classes
+  drop constraint if exists classes_discussion_topic_check;
+alter table public.classes
+  add constraint classes_discussion_topic_check
+  check (char_length(discussion_topic) <= 300);
 
 alter table public.word_suggestions
   add column if not exists core_feature text not null default '진단 맥락 반영';
 alter table public.words
   add column if not exists submit_count integer not null default 1;
+
+create table if not exists public.opinion_responses (
+  id uuid primary key default gen_random_uuid(),
+  class_id uuid not null references public.classes(id) on delete cascade,
+  owner_id uuid not null,
+  choice text not null check (choice in ('agree', 'disagree')),
+  reason text not null check (char_length(reason) between 1 and 500),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (class_id, owner_id)
+);
+
+create index if not exists opinion_responses_class_id_idx
+  on public.opinion_responses(class_id);
+
+alter table public.opinion_responses enable row level security;
+
+drop policy if exists opinion_responses_read on public.opinion_responses;
+create policy opinion_responses_read on public.opinion_responses
+for select to authenticated
+using (
+  owner_id = (select auth.uid())
+  or public.can_manage_class(class_id)
+);
+
+revoke all on table public.opinion_responses from anon, authenticated;
+grant select on table public.opinion_responses to authenticated;
 
 create or replace function public.normalize_korean_class_word(value text)
 returns text
@@ -64,6 +104,90 @@ begin
 end;
 $$;
 
+-- 1차시 ① 생각 나누기: 교사가 주제를 열고, 같은 QR에서 학생 응답을 받습니다.
+create or replace function public.start_opinion_discussion(p_class_id uuid, p_topic text)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  clean_topic text := btrim(coalesce(p_topic, ''));
+  previous_topic text;
+begin
+  if not public.can_manage_class(p_class_id) then
+    raise exception '이 클래스의 생각 나누기를 시작할 권한이 없습니다.';
+  end if;
+  if char_length(clean_topic) not between 1 and 300 then
+    raise exception '생각 나누기 주제를 1~300자로 입력해 주세요.';
+  end if;
+
+  select c.discussion_topic into previous_topic
+  from public.classes c
+  where c.id = p_class_id and c.is_active
+  for update;
+  if previous_topic is null then
+    raise exception '클래스를 찾을 수 없습니다.';
+  end if;
+
+  if previous_topic is distinct from clean_topic then
+    delete from public.opinion_responses where class_id = p_class_id;
+  end if;
+
+  update public.classes
+  set discussion_topic = clean_topic,
+      current_stage = 'opinion',
+      current_task_id = null,
+      updated_at = now()
+  where id = p_class_id;
+  return true;
+end;
+$$;
+
+create or replace function public.submit_opinion_response(
+  p_class_id uuid,
+  p_choice text,
+  p_reason text
+)
+returns table(response_id uuid)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  current_user_id uuid := (select auth.uid());
+  clean_choice text := lower(btrim(coalesce(p_choice, '')));
+  clean_reason text := btrim(coalesce(p_reason, ''));
+  saved_id uuid;
+begin
+  if current_user_id is null or not public.is_class_member(p_class_id) then
+    raise exception '참여 중인 학생만 생각을 나눌 수 있습니다.';
+  end if;
+  if not exists (
+    select 1 from public.classes c
+    where c.id = p_class_id and c.is_active and c.current_stage = 'opinion'
+  ) then
+    raise exception '지금은 생각 나누기 시간이 아닙니다.';
+  end if;
+  if clean_choice not in ('agree', 'disagree') then
+    raise exception '찬성 또는 반대를 선택해 주세요.';
+  end if;
+  if char_length(clean_reason) not between 1 and 500 then
+    raise exception '찬성 또는 반대 이유를 1~500자로 입력해 주세요.';
+  end if;
+
+  insert into public.opinion_responses(class_id, owner_id, choice, reason)
+  values (p_class_id, current_user_id, clean_choice, clean_reason)
+  on conflict (class_id, owner_id) do update set
+    choice = excluded.choice,
+    reason = excluded.reason,
+    updated_at = now()
+  returning id into saved_id;
+
+  return query select saved_id;
+end;
+$$;
+
 create table if not exists public.dictionary (
   id uuid primary key default gen_random_uuid(),
   word_id uuid not null unique references public.words(id) on delete cascade,
@@ -109,6 +233,62 @@ create table if not exists public.dictionary_usage_logs (
   created_at timestamptz not null default now(),
   unique (dictionary_id, owner_id, week_start)
 );
+
+-- 일부 기존 설치본에는 기존 클래스 대시보드가 조회하는 사용성 응답 테이블이 없습니다.
+create table if not exists public.usability_responses (
+  id uuid primary key default gen_random_uuid(),
+  test_id uuid not null references public.context_tasks(id) on delete cascade,
+  owner_id uuid not null,
+  score smallint not null check (score between 1 and 5),
+  created_at timestamptz not null default now(),
+  unique (test_id, owner_id)
+);
+
+create index if not exists usability_responses_test_id_idx
+  on public.usability_responses(test_id);
+
+alter table public.usability_responses enable row level security;
+
+drop policy if exists usability_responses_read on public.usability_responses;
+create policy usability_responses_read on public.usability_responses
+for select to authenticated
+using (
+  owner_id = (select auth.uid())
+  or exists (
+    select 1 from public.context_tasks tests
+    where tests.id = usability_responses.test_id
+      and (public.can_manage_class(tests.class_id) or public.is_class_member(tests.class_id))
+  )
+);
+
+drop policy if exists usability_responses_submit on public.usability_responses;
+create policy usability_responses_submit on public.usability_responses
+for insert to authenticated
+with check (
+  owner_id = (select auth.uid())
+  and exists (
+    select 1 from public.context_tasks tests
+    join public.classes on classes.id = tests.class_id
+    where tests.id = usability_responses.test_id
+      and tests.active
+      and public.is_class_member(tests.class_id)
+      and classes.current_stage = 'context'
+  )
+);
+
+drop policy if exists usability_responses_manager_delete on public.usability_responses;
+create policy usability_responses_manager_delete on public.usability_responses
+for delete to authenticated
+using (
+  exists (
+    select 1 from public.context_tasks tests
+    where tests.id = usability_responses.test_id
+      and public.can_manage_class(tests.class_id)
+  )
+);
+
+revoke all on table public.usability_responses from anon, authenticated;
+grant select, insert, delete on table public.usability_responses to authenticated;
 
 alter table public.classes
   drop constraint if exists classes_diagnostic_word_capacity_check;
@@ -524,16 +704,53 @@ revoke all on function public.claim_diagnostic_word(uuid, uuid) from public;
 revoke all on function public.save_diagnostic_card(uuid, text[], text, text, text, text, smallint, text, text, text, text, smallint, text) from public;
 revoke all on function public.submit_diagnostic_redesign(uuid, text, text, text, text) from public;
 revoke all on function public.submit_comparison_vote(uuid, text) from public;
+revoke all on function public.start_opinion_discussion(uuid, text) from public;
+revoke all on function public.submit_opinion_response(uuid, text, text) from public;
 grant execute on function public.claim_diagnostic_word(uuid, uuid) to authenticated;
 revoke all on function public.submit_word(uuid, text, text) from public;
 grant execute on function public.submit_word(uuid, text, text) to authenticated;
 grant execute on function public.save_diagnostic_card(uuid, text[], text, text, text, text, smallint, text, text, text, text, smallint, text) to authenticated;
 grant execute on function public.submit_diagnostic_redesign(uuid, text, text, text, text) to authenticated;
 grant execute on function public.submit_comparison_vote(uuid, text) to authenticated;
+grant execute on function public.start_opinion_discussion(uuid, text) to authenticated;
+grant execute on function public.submit_opinion_response(uuid, text, text) to authenticated;
+
+-- 일부 기존 설치본에 빠진 결과 초기화 RPC도 함께 복구합니다.
+-- words를 지우면 진단 카드, 설계안, 비교, 사전 자료는 외래 키 cascade로 함께 정리됩니다.
+create or replace function public.reset_class_results(p_class_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.can_manage_class(p_class_id) then
+    raise exception '이 클래스의 결과를 초기화할 권한이 없습니다.';
+  end if;
+
+  update public.classes
+  set current_stage = 'waiting', current_task_id = null, discussion_topic = '', updated_at = now()
+  where id = p_class_id;
+  delete from public.opinion_responses where class_id = p_class_id;
+  delete from public.class_pledges where class_id = p_class_id;
+  delete from public.context_tasks where class_id = p_class_id;
+  delete from public.words where class_id = p_class_id;
+  return true;
+end;
+$$;
+
+revoke all on function public.reset_class_results(uuid) from public;
+grant execute on function public.reset_class_results(uuid) to authenticated;
 
 -- Realtime에서 교사 화면이 학생 진단·설계·검증을 즉시 받을 수 있게 합니다.
 do $$
 begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'opinion_responses'
+  ) then
+    alter publication supabase_realtime add table public.opinion_responses;
+  end if;
   if not exists (
     select 1 from pg_publication_tables
     where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'diagnostic_cards'

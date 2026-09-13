@@ -34,8 +34,9 @@ create table if not exists public.classes (
   class_name text not null check (char_length(class_name) between 1 and 40),
   class_code text not null unique check (class_code ~ '^[A-Z0-9]{4,12}$'),
   current_stage text not null default 'waiting'
-    check (current_stage in ('waiting', 'submit', 'rate', 'context', 'wordmaking', 'dictionary')),
+    check (current_stage in ('waiting', 'opinion', 'submit', 'rate', 'context', 'wordmaking', 'dictionary')),
   current_task_id uuid,
+  discussion_topic text not null default '' check (char_length(discussion_topic) <= 300),
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
