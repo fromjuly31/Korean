@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="학생들과 함께 만드는 우리 반 우리말 사전">
   <title>우리말 바로쓰기 | 참여형 국어 수업</title>
+  <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css">
   <style>
     :root {
       --primary: #315f5b;
@@ -23,8 +24,8 @@
       --warning: #9b671d;
       --shadow: 0 16px 42px rgba(48, 72, 68, .08);
       --radius: 22px;
-      --sans: Pretendard, "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
-      --title-font: "Malgun Gothic", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+      --sans: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+      --title-font: "Pretendard Variable", Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
     }
     * { box-sizing: border-box; }
     html { min-height: 100%; background: var(--background); }
@@ -36,7 +37,7 @@
         radial-gradient(circle at 82% 82%, rgba(202,187,230,.13), transparent 22%),
         var(--background);
       background-attachment: fixed;
-      font: 16px/1.65 Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif;
+      font: 16px/1.65 var(--sans);
       word-break: keep-all; overflow-wrap: anywhere; overflow-x: hidden;
     }
     body.home-page {
@@ -168,7 +169,7 @@
     .modal.qr-modal .modal-head:active { cursor: grabbing; }
     .modal.is-draggable { position: fixed; margin: 0; }
     .modal-head { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; gap: 15px; align-items: center; padding: 20px 22px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.96); }
-    .modal-head h2 { margin: 0; font-size: 23px; }
+    .modal-head h2 { margin:0; font-family:var(--title-font); font-size:23px; font-weight:720; line-height:1.25; letter-spacing:-.025em; }
     .icon-btn { display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: white; font-size: 23px; }
     .modal-body { padding: 22px; }
     .modal-foot { display: flex; justify-content: flex-end; gap: 9px; padding: 16px 22px 22px; }
@@ -305,21 +306,19 @@
     .teacher-top-actions { display: flex; gap: 7px; margin-left: auto; }
     .teacher-top-actions .btn { min-height: 39px; padding: 7px 12px; font-size: 13px; }
     .code-button { border-color: #dce5e1; background: #f3f8f5; color: var(--primary); letter-spacing: .08em; }
-    .lesson-tabs { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; margin: 17px 0; }
-    .lesson-tab { position: relative; display:grid; grid-template-columns:48px minmax(0,1fr); align-items:center; gap:14px; min-height: 90px; padding: 14px 17px; overflow: hidden; border: 1px solid #e0e5e2; border-radius: 18px; background: rgba(255,255,255,.92); color: #596663; text-align: left; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
-    .lesson-tab::after { content: ""; position: absolute; inset:0 0 auto; height:4px; background:var(--lesson-color,#b9d8cb); opacity:.88; }
-    .lesson-tab-icon { position:relative; z-index:1; display:grid; place-items:center; width:48px; height:48px; border-radius:15px; background:#f2f6f4; background:color-mix(in srgb,var(--lesson-color) 14%,#fff); color:var(--lesson-color); }
-    .lesson-tab-icon svg { width:25px; height:25px; }
-    .lesson-tab-copy { position:relative; z-index:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:5px; min-width:0; }
-    .lesson-tab-copy small { display:block; padding:0; background:transparent; color:var(--lesson-color,var(--primary)); font-size:11px; font-weight:900; line-height:1; letter-spacing:-.025em; white-space:nowrap; }
-    .lesson-tab-copy b { display:block; margin:0; color:#102f3d; font-family:var(--title-font); font-size:22px; font-weight:900; line-height:1; letter-spacing:-.06em; -webkit-text-stroke:.25px currentColor; text-shadow:.25px 0 currentColor; }
-    .lesson-tab:hover { transform: translateY(-2px); border-color: #cdd8d3; background: #fff; }
-    .lesson-tab.active { transform:translateY(-2px); border-color: var(--lesson-color, var(--primary)); background: #fff; box-shadow: 0 11px 26px rgba(28,62,70,.12); color: var(--ink); }
-    .lesson-tab.active .lesson-tab-icon { background:var(--lesson-color); color:#fff; box-shadow:0 6px 14px color-mix(in srgb,var(--lesson-color) 25%,transparent); }
-    .lesson-tab:nth-child(1) { --lesson-color: #e6775d; }
-    .lesson-tab:nth-child(2) { --lesson-color: #4b837c; }
-    .lesson-tab:nth-child(3) { --lesson-color: #9a76bd; }
-    .lesson-tab:nth-child(4) { --lesson-color: #b78635; }
+    .lesson-tabs { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:14px 0; }
+    .lesson-tab { position:relative; display:grid; grid-template-columns:38px minmax(0,1fr); align-items:center; gap:11px; min-height:76px; padding:11px 14px; overflow:hidden; border:1px solid #d9e3e5; border-radius:14px; background:rgba(255,255,255,.9); color:#53666d; text-align:left; transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,color .16s ease; }
+    .lesson-tab::after { content:none; }
+    .lesson-tab-icon { position:relative; z-index:1; display:grid; place-items:center; width:38px; height:38px; border-radius:10px; background:#eef3f4; color:#42636d; transition:background .16s ease,color .16s ease; }
+    .lesson-tab-icon svg { width:20px; height:20px; stroke-width:1.7; }
+    .lesson-tab-copy { position:relative; z-index:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:4px; min-width:0; }
+    .lesson-tab-copy small { display:block; padding:0; background:transparent; color:#71848a; font-family:var(--sans); font-size:10px; font-weight:650; line-height:1; letter-spacing:.015em; white-space:nowrap; }
+    .lesson-tab-copy b { display:block; margin:0; color:#173543; font-family:var(--title-font); font-size:19px; font-weight:730; line-height:1.08; letter-spacing:-.025em; }
+    .lesson-tab:hover { border-color:#9eb5bb; background:#fff; }
+    .lesson-tab.active { border-color:#0b4052; background:#0b3347; box-shadow:0 7px 18px rgba(11,51,71,.14); color:#fff; }
+    .lesson-tab.active .lesson-tab-icon { background:rgba(255,255,255,.11); color:#79dce8; }
+    .lesson-tab.active .lesson-tab-copy small { color:#9ddfe7; }
+    .lesson-tab.active .lesson-tab-copy b { color:#fff; }
     .lesson-hero { position: relative; display: flex; align-items: center; gap: 17px; min-height: 128px; padding: 25px 27px; overflow: hidden; border: 1px solid rgba(255,255,255,.88); border-radius: 27px; background: linear-gradient(135deg,#fffefa,#f1f7f3); box-shadow: var(--shadow); }
     .lesson-hero::before, .lesson-hero::after { content: ""; position: absolute; border-radius: 50%; pointer-events: none; }
     .lesson-hero::before { width: 120px; height: 120px; right: 8%; top: -78px; border: 18px solid rgba(238,128,101,.09); }
@@ -328,7 +327,7 @@
     .lesson-number { display: grid; place-items:center; flex: 0 0 66px; width: 66px; height: 66px; border-radius: 20px 20px 20px 7px; background: var(--hero-soft,var(--accent-soft)); color: var(--hero-color,var(--accent)); }
     .lesson-number svg { width:34px; height:34px; stroke-width:1.65; }
     .lesson-copy { position: relative; z-index: 1; min-width: 0; }
-    .lesson-copy h2 { margin: 0 0 4px; font-family:var(--title-font); font-size: clamp(23px,3vw,30px); font-weight:900; line-height:1.22; letter-spacing: -.055em; -webkit-text-stroke:.2px currentColor; text-shadow:.2px 0 currentColor; }
+    .lesson-copy h2 { margin:0 0 4px; font-family:var(--title-font); font-size:clamp(23px,3vw,29px); font-weight:740; line-height:1.22; letter-spacing:-.03em; }
     .lesson-copy p { margin: 0; color: var(--muted); }
     .lesson-actions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-left: auto; }
     .live-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 7px 12px; border-radius: 99px; background: #e8f5ef; color: #26705b; font-size: 13px; font-weight: 850; }
@@ -379,10 +378,10 @@
     .suggestion-copy { min-width: 0; }
     .suggestion-copy > span { display: block; margin-top: 2px; color: var(--muted); font-size: 13px; }
     .student-shell { width: min(720px, calc(100% - 28px)); }
-    .student-hero { position: relative; overflow: hidden; border-color: #fff; background: linear-gradient(135deg,#fffefa,#edf6f2); }
-    .student-hero::after { content: "✦"; position: absolute; right: 22px; top: 15px; color: rgba(238,128,101,.38); font-size: 26px; }
+    .student-hero { position:relative; overflow:hidden; border-color:#dce6e7; background:#fff; }
+    .student-hero::after { content:none; }
     .student-hero-heading { display:flex; align-items:center; gap:12px; }
-    .student-hero-icon { display:grid; place-items:center; flex:0 0 46px; width:46px; height:46px; border-radius:15px 15px 15px 6px; background:var(--primary-soft); color:var(--primary); }
+    .student-hero-icon { display:grid; place-items:center; flex:0 0 46px; width:46px; height:46px; border-radius:12px; background:#edf5f6; color:#126d7c; }
     .student-hero-icon svg { width:25px; height:25px; }
     .student-card { border-color: rgba(255,255,255,.95); }
     .star-row { flex-wrap: wrap; }
@@ -493,23 +492,19 @@
     .lab-workspace .teacher-top { padding:13px 16px; border-color:#d5e6e9; border-radius:18px; background:rgba(255,255,255,.94); box-shadow:0 10px 28px rgba(16,63,76,.07); }
     .lab-workspace .teacher-top .mini-mark { border:1px solid #0c94a7; border-radius:12px; background:#0b3347; color:#72efff; box-shadow:inset 0 0 16px rgba(114,239,255,.09); font:850 12px/1 ui-monospace,monospace; letter-spacing:.05em; }
     .lab-workspace .code-button { border-color:#a9d8df; background:#edfafb; color:#087385; }
-    .lab-workspace .lesson-tabs { gap:8px; margin:11px 0; }
-    .lab-workspace .lesson-tab { min-height:88px; padding:13px 16px; border-color:#d7e5e7; border-radius:16px; background:rgba(255,255,255,.94); }
-    .lab-workspace .lesson-tab-copy small { padding:0; background:transparent; color:var(--lesson-color,#087d8f); font:900 11px/1 var(--sans); letter-spacing:-.025em; }
-    .lab-workspace .lesson-tab-copy b { margin:0; color:#0b3347; font-family:var(--title-font); font-size:22px; font-weight:900; line-height:1; letter-spacing:-.06em; -webkit-text-stroke:.25px currentColor; text-shadow:.25px 0 currentColor; }
-    .lab-workspace .lesson-tab::after { background:var(--lesson-color,#72efff); }
-    .lab-workspace .lesson-tab.active { border-color:var(--lesson-color,#0792a5); box-shadow:0 11px 25px rgba(8,70,82,.13); }
-    .lab-workspace .lesson-tab.active .lesson-tab-copy small { background:transparent; color:var(--lesson-color,#087d8f); }
-    .lab-workspace .lesson-tab:nth-child(1) { --lesson-color:#55c7d6; }
-    .lab-workspace .lesson-tab:nth-child(2) { --lesson-color:#93bd2e; }
-    .lab-workspace .lesson-tab:nth-child(3) { --lesson-color:#587eae; }
-    .lab-workspace .lesson-tab:nth-child(4) { --lesson-color:#e69a35; }
-    .lab-workspace .lesson-hero { min-height:102px; padding:17px 21px; border-color:#d7e8ea; border-radius:20px; background:linear-gradient(135deg,#fff,#edf9fa); box-shadow:0 11px 30px rgba(16,63,76,.07); }
-    .lab-workspace .lesson-hero::before { border-color:rgba(114,239,255,.14); }
-    .lab-workspace .lesson-hero::after { background:#72efff; box-shadow:18px -13px 0 #c9ff62,39px 5px 0 #6f91b7; }
-    .lab-workspace .lesson-number { flex-basis:62px; width:62px; height:62px; border-radius:17px 17px 17px 6px; background:#0b3347; color:#72efff; }
-    .lab-workspace .lesson-number svg { width:35px; height:35px; }
-    .lab-workspace .lesson-copy h2 { font-size:clamp(21px,2.4vw,27px); }
+    .lab-workspace .lesson-tabs { gap:8px; margin:12px 0; }
+    .lab-workspace .lesson-tab { min-height:76px; padding:11px 14px; border-color:#d8e4e6; border-radius:14px; background:rgba(255,255,255,.94); }
+    .lab-workspace .lesson-tab:hover { border-color:#9eb7bd; background:#fff; }
+    .lab-workspace .lesson-tab-copy small { padding:0; background:transparent; color:#71848a; font:650 10px/1 var(--sans); letter-spacing:.015em; }
+    .lab-workspace .lesson-tab-copy b { margin:0; color:#173543; font-family:var(--title-font); font-size:19px; font-weight:730; line-height:1.08; letter-spacing:-.025em; }
+    .lab-workspace .lesson-tab.active { border-color:#0b4052; background:#0b3347; box-shadow:0 7px 18px rgba(11,51,71,.14); }
+    .lab-workspace .lesson-tab.active .lesson-tab-copy small { color:#9ddfe7; }
+    .lab-workspace .lesson-tab.active .lesson-tab-copy b { color:#fff; }
+    .lab-workspace .lesson-hero { min-height:94px; padding:17px 20px; border-color:#d8e4e6; border-radius:17px; background:#fff; box-shadow:0 8px 24px rgba(16,63,76,.06); }
+    .lab-workspace .lesson-hero::before,.lab-workspace .lesson-hero::after { content:none; }
+    .lab-workspace .lesson-number { flex-basis:50px; width:50px; height:50px; border-radius:12px; background:#edf5f6; color:#126d7c; }
+    .lab-workspace .lesson-number svg { width:27px; height:27px; }
+    .lab-workspace .lesson-copy h2 { font-size:clamp(21px,2.4vw,26px); font-weight:740; letter-spacing:-.03em; }
     .lab-workspace .lesson-tools { margin:12px 2px 8px; }
     .lab-workspace .linked-words { margin-top:10px; padding:12px 15px; }
     .lab-workspace .simple-panel,.lab-workspace .context-grid,.lab-workspace .refine-grid,.lab-workspace .launch-grid { max-height:calc(100svh - 335px); overflow:auto; scrollbar-color:#a7cdd3 transparent; }
@@ -520,13 +515,13 @@
     .lab-workspace .student-tab-icon { margin:0; color:var(--student-tab-color); }
     .lab-workspace .student-tab-copy { margin:0; color:inherit; line-height:1.2; }
     .lab-workspace .student-tab-copy small { color:#526b75; font:800 10px/1.25 var(--sans); letter-spacing:-.01em; }
-    .lab-workspace .student-tab-copy b { color:#0b3347; font-family:var(--title-font); font-size:14px; font-weight:900; line-height:1.15; letter-spacing:-.045em; -webkit-text-stroke:.2px currentColor; text-shadow:.2px 0 currentColor; }
+    .lab-workspace .student-tab-copy b { color:#173543; font-family:var(--title-font); font-size:14px; font-weight:720; line-height:1.15; letter-spacing:-.025em; }
     .lab-workspace .student-lesson-tab.active { border-color:#078ca0; background:#0b3347; color:#fff; box-shadow:inset 0 3px 0 #72efff,0 8px 20px rgba(11,51,71,.13); }
     .lab-workspace .student-lesson-tab.active .student-tab-copy small,
     .lab-workspace .student-lesson-tab.active .student-tab-copy b { color:#fff; }
     .lab-workspace .student-lesson-tab.active .student-tab-icon { color:#fff; }
     .lab-workspace .student-hero { padding:18px 22px; margin-bottom:10px; border-color:#d8e7ea; border-radius:19px; background:linear-gradient(135deg,#fff,#edf9fa); }
-    .lab-workspace .student-hero h1 { margin:2px 0 5px; font-family:var(--title-font); font-size:clamp(25px,5vw,32px); font-weight:900; letter-spacing:-.055em; -webkit-text-stroke:.2px currentColor; text-shadow:.2px 0 currentColor; }
+    .lab-workspace .student-hero h1 { margin:2px 0 5px; font-family:var(--title-font); font-size:clamp(25px,5vw,32px); font-weight:740; letter-spacing:-.03em; }
     .lab-workspace .student-card { padding:18px 20px; margin-bottom:10px; border-color:#dce9eb; }
     .btn-results { gap:8px; border-color:#0b3347 !important; background:#0b3347 !important; color:#fff !important; }
     .btn-results::before { content:"▦"; color:#c9ff62; font-size:16px; }
@@ -543,11 +538,10 @@
 
     /* 단순화한 차시 공통 UI */
     .student-lesson-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin:0 0 14px; }
-    .student-lesson-tab { display:flex; align-items:center; justify-content:center; gap:7px; min-height:62px; padding:8px 7px; border:1px solid #dce3e1; border-radius:13px; background:rgba(255,255,255,.68); color:#7d8986; font-size:12px; font-weight:850; text-align:left; }
-    .student-tab-icon { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; border-radius:9px; background:#eef3f1; color:var(--student-tab-color,var(--primary)); }.student-tab-icon svg { width:16px; height:16px; }
-    .student-tab-copy { min-width:0; }.student-tab-copy small,.student-tab-copy b { display:block; }.student-tab-copy small { font-size:9px; letter-spacing:.05em; }.student-tab-copy b { font-size:12px; }
-    .student-lesson-tab:nth-child(1) { --student-tab-color:#d56850; }.student-lesson-tab:nth-child(2) { --student-tab-color:#3f7771; }.student-lesson-tab:nth-child(3) { --student-tab-color:#8762aa; }.student-lesson-tab:nth-child(4) { --student-tab-color:#a87220; }
-    .student-lesson-tab.active { border-color:var(--student-tab-color); background:var(--student-tab-color); color:#fff; box-shadow:0 8px 20px rgba(49,95,91,.14); }
+    .student-lesson-tab { --student-tab-color:#315f69; display:flex; align-items:center; justify-content:center; gap:7px; min-height:60px; padding:8px 7px; border:1px solid #dce5e6; border-radius:12px; background:rgba(255,255,255,.8); color:#687a7f; font-size:12px; font-weight:700; text-align:left; }
+    .student-tab-icon { display:grid; place-items:center; flex:0 0 28px; width:28px; height:28px; border-radius:8px; background:#eef3f4; color:var(--student-tab-color); }.student-tab-icon svg { width:16px; height:16px; }
+    .student-tab-copy { min-width:0; }.student-tab-copy small,.student-tab-copy b { display:block; }.student-tab-copy small { font-size:9px; font-weight:620; letter-spacing:.03em; }.student-tab-copy b { font-size:12px; font-weight:720; letter-spacing:-.02em; }
+    .student-lesson-tab.active { border-color:#0b4052; background:#0b3347; color:#fff; box-shadow:0 7px 18px rgba(11,51,71,.13); }
     .student-lesson-tab.active .student-tab-icon { background:rgba(255,255,255,.16); color:#fff; }
     .category-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 16px; }
     .category-choice { display:flex; align-items:center; justify-content:center; gap:8px; min-width:0; min-height:50px; padding:8px 10px; border:1px solid #d8dddc; border-radius:12px; background:#fff; color:#5e6b68; font-weight:850; white-space:nowrap; }
@@ -627,8 +621,8 @@
     .lesson-phase-card.complete { background:#f8fbfa; }
     .lesson-phase-head { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:17px; }
     .lesson-phase-title { display:flex; gap:13px; align-items:flex-start; min-width:0; }
-    .lesson-phase-number { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; border-radius:13px 13px 13px 5px; background:#0b3347; color:#72efff; font-size:18px; font-weight:950; }
-    .lesson-phase-title h2 { margin:0 0 4px; font-size:22px; }
+    .lesson-phase-number { display:grid; place-items:center; flex:0 0 42px; width:42px; height:42px; border-radius:11px; background:#0b3347; color:#72d6e1; font-size:17px; font-weight:750; }
+    .lesson-phase-title h2 { margin:0 0 4px; font-family:var(--title-font); font-size:22px; font-weight:730; letter-spacing:-.025em; }
     .lesson-phase-title p { margin:0; color:var(--muted); font-size:13px; }
     .phase-status { flex:0 0 auto; padding:6px 10px; border-radius:99px; background:#edf2f0; color:var(--muted); font-size:12px; font-weight:900; }
     .phase-status.live { background:#dff4ef; color:#176650; }
@@ -927,9 +921,9 @@
     const CATEGORIES = ['비속어', '유행어', '외래어'];
     const CLASS_STAGES = [
       { id: 'waiting', label: '수업 대기' },
-      { id: 'opinion', label: '1차시 ① 생각 나누기' },
-      { id: 'submit', label: '1차시 ② 발견' },
-      { id: 'rate', label: '1차시 ② 발견' },
+      { id: 'opinion', label: '1차시 · 발견' },
+      { id: 'submit', label: '1차시 · 발견' },
+      { id: 'rate', label: '1차시 · 발견' },
       { id: 'context', label: '2차시 · 진단' },
       { id: 'wordmaking', label: '3차시 · 설계' },
       { id: 'dictionary', label: '4차시 · 검증' }
@@ -1239,8 +1233,9 @@
       const current = qrStage === 'lesson1' && ['opinion','submit'].includes(roomStage) ? roomStage : (qrStage || roomStage);
       const firstLessonActive = ['opinion','submit'].includes(current);
       const showLessonIcon = ['opinion','submit','context','wordmaking','dictionary'].includes(current);
-      const tabs = room ? `<nav class="student-lesson-tabs no-print" aria-label="수업 차시"><span class="student-lesson-tab ${firstLessonActive?'active':''}"><span class="student-tab-icon">${lessonIcon(current==='opinion'?'opinion':'submit')}</span><span class="student-tab-copy"><small>1차시</small><b>① 생각 · ② 발견</b></span></span><span class="student-lesson-tab ${current==='context'?'active':''}"><span class="student-tab-icon">${lessonIcon('context')}</span><span class="student-tab-copy"><small>2차시</small><b>진단</b></span></span><span class="student-lesson-tab ${current==='wordmaking'?'active':''}"><span class="student-tab-icon">${lessonIcon('wordmaking')}</span><span class="student-tab-copy"><small>3차시</small><b>설계</b></span></span><span class="student-lesson-tab ${current==='dictionary'?'active':''}"><span class="student-tab-icon">${lessonIcon('dictionary')}</span><span class="student-tab-copy"><small>4차시</small><b>검증</b></span></span></nav>` : '';
-      return `<div class="student-shell">${roomLine}${tabs}<header class="student-hero card"><p class="eyebrow">말을 다시 디자인하다</p><div class="student-hero-heading">${showLessonIcon?`<span class="student-hero-icon">${lessonIcon(current)}</span>`:''}<div><h1>${esc(title)}</h1><p>${esc(description || '')}</p></div></div></header><div id="studentContent"></div></div>`;
+      const lessonLabel = firstLessonActive ? '1차시' : current === 'context' ? '2차시' : current === 'wordmaking' ? '3차시' : current === 'dictionary' ? '4차시' : '우리말 바로쓰기';
+      const tabs = room ? `<nav class="student-lesson-tabs no-print" aria-label="수업 차시"><span class="student-lesson-tab ${firstLessonActive?'active':''}"><span class="student-tab-icon">${lessonIcon('submit')}</span><span class="student-tab-copy"><small>1차시</small><b>발견</b></span></span><span class="student-lesson-tab ${current==='context'?'active':''}"><span class="student-tab-icon">${lessonIcon('context')}</span><span class="student-tab-copy"><small>2차시</small><b>진단</b></span></span><span class="student-lesson-tab ${current==='wordmaking'?'active':''}"><span class="student-tab-icon">${lessonIcon('wordmaking')}</span><span class="student-tab-copy"><small>3차시</small><b>설계</b></span></span><span class="student-lesson-tab ${current==='dictionary'?'active':''}"><span class="student-tab-icon">${lessonIcon('dictionary')}</span><span class="student-tab-copy"><small>4차시</small><b>검증</b></span></span></nav>` : '';
+      return `<div class="student-shell">${roomLine}${tabs}<header class="student-hero card"><p class="eyebrow">${lessonLabel}</p><div class="student-hero-heading">${showLessonIcon?`<span class="student-hero-icon">${lessonIcon(current)}</span>`:''}<div><h1>${esc(title)}</h1><p>${esc(description || '')}</p></div></div></header><div id="studentContent"></div></div>`;
     }
 
     function renderHomeView() {
@@ -1505,7 +1500,7 @@
         <header class="teacher-top no-print"><span class="mini-mark">LAB</span><div><h1>${esc(room.school)} ${esc(room.grade)} ${esc(room.className)}</h1><p>${esc(room.region)} · 디지털 언어 연구실</p></div>
           <div class="teacher-top-actions"><button class="btn code-button" onclick="copyUrl('${attr(room.classCode)}','클래스 코드를')">${esc(room.classCode)}</button><button class="btn" onclick="refreshTeacherDashboard()">새로고침</button><button class="btn btn-danger" onclick="confirmResetClass()">결과 초기화</button><button class="btn" onclick="leaveTeacherClass()">메인 화면</button></div></header>
         <nav class="lesson-tabs no-print" aria-label="차시 선택">
-          <button class="lesson-tab ${state.tab==='lesson1'?'active':''}" data-lesson="lesson1"><span class="lesson-tab-icon">${lessonIcon(room.currentStage==='opinion'?'opinion':'submit')}</span><span class="lesson-tab-copy"><small>1차시</small><b>① 생각 · ② 발견</b></span></button>
+          <button class="lesson-tab ${state.tab==='lesson1'?'active':''}" data-lesson="lesson1"><span class="lesson-tab-icon">${lessonIcon('submit')}</span><span class="lesson-tab-copy"><small>1차시</small><b>발견</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson2'?'active':''}" data-lesson="lesson2"><span class="lesson-tab-icon">${lessonIcon('context')}</span><span class="lesson-tab-copy"><small>2차시</small><b>진단</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson3'?'active':''}" data-lesson="lesson3"><span class="lesson-tab-icon">${lessonIcon('wordmaking')}</span><span class="lesson-tab-copy"><small>3차시</small><b>설계</b></span></button>
           <button class="lesson-tab ${state.tab==='lesson4'?'active':''}" data-lesson="lesson4"><span class="lesson-tab-icon">${lessonIcon('dictionary')}</span><span class="lesson-tab-copy"><small>4차시</small><b>검증</b></span></button>
@@ -1592,18 +1587,18 @@
 
     function lessonQrInfo(tab) {
       return ({
-        lesson1: { step:'1', stage:'opinion', label:'1차시 ① 생각 나누기 → 1차시 ② 발견', title:'생각을 나눈 뒤 우리 반 언어 수집' },
-        lesson2: { step:'2', stage:'context', label:'2차시 · 진단', title:'맥락과 적절성 진단' },
-        lesson3: { step:'3', stage:'wordmaking', label:'3차시 · 설계', title:'진단에서 새 표현으로' },
-        lesson4: { step:'4', stage:'dictionary', label:'4차시 · 검증', title:'기존 표현과 새 표현 1:1 비교' }
-      })[tab] || { step:'1', stage:'opinion', label:'1차시 ① 생각 나누기 → 1차시 ② 발견', title:'생각을 나눈 뒤 우리 반 언어 수집' };
+        lesson1: { step:'1', stage:'opinion', label:'1차시', title:'발견', qrTitle:'발견' },
+        lesson2: { step:'2', stage:'context', label:'2차시', title:'진단', qrTitle:'진단' },
+        lesson3: { step:'3', stage:'wordmaking', label:'3차시', title:'설계', qrTitle:'설계' },
+        lesson4: { step:'4', stage:'dictionary', label:'4차시', title:'검증', qrTitle:'검증' }
+      })[tab] || { step:'1', stage:'opinion', label:'1차시', title:'발견', qrTitle:'발견' };
     }
 
     function openLessonQr(stage) {
       const tab = stage === 'context' ? 'lesson2' : stage === 'wordmaking' ? 'lesson3' : stage === 'dictionary' ? 'lesson4' : 'lesson1';
       const info = lessonQrInfo(tab);
       const url = appUrl('student', { code:state.activeClass.classCode, step:info.step });
-      openQr(url, `${info.label} · ${info.title} 참여 QR`);
+      openQr(url, info.qrTitle);
     }
 
     function renderTeacherLessonTab() {
@@ -1711,7 +1706,7 @@
 
     async function renderTeacherLessonTwo(version, silent) {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      if (!silent) root.innerHTML = `${teacherLessonHero('진단: 맥락과 적절성','학생이 1차시 표현을 고르고 두 맥락을 직접 설계합니다.','context')}<div class="lesson-body"><div class="empty">진단 카드를 불러오는 중...</div></div>`;
+      if (!silent) root.innerHTML = `${teacherLessonHero('진단','1차시에서 모은 표현을 맥락과 적절성 기준으로 살펴봅니다.','context')}<div class="lesson-body"><div class="empty">진단 카드를 불러오는 중...</div></div>`;
       try {
         const workspace = await api('getDiagnosticWorkspace', managerToken(), state.activeClass.id);
         if (!teacherViewIsCurrent('lesson2', version)) return;
@@ -1738,7 +1733,7 @@
 
     async function renderTeacherLessonThree(version, silent) {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      if (!silent) root.innerHTML = `${teacherLessonHero('설계: 진단에서 새 표현으로','학생이 2차시 진단 카드 하나를 골라 새로운 표현을 설계합니다.','wordmaking')}<div class="lesson-body"><div class="empty">진단 카드와 설계안을 불러오는 중...</div></div>`;
+      if (!silent) root.innerHTML = `${teacherLessonHero('설계','진단 카드를 바탕으로 더 나은 새 표현을 만듭니다.','wordmaking')}<div class="lesson-body"><div class="empty">진단 카드와 설계안을 불러오는 중...</div></div>`;
       try {
         const workspace = await api('getRedesignWorkspace', managerToken(), state.activeClass.id);
         if (!teacherViewIsCurrent('lesson3', version)) return;
@@ -1756,7 +1751,7 @@
 
     async function renderTeacherLessonFour(version, silent) {
       const root = document.getElementById('teacherLessonContent'); if (!root) return;
-      if (!silent) root.innerHTML = `${teacherLessonHero('검증: 기존 표현과 새 표현 1:1 비교','학생 선택이 모이는 즉시 현재 우세 표현을 우리 반 사전에 반영합니다.','dictionary')}<div class="lesson-body"><div class="empty">비교 항목을 불러오는 중...</div></div>`;
+      if (!silent) root.innerHTML = `${teacherLessonHero('검증','기존 표현과 새 표현을 비교하고 선택 결과를 확인합니다.','dictionary')}<div class="lesson-body"><div class="empty">비교 항목을 불러오는 중...</div></div>`;
       try {
         const workspace = await api('getDictionaryWorkspace', managerToken(), state.activeClass.id);
         if (!teacherViewIsCurrent('lesson4', version)) return;
@@ -1814,7 +1809,7 @@
         const discussion = state.dashboard.discussion || {topic:'',responses:[],agreeCount:0,disagreeCount:0};
         const submissions = words.reduce((sum, item) => sum + Number(item.submissionCount || 0), 0);
         const topWord = words[0];
-        title = '1차시 ① 생각 나누기 · 1차시 ② 발견';
+        title = '1차시 · 발견';
         overview = resultStat('생각 나누기', `${discussion.responses.length}명`) + resultStat('찬성 / 반대', `${discussion.agreeCount} / ${discussion.disagreeCount}`) + resultStat('고유 표현', `${words.length}개`) + resultStat('전체 등록', `${submissions}회`);
         content = `<section class="lesson-phase-card card"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>${esc(discussion.topic||'등록된 주제가 없습니다.')}</p></div></div>${opinionTeacherResultsHtml(discussion)}</section><section class="lesson-phase-card card" style="margin-top:14px"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견</h2><p>${topWord?'가장 많이 나온 말: '+esc(topWord.word):'우리 반 언어 데이터 수집'}</p></div></div><div class="simple-list" style="margin-top:14px">${words.length ? words.map((word, index) => `<div class="simple-row"><div class="simple-word"><span class="eyebrow">RANK ${String(index + 1).padStart(2, '0')}</span>${esc(word.word)}<small>${esc(word.category)}</small></div>${badge(word.category)}<span class="submission-count">${word.submissionCount}회</span></div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
       } else if (step === 'lesson2') {
@@ -2126,7 +2121,7 @@
 
     /* ------------------------------ 1차시 ① 생각 나누기 ------------------------------ */
     async function renderOpinionView() {
-      setApp(studentHeader('1차시 ① 생각 나누기','주제를 읽고 찬성 또는 반대를 고른 뒤 이유를 간단히 적어 주세요.'));
+      setApp(studentHeader('발견','주제를 읽고 찬성 또는 반대를 고른 뒤 이유를 간단히 적어 주세요.'));
       document.getElementById('studentContent').innerHTML='<div class="empty">생각 나누기 주제를 불러오는 중...</div>';
       try{state.opinionLesson=await api('getOpinionLesson',state.anonId,state.classInfo.id);state.opinionChoice=state.opinionLesson.myResponse?state.opinionLesson.myResponse.choice:'';renderOpinionContent(false);}
       catch(error){const root=document.getElementById('studentContent');if(root)root.innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;}
@@ -2153,7 +2148,7 @@
 
     /* ------------------------------ 1차시 ② 발견 ------------------------------ */
     async function renderSubmitView() {
-      setApp(studentHeader('1차시 ② 발견 · 표현 수집', '생각 나누기에 이어 우리 반이 실제로 쓰는 표현을 모아 봐요.'));
+      setApp(studentHeader('발견', '우리 반이 실제로 쓰는 표현을 모아 봐요.'));
       document.getElementById('studentContent').innerHTML = `<form id="submitWordForm" class="student-card card">
         <div class="student-form-heading"><span class="student-hero-icon" aria-hidden="true">${lessonIcon('submit')}</span><div><h2>수집할 표현</h2><p>자주 쓰거나 들은 말을 적어 주세요.</p></div></div>
         <label class="sr-only" for="studentWord">수집할 표현</label><input id="studentWord" type="text" maxlength="80" required autocomplete="off" enterkeyhint="done" placeholder="표현 입력"><label class="field-label" id="categoryLabel">유형 선택</label><div class="category-choices" role="group" aria-labelledby="categoryLabel">${CATEGORIES.map(category=>`<button class="category-choice" type="button" data-student-category="${attr(category)}" aria-pressed="false"><span class="category-choice-icon">${categoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div><button class="btn btn-primary btn-lg btn-block" type="submit">표현 등록</button>
@@ -2185,7 +2180,7 @@
 
     /* ------------------------------ 상황 활동 학생 ------------------------------ */
     async function renderContextView() {
-      setApp(studentHeader('2차시 · 맥락 진단', '표현을 고르고, 어울리는 경우와 그렇지 않은 경우를 직접 만들어 봐요.'));
+      setApp(studentHeader('진단', '표현을 고르고, 어울리는 경우와 그렇지 않은 경우를 직접 만들어 봐요.'));
       document.getElementById('studentContent').innerHTML = `<div class="empty">표현 목록을 불러오는 중...</div>`;
       state.diagnosticDraft = null;
       try {
@@ -2302,7 +2297,7 @@
 
     /* ------------------------------ 우리말 만들기 학생 ------------------------------ */
     async function renderWordmakingView() {
-      setApp(studentHeader('3차시 · 새 표현 설계', '2차시 진단 카드 하나를 골라 더 잘 어울리는 표현을 만들어 봐요.'));
+      setApp(studentHeader('설계', '진단 카드 하나를 골라 더 잘 어울리는 표현을 만들어 봐요.'));
       document.getElementById('studentContent').innerHTML='<div class="empty">진단 카드를 불러오는 중...</div>';
       state.selectedDiagnosticId='';
       try { state.redesignCards=await api('getRedesignLesson',state.anonId,state.classInfo.id); state.makingWords=state.redesignCards; renderMakingContent(); }
@@ -2329,7 +2324,7 @@
 
     /* ------------------------------ 블라인드 검증 · 공개 사전 ------------------------------ */
     async function renderDictionaryView(){
-      setApp(studentHeader('4차시 · 1:1 검증','기존 표현과 새 표현 중 이 상황에 더 잘 어울리는 말을 골라요.'));
+      setApp(studentHeader('검증','기존 표현과 새 표현 중 이 상황에 더 잘 어울리는 말을 골라요.'));
       document.getElementById('studentContent').innerHTML='<div class="empty">검증 항목을 불러오는 중...</div>';
       state.abAnswers={choice:''};
       try{[state.abLesson,state.publishedDictionary]=await Promise.all([api('getAbTestLesson',state.anonId,state.classInfo.id),api('getPublishedDictionary',state.anonId,state.classInfo.id)]);renderVerificationView();}catch(error){document.getElementById('studentContent').innerHTML=`<div class="empty">${esc(friendlyError(error))}</div>`;}
