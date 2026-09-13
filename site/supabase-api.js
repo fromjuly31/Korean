@@ -1,7 +1,7 @@
 (function (global) {
   'use strict';
 
-  const CATEGORIES = ['비속어', '유행어', '외래어'];
+  const CATEGORIES = ['유행어', '신조어'];
   const SUGGESTION_TYPES = ['기존 표현으로 바꾸기', '새로운 말 만들기'];
   const PAGE_SIZE = 1000;
   let client = null;
@@ -137,7 +137,7 @@
     return id;
   }
 
-  function buildWordGroups(wordRows, ratingRows) {
+  function buildWordGroups(wordRows, ratingRows, sourceRows) {
     const words = wordRows.slice().sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
     const grouped = words.reduce((result, row) => {
       const key = String(row.class_id || '') + '\u0000' + String(row.normalized_word);
@@ -145,13 +145,22 @@
       return result;
     }, Object.create(null));
     const ratingsByWord = groupBy(ratingRows, 'word_id');
+    const sourcesByWord = groupBy(sourceRows || [], 'word_id');
     return Object.keys(grouped).map(key => {
       const submissions = grouped[key];
       const representative = submissions[0];
       const latestByOwner = Object.create(null);
+      const sourceCounts = Object.create(null);
+      const sourceOrder = [];
       submissions.forEach(submission => {
         (ratingsByWord[String(submission.id)] || []).forEach(rating => {
           latestByOwner[rating.owner_id] = Number(rating.rating);
+        });
+        (sourcesByWord[String(submission.id)] || []).forEach(entry => {
+          const source = cleanText(entry.source, 200);
+          if (!source) return;
+          if (!sourceCounts[source]) sourceOrder.push(source);
+          sourceCounts[source] = (sourceCounts[source] || 0) + 1;
         });
       });
       const scores = Object.values(latestByOwner);
@@ -161,6 +170,11 @@
         categoryCounts[category] = (categoryCounts[category] || 0) + 1;
       });
       const category = CATEGORIES.slice().sort((a, b) => (categoryCounts[b] || 0) - (categoryCounts[a] || 0))[0];
+      const sources = sourceOrder.map((text, index) => ({ text, count: sourceCounts[text], index }))
+        .sort((a, b) => b.count - a.count || a.index - b.index)
+        .map(({ text, count }) => ({ text, count }));
+      const submissionCount = submissions.reduce((sum, row) => sum + Math.max(1, Number(row.submit_count) || 1), 0);
+      const attributedSourceCount = sources.reduce((sum, item) => sum + item.count, 0);
       const mean = scores.length ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
       const variance = scores.length ? scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length : 0;
       return {
@@ -169,14 +183,17 @@
         word: representative.word,
         normalizedWord: representative.normalized_word,
         category,
-        submissionCount: submissions.reduce((sum, row) => sum + Math.max(1, Number(row.submit_count) || 1), 0),
+        submissionCount,
         averageRating: Math.round(mean * 10) / 10,
         ratingCount: scores.length,
         ratingSpread: Math.round(Math.sqrt(variance) * 10) / 10,
         approved: submissions.some(row => Boolean(row.approved)),
         createdAt: representative.created_at,
         submitterOwnerIds: submissions.map(row => row.owner_id),
-        ratingsByOwner: latestByOwner
+        ratingsByOwner: latestByOwner,
+        representativeSource: sources[0] ? sources[0].text : '',
+        sources,
+        unattributedSourceCount: Math.max(0, submissionCount - attributedSourceCount)
       };
     }).sort((a, b) => b.submissionCount - a.submissionCount || String(a.word).localeCompare(String(b.word), 'ko'));
   }
@@ -193,12 +210,15 @@
       ratingCount: word.ratingCount,
       ratingSpread: word.ratingSpread,
       approved: word.approved,
-      createdAt: word.createdAt
+      createdAt: word.createdAt,
+      representativeSource: word.representativeSource,
+      sources: word.sources,
+      unattributedSourceCount: word.unattributedSourceCount
     };
   }
 
   function buildWordStats(words) {
-    const stats = { total: words.length, '비속어': 0, '유행어': 0, '외래어': 0, ratingCount: 0 };
+    const stats = { total: words.length, '유행어': 0, '신조어': 0, ratingCount: 0 };
     words.forEach(word => {
       stats[word.category] = (stats[word.category] || 0) + 1;
       stats.ratingCount += word.ratingCount;
@@ -335,6 +355,17 @@
         session = signIn && signIn.session;
       }
       accessToken = session && session.access_token ? session.access_token : '';
+    }
+  }
+
+  async function fetchWordSources(configure) {
+    try {
+      return await fetchRows('word_sources', '*', configure);
+    } catch (error) {
+      // 정적 화면이 먼저 배포된 경우에도 기존 수업 자료 조회는 유지합니다.
+      // 새 출처 저장은 submit_word RPC에서 DB 업데이트 안내와 함께 중단됩니다.
+      if (/lesson-flow-update\.sql/i.test(String(error && error.message || ''))) return [];
+      throw error;
     }
   }
 
@@ -482,9 +513,10 @@
 
   async function getClassDashboard(_token, classId) {
     const id = await assertClassManager(classId);
-    const [classRow, words, tasks, opinionRows] = await Promise.all([
+    const [classRow, words, wordSources, tasks, opinionRows] = await Promise.all([
       client.from('classes').select('id,discussion_topic').eq('id', id).maybeSingle().then(check),
       fetchRows('words', '*', query => query.eq('class_id', id).order('created_at')),
+      fetchWordSources(query => query.eq('class_id', id).order('created_at')),
       fetchRows('context_tasks', '*', query => query.eq('class_id', id).order('created_at')),
       fetchRows('opinion_responses', '*', query => query.eq('class_id', id).order('created_at'))
     ]);
@@ -494,7 +526,7 @@
       wordIds.length ? fetchRows('dictionary', '*', query => query.in('word_id', wordIds).eq('approved', true)) : [],
       taskIds.length ? fetchRows('usability_responses', '*', query => query.in('test_id', taskIds)) : []
     ]);
-    const groups = buildWordGroups(words, []);
+    const groups = buildWordGroups(words, [], wordSources);
     return {
       words: groups.map(publicAdminWord),
       discussion: buildOpinionDiscussion(classRow, opinionRows),
@@ -576,20 +608,24 @@
 
   async function getClassWords(_token, classId) {
     const id = requiredText(classId, '클래스', 80);
-    const words = await fetchRows('words', '*', query => query.eq('class_id', id).order('created_at'));
-    return buildWordGroups(words, []).map(publicAdminWord);
+    const [words, wordSources] = await Promise.all([
+      fetchRows('words', '*', query => query.eq('class_id', id).order('created_at')),
+      fetchWordSources(query => query.eq('class_id', id).order('created_at'))
+    ]);
+    return buildWordGroups(words, [], wordSources).map(publicAdminWord);
   }
 
   async function getAdminDashboard() {
     await assertAdmin();
-    const [classes, words, tasks, dictionary, usabilityResponses] = await Promise.all([
+    const [classes, words, wordSources, tasks, dictionary, usabilityResponses] = await Promise.all([
       fetchRows('classes', '*', query => query.order('created_at', { ascending: false })),
       fetchRows('words', '*', query => query.order('created_at')),
+      fetchWordSources(query => query.order('created_at')),
       fetchRows('context_tasks'),
       fetchRows('dictionary'),
       fetchRows('usability_responses')
     ]);
-    const groups = buildWordGroups(words, []);
+    const groups = buildWordGroups(words, [], wordSources);
     return {
       classes: classes.map(mapClass),
       words: groups.map(publicAdminWord),
@@ -602,8 +638,8 @@
 
   async function getAdminWords() {
     await assertAdmin();
-    const [words, ratings] = await Promise.all([fetchRows('words'), fetchRows('word_ratings')]);
-    const groups = buildWordGroups(words, ratings);
+    const [words, ratings, wordSources] = await Promise.all([fetchRows('words'), fetchRows('word_ratings'), fetchWordSources()]);
+    const groups = buildWordGroups(words, ratings, wordSources);
     return { words: groups.map(publicAdminWord), stats: buildWordStats(groups) };
   }
 
@@ -632,51 +668,20 @@
     return { ok: true };
   }
 
-  async function submitWord(_anonId, word, category, classId) {
-    const user = await currentUser();
+  async function submitWord(_anonId, word, category, source, classId) {
+    await currentUser();
     const targetClassId = requiredText(classId, '클래스', 80);
     assertCategory(category);
     const original = requiredText(word, '단어 또는 표현', 80);
+    const collectionSource = requiredText(source, '수집 출처', 200);
     const normalized = normalizeWord(original);
     if (!normalized || !/[\p{L}\p{N}]/u.test(normalized)) throw new Error('문자나 숫자가 포함된 표현을 입력해 주세요.');
-    const rpcResult = await client.rpc('submit_word', {
+    const rows = check(await client.rpc('submit_word', {
       p_class_id: targetClassId,
       p_word: original,
-      p_category: category
-    });
-    let rows;
-    if (!rpcResult.error) {
-      rows = rpcResult.data;
-    } else {
-      const raw = String(rpcResult.error.message || '');
-      const missingRpc = rpcResult.error.code === 'PGRST202'
-        || /submit_word.*schema cache|could not find.*submit_word/i.test(raw);
-      if (!missingRpc) fail(rpcResult.error);
-
-      // 구버전 DB와의 호환 경로입니다. 최신 permissions-update.sql을 적용하면
-      // 원자적 중복 병합 RPC가 사용되고, 적용 전에도 학생 등록은 막히지 않습니다.
-      const cutoff = new Date(Date.now() - 15000).toISOString();
-      const recentResult = await client.from('words').select('id').eq('owner_id', user.id)
-        .eq('class_id', targetClassId).eq('normalized_word', normalized).eq('category', category)
-        .gte('created_at', cutoff).limit(1).maybeSingle();
-      if (recentResult.error) fail(recentResult.error);
-      if (recentResult.data) return { ok: true, duplicatePrevented: true, id: recentResult.data.id };
-      const fallbackResult = await client.from('words').insert({
-        owner_id: user.id,
-        class_id: targetClassId,
-        word: original,
-        normalized_word: normalized,
-        category,
-        approved: false
-      }).select('id').single();
-      if (fallbackResult.error) {
-        if (/row-level security|permission denied/i.test(String(fallbackResult.error.message || ''))) {
-          throw new Error('학생 표현 저장 설정을 업데이트해야 합니다. 선생님께 알려 주세요.');
-        }
-        fail(fallbackResult.error);
-      }
-      return { ok: true, id: fallbackResult.data.id, compatibilityMode: true };
-    }
+      p_category: category,
+      p_source: collectionSource
+    }));
     const saved = rows && rows[0];
     if (!saved) throw new Error('저장하지 못했습니다. 잠시 후 다시 시도해 주세요.');
     return { ok: true, id: saved.id, submissionCount: saved.submit_count, merged: Boolean(saved.duplicate) };
@@ -685,14 +690,20 @@
   async function getApprovedWords(_anonId, classId) {
     const user = await currentUser();
     const targetClassId = requiredText(classId, '클래스', 80);
-    const words = await fetchRows('words', '*', query => query.eq('class_id', targetClassId).order('created_at'));
-    return buildWordGroups(words, []).map(word => ({
+    const [words, wordSources] = await Promise.all([
+      fetchRows('words', '*', query => query.eq('class_id', targetClassId).order('created_at')),
+      fetchWordSources(query => query.eq('class_id', targetClassId).order('created_at'))
+    ]);
+    return buildWordGroups(words, [], wordSources).map(word => ({
       id: word.id,
       word: word.word,
       category: word.category,
       submissionCount: word.submissionCount,
       averageRating: word.averageRating,
       ratingCount: word.ratingCount,
+      representativeSource: word.representativeSource,
+      sources: word.sources,
+      unattributedSourceCount: word.unattributedSourceCount,
       mine: word.submitterOwnerIds.includes(user.id),
       myRating: word.ratingsByOwner[user.id] || 0
     }));

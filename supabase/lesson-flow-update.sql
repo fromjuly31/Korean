@@ -52,6 +52,28 @@ using (
 revoke all on table public.opinion_responses from anon, authenticated;
 grant select on table public.opinion_responses to authenticated;
 
+-- 같은 표현을 여러 번 수집해도 출처는 제출 건별로 보존합니다.
+create table if not exists public.word_sources (
+  id uuid primary key default gen_random_uuid(),
+  word_id uuid not null references public.words(id) on delete cascade,
+  class_id uuid not null references public.classes(id) on delete cascade,
+  owner_id uuid not null,
+  source text not null check (char_length(source) between 1 and 200),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists word_sources_word_id_idx on public.word_sources(word_id);
+create index if not exists word_sources_class_id_idx on public.word_sources(class_id);
+
+alter table public.word_sources enable row level security;
+drop policy if exists word_sources_read on public.word_sources;
+create policy word_sources_read on public.word_sources
+for select to authenticated
+using (public.can_manage_class(class_id) or public.is_class_member(class_id));
+
+revoke all on table public.word_sources from anon, authenticated;
+grant select on table public.word_sources to authenticated;
+
 create or replace function public.normalize_korean_class_word(value text)
 returns text
 language sql
@@ -61,8 +83,9 @@ as $$
   select lower(trim(coalesce(value, '')));
 $$;
 
--- 학생 표현 저장 오류를 함께 복구합니다. 같은 표현은 새 행 대신 등록 횟수만 올립니다.
-create or replace function public.submit_word(p_class_id uuid, p_word text, p_category text)
+-- 학생 표현 저장 오류를 함께 복구합니다. 같은 표현은 새 행 대신 등록 횟수만 올리고 출처는 모두 보존합니다.
+drop function if exists public.submit_word(uuid, text, text);
+create or replace function public.submit_word(p_class_id uuid, p_word text, p_category text, p_source text)
 returns table (id uuid, submit_count integer, duplicate boolean)
 language plpgsql
 security definer
@@ -70,9 +93,11 @@ set search_path = ''
 as $$
 declare
   clean_word text := trim(coalesce(p_word, ''));
+  clean_source text := trim(coalesce(p_source, ''));
   normalized text := public.normalize_korean_class_word(p_word);
   found_id uuid;
   next_count integer;
+  was_duplicate boolean := false;
 begin
   if (select auth.uid()) is null or not public.is_class_member(p_class_id) then
     raise exception '이 클래스에 참여한 학생만 표현을 등록할 수 있습니다.';
@@ -81,8 +106,9 @@ begin
     select 1 from public.classes c
     where c.id = p_class_id and c.is_active and c.current_stage = 'submit'
   ) then raise exception '지금은 언어 수집 시간이 아닙니다.'; end if;
-  if p_category not in ('비속어', '유행어', '외래어') then raise exception '유형을 올바르게 선택해 주세요.'; end if;
+  if p_category not in ('유행어', '신조어') then raise exception '유형을 올바르게 선택해 주세요.'; end if;
   if char_length(clean_word) not between 1 and 80 or normalized = '' then raise exception '표현을 입력해 주세요.'; end if;
+  if char_length(clean_source) not between 1 and 200 then raise exception '수집 출처를 1~200자로 입력해 주세요.'; end if;
 
   perform pg_advisory_xact_lock(hashtextextended(p_class_id::text || ':' || normalized, 0));
   select w.id, w.submit_count into found_id, next_count
@@ -93,14 +119,17 @@ begin
   if found_id is not null then
     update public.words w set submit_count = w.submit_count + 1 where w.id = found_id
     returning w.submit_count into next_count;
-    return query select found_id, next_count, true;
-    return;
+    was_duplicate := true;
+  else
+    insert into public.words(class_id, owner_id, word, normalized_word, category, submit_count, approved)
+    values (p_class_id, (select auth.uid()), clean_word, normalized, p_category, 1, false)
+    returning words.id, words.submit_count into found_id, next_count;
   end if;
 
-  insert into public.words(class_id, owner_id, word, normalized_word, category, submit_count, approved)
-  values (p_class_id, (select auth.uid()), clean_word, normalized, p_category, 1, false)
-  returning words.id, words.submit_count into found_id, next_count;
-  return query select found_id, next_count, false;
+  insert into public.word_sources(word_id, class_id, owner_id, source)
+  values (found_id, p_class_id, (select auth.uid()), clean_source);
+
+  return query select found_id, next_count, was_duplicate;
 end;
 $$;
 
@@ -193,7 +222,7 @@ create table if not exists public.dictionary (
   word_id uuid not null unique references public.words(id) on delete cascade,
   suggestion_id uuid references public.word_suggestions(id) on delete set null,
   original_word text not null check (char_length(original_word) between 1 and 120),
-  category text not null check (category in ('비속어', '유행어', '외래어')),
+  category text not null check (category in ('유행어', '신조어')),
   final_word text not null default '' check (char_length(final_word) <= 160),
   meaning text not null default '' check (char_length(meaning) <= 1200),
   caution text not null default '' check (char_length(caution) <= 1200),
@@ -202,6 +231,23 @@ create table if not exists public.dictionary (
   updated_at timestamptz not null default now(),
   check (not approved or (char_length(final_word) > 0 and char_length(meaning) > 0))
 );
+
+-- 분류 체계를 유행어·신조어 두 가지로 통일합니다.
+-- 기존 유행어는 유지하고, 이전 비속어·외래어 자료는 신조어로 합칩니다.
+alter table public.words drop constraint if exists words_category_check;
+alter table public.context_tasks drop constraint if exists context_tasks_category_check;
+alter table public.word_suggestions drop constraint if exists word_suggestions_category_check;
+alter table public.dictionary drop constraint if exists dictionary_category_check;
+
+update public.words set category = case when category = '유행어' then '유행어' else '신조어' end;
+update public.context_tasks set category = case when category = '유행어' then '유행어' else '신조어' end;
+update public.word_suggestions set category = case when category = '유행어' then '유행어' else '신조어' end;
+update public.dictionary set category = case when category = '유행어' then '유행어' else '신조어' end;
+
+alter table public.words add constraint words_category_check check (category in ('유행어', '신조어'));
+alter table public.context_tasks add constraint context_tasks_category_check check (category in ('유행어', '신조어'));
+alter table public.word_suggestions add constraint word_suggestions_category_check check (category in ('유행어', '신조어'));
+alter table public.dictionary add constraint dictionary_category_check check (category in ('유행어', '신조어'));
 
 create table if not exists public.ab_tests (
   id uuid primary key default gen_random_uuid(),
@@ -707,8 +753,8 @@ revoke all on function public.submit_comparison_vote(uuid, text) from public;
 revoke all on function public.start_opinion_discussion(uuid, text) from public;
 revoke all on function public.submit_opinion_response(uuid, text, text) from public;
 grant execute on function public.claim_diagnostic_word(uuid, uuid) to authenticated;
-revoke all on function public.submit_word(uuid, text, text) from public;
-grant execute on function public.submit_word(uuid, text, text) to authenticated;
+revoke all on function public.submit_word(uuid, text, text, text) from public;
+grant execute on function public.submit_word(uuid, text, text, text) to authenticated;
 grant execute on function public.save_diagnostic_card(uuid, text[], text, text, text, text, smallint, text, text, text, text, smallint, text) to authenticated;
 grant execute on function public.submit_diagnostic_redesign(uuid, text, text, text, text) to authenticated;
 grant execute on function public.submit_comparison_vote(uuid, text) to authenticated;

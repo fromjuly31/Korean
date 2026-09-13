@@ -79,7 +79,7 @@
     .btn-soft { border-color: #d8e1ff; color: var(--primary); background: var(--primary-soft); }
     .btn-lg { min-height: 54px; padding: 13px 21px; font-size: 17px; }
     .btn-block { width: 100%; }
-    .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; }
     .stat { padding: 18px; }
     .stat span { display: block; color: var(--muted); font-size: 14px; font-weight: 700; }
     .stat strong { display: block; margin-top: 5px; font-size: 27px; letter-spacing: -.04em; }
@@ -121,7 +121,7 @@
     .badge { display: inline-flex; align-items: center; min-height: 27px; padding: 3px 9px; border-radius: 99px; font-size: 13px; font-weight: 800; }
     .badge-slang { color: #ad3544; background: #fff0f2; }
     .badge-trend { color: #795000; background: #fff4d8; }
-    .badge-loan { color: #206359; background: #e9f8f4; }
+    .badge-new { color:#6b4aa0; background:#f1eafd; }
     .badge-approved { color: var(--success); background: #e8f7f1; }
     .badge-pending { color: #6e7480; background: #eff1f4; }
     .table-wrap { overflow-x: auto; }
@@ -340,7 +340,32 @@
     .simple-row.live-updated { animation: live-word-in 1.8s ease-out; }
     @keyframes live-word-in { 0% { background:#ddf7ef; box-shadow:inset 4px 0 0 var(--success); } 100% { background:#fff; box-shadow:inset 4px 0 0 transparent; } }
     .simple-word { min-width: 0; font-size: 18px; font-weight: 850; letter-spacing: -.025em; }
+    .simple-word > strong { display:block; font:730 18px/1.3 var(--title-font); letter-spacing:-.025em; }
     .simple-word small { display: block; margin-top: 1px; color: var(--muted); font-size: 12px; font-weight: 650; }
+    .word-source-row { grid-template-columns:minmax(170px,1.2fr) minmax(145px,.8fr) auto auto; }
+    .word-source-button { position:relative; display:block; width:100%; min-width:0; padding:2px 24px 2px 0; border:0; background:transparent; color:var(--ink); text-align:left; }
+    .word-source-button::after { content:""; position:absolute; top:50%; right:4px; width:7px; height:7px; margin-top:-6px; border-right:1.5px solid #789097; border-bottom:1.5px solid #789097; transform:rotate(45deg); transition:transform .16s ease,margin .16s ease; }
+    .word-source-button[aria-expanded="true"]::after { margin-top:-2px; transform:rotate(225deg); }
+    .word-source-button:hover strong { color:#08798a; }
+    .word-source-preview { display:grid; min-width:0; padding-left:14px; border-left:1px solid #e1e8e9; }
+    .word-source-preview small { color:#87979b; font-size:9px; font-weight:650; line-height:1.2; letter-spacing:.06em; }
+    .word-source-preview b { overflow:hidden; margin-top:3px; color:#41565d; font-size:12px; font-weight:680; line-height:1.3; text-overflow:ellipsis; white-space:nowrap; }
+    .word-source-preview.empty b { color:#9aa7aa; font-weight:600; }
+    .word-source-detail { grid-column:1/-1; display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px 14px; align-items:start; padding:13px 14px; margin-top:2px; border-top:1px solid #e4ebec; border-radius:0 0 10px 10px; background:#f7fafb; }
+    .word-source-detail > b { padding-top:4px; color:#52676d; font-size:11px; font-weight:700; letter-spacing:.02em; }
+    .source-chip-list { display:flex; flex-wrap:wrap; gap:6px; }
+    .source-chip { display:inline-flex; align-items:center; gap:5px; min-height:28px; padding:5px 9px; border:1px solid #dce6e8; border-radius:8px; background:#fff; color:#40575d; font-size:12px; line-height:1.3; }
+    .source-chip small { color:#118092; font-size:10px; font-weight:750; }
+    .source-chip-missing { border-style:dashed; color:#89979a; }
+    .source-field-help { margin:5px 0 0; color:var(--muted); font-size:11px; }
+    .simple-row-ranked { grid-template-columns:58px minmax(0,1fr) minmax(130px,.7fr) auto; column-gap:16px; min-height:72px; padding:11px 16px; border-color:#e1e8e9; border-radius:13px; }
+    .rank-label { display:flex; align-items:baseline; gap:4px; min-width:0; padding-right:14px; border-right:1px solid #dce6e8; color:#0b7788; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .rank-label span { font-size:9px; font-weight:700; line-height:1; letter-spacing:.09em; }
+    .rank-label b { font-size:15px; font-weight:760; line-height:1; letter-spacing:-.02em; }
+    .simple-row-ranked .simple-word small { margin-top:3px; font-size:11px; font-weight:600; }
+    .simple-row-ranked .submission-count { padding:5px 8px; border-radius:8px; background:#f0f5f5; color:#536a70; font-size:12px; font-weight:700; }
+    .result-row-source { grid-template-columns:minmax(0,1fr) minmax(130px,.75fr) auto; }
+    .result-row-source .word-source-detail { grid-column:1/-1; }
     .score-pill { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; min-height: 34px; padding: 6px 10px; border-radius: 99px; background: #fff7df; color: #9b6a14; font-size: 13px; font-weight: 900; }
     .score-pill .score-star { color: #e5a62a; font-size: 16px; }
     .select-toggle { min-height: 36px; padding: 6px 11px; border: 1px solid #ded7e8; border-radius: 11px; background: #faf7fd; color: #785a98; font-size: 12px; font-weight: 850; }
@@ -543,7 +568,7 @@
     .student-tab-copy { min-width:0; }.student-tab-copy small,.student-tab-copy b { display:block; }.student-tab-copy small { font-size:9px; font-weight:620; letter-spacing:.03em; }.student-tab-copy b { font-size:12px; font-weight:720; letter-spacing:-.02em; }
     .student-lesson-tab.active { border-color:#0b4052; background:#0b3347; color:#fff; box-shadow:0 7px 18px rgba(11,51,71,.13); }
     .student-lesson-tab.active .student-tab-icon { background:rgba(255,255,255,.16); color:#fff; }
-    .category-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 16px; }
+    .category-choices { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin:12px 0 16px; }
     .category-choice { display:flex; align-items:center; justify-content:center; gap:8px; min-width:0; min-height:50px; padding:8px 10px; border:1px solid #d8dddc; border-radius:12px; background:#fff; color:#5e6b68; font-weight:850; white-space:nowrap; }
     .category-choice.active { border-color:var(--primary); background:var(--primary-soft); color:var(--primary); box-shadow:inset 0 0 0 1px var(--primary); }
     .category-choice-icon { display:grid; place-items:center; flex:0 0 24px; width:24px; height:24px; border-radius:8px; background:#f1f5f3; color:currentColor; }
@@ -790,6 +815,16 @@
       .lesson-actions { justify-content: flex-start; width: 100%; margin-left: 0; }
       .lesson-actions .btn { flex: 1; }
       .simple-row { grid-template-columns: minmax(0,1fr) auto; }
+      .simple-row.word-source-row { grid-template-columns:minmax(0,1fr) minmax(110px,.7fr); }
+      .simple-row.simple-row-ranked { grid-template-columns:52px minmax(0,1fr) auto; gap:12px; padding:10px 12px; }
+      .simple-row-ranked .rank-label { grid-column:1; grid-row:1; padding-right:10px; }
+      .simple-row-ranked .word-source-button { grid-column:2; grid-row:1; }
+      .simple-row-ranked > .submission-count { grid-column:3; grid-row:1; }
+      .simple-row-ranked .word-source-preview { grid-column:2/4; grid-row:2; padding:8px 0 0; border-top:1px solid #e5ebec; border-left:0; }
+      .result-row.result-row-source { grid-template-columns:minmax(0,1fr) auto; }
+      .result-row-source .word-source-button { grid-column:1; grid-row:1; }
+      .result-row-source > .submission-count { grid-column:2; grid-row:1; }
+      .result-row-source .word-source-preview { grid-column:1/3; grid-row:2; padding:7px 0 0; border-left:0; }
       .simple-row .row-actions { grid-column: 1 / -1; }
       .context-grid, .refine-grid { grid-template-columns: 1fr; }
       .diagnostic-word-grid { grid-template-columns:1fr 1fr; }
@@ -902,7 +937,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./config.js"></script>
-  <script src="./supabase-api.js?v=20260913-opinion-flow"></script>
+  <script src="./supabase-api.js?v=20260913-source-flow"></script>
   <script>
     'use strict';
     const query = new URLSearchParams(location.search);
@@ -918,7 +953,7 @@
       classCode: String(query.get('code') || '').replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 12),
       baseUrl: location.origin + location.pathname
     }));
-    const CATEGORIES = ['비속어', '유행어', '외래어'];
+    const CATEGORIES = ['유행어', '신조어'];
     const CLASS_STAGES = [
       { id: 'waiting', label: '수업 대기' },
       { id: 'opinion', label: '1차시 · 발견' },
@@ -1038,8 +1073,29 @@
     }
     function attr(value) { return esc(value).replace(/`/g, '&#96;'); }
     function jsArg(value) { return esc(JSON.stringify(String(value == null ? '' : value))); }
-    function categoryClass(category) { return category === '비속어' ? 'badge-slang' : category === '외래어' ? 'badge-loan' : 'badge-trend'; }
+    function categoryClass(category) { return category === '신조어' ? 'badge-new' : 'badge-trend'; }
     function badge(category) { return `<span class="badge ${categoryClass(category)}">${esc(category)}</span>`; }
+    function wordSourcePreviewHtml(word) {
+      const source = String(word && word.representativeSource || '');
+      return `<span class="word-source-preview ${source?'':'empty'}"><small>대표 출처</small><b title="${attr(source||'출처 미입력')}">${esc(source||'출처 미입력')}</b></span>`;
+    }
+    function wordSourceDetailsHtml(word) {
+      const sources = Array.isArray(word && word.sources) ? word.sources : [];
+      const missing = Math.max(0, Number(word && word.unattributedSourceCount || 0));
+      const chips = sources.map(item=>`<span class="source-chip">${esc(item.text)}${Number(item.count)>1?`<small>${Number(item.count)}회</small>`:''}</span>`).join('')
+        + (missing ? `<span class="source-chip source-chip-missing">출처 미기록 <small>${missing}회</small></span>` : '');
+      return `<div class="word-source-detail hidden"><b>수집 출처</b><div class="source-chip-list">${chips||'<span class="help">등록된 출처가 없습니다.</span>'}</div></div>`;
+    }
+    function toggleWordSources(button) {
+      const row = button && button.closest('[data-source-row]');
+      const detail = row && row.querySelector('.word-source-detail');
+      if (!detail) return;
+      const expanded = detail.classList.contains('hidden');
+      detail.classList.toggle('hidden', !expanded);
+      button.setAttribute('aria-expanded', String(expanded));
+      const hint = button.querySelector('[data-source-hint]');
+      if (hint) hint.textContent = expanded ? '출처 접기' : '출처 보기';
+    }
     function formatScore(value) { return Number(value) ? Number(value).toFixed(1) : '-'; }
     function summarizeUsabilityTests(tests) {
       const answered = (tests || []).filter(item => Number(item.responseCount));
@@ -1191,9 +1247,8 @@
 
     function categoryIcon(category) {
       const paths = {
-        '비속어': '<path d="M12 3 2.8 19h18.4L12 3Z"/><path d="M12 9v4M12 16h.01"/>',
         '유행어': '<path d="m4 15 5-5 4 4 7-8"/><path d="M15 6h5v5"/>',
-        '외래어': '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9S14.4 18.5 12 21M12 3C9.6 5.5 8.4 8.5 8.4 12S9.6 18.5 12 21"/>'
+        '신조어': '<path d="m12 3 1.35 4.15L17.5 8.5l-4.15 1.35L12 14l-1.35-4.15L6.5 8.5l4.15-1.35L12 3Z"/><path d="m18.5 14 .7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3Z"/>'
       };
       return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[category]||paths['유행어']}</svg>`;
     }
@@ -1244,7 +1299,7 @@
       setApp(`<div class="lab-home-shell">
         <nav class="lab-home-nav" aria-label="시작 화면"><a class="lab-home-brand" href="${attr(CONFIG.baseUrl)}"><span class="lab-home-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5.5 5.5h9a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-4.8L6 18.5v-3.1a3 3 0 0 1-2.5-2.9v-4a3 3 0 0 1 2-3Z"/><path d="M9 9h5M9 12h3"/><path d="M17.5 9.5h1a2 2 0 0 1 2 2v5.5l-2.5-1.8"/></svg></span><span>우리말 바로쓰기</span></a><span class="lab-home-status">SYSTEM READY · 익명 참여</span><a class="lab-admin-link" href="${attr(appUrl('admin'))}">관리자</a></nav>
         <header class="lab-home-hero">
-          <div class="lab-home-copy"><p class="lab-kicker">우리말 리디자인 프로젝트</p><h1>우리말,<br><span>다시 디자인하다.</span></h1><p class="lab-lead">비속어·유행어·외래어를 수집하고, 더 나은 우리말로 재구성합니다.</p></div>
+          <div class="lab-home-copy"><p class="lab-kicker">우리말 리디자인 프로젝트</p><h1>우리말,<br><span>다시 디자인하다.</span></h1><p class="lab-lead">유행어·신조어를 수집하고, 더 나은 우리말로 재구성합니다.</p></div>
           <div class="lab-network" aria-hidden="true"><svg viewBox="0 0 800 610"><path class="lab-net-line" d="M80 430 C180 280 240 390 327 257 S530 70 720 142"/><path class="lab-net-line alt" d="M90 185 C215 98 277 170 349 248 S535 420 730 340"/><path class="lab-net-line" d="M155 540 C260 430 385 480 451 365 S579 198 738 230"/><g transform="translate(90 430)"><circle class="lab-node-ring" r="34"/><circle class="lab-node" r="4"/><text class="lab-node-label" x="-22" y="54">DISCOVER</text></g><g transform="translate(349 248)"><circle class="lab-node-ring" r="57"/><circle class="lab-node alt" r="6"/><text class="lab-node-label" x="-29" y="80">DIAGNOSE</text></g><g transform="translate(535 420)"><circle class="lab-node-ring" r="38"/><circle class="lab-node" r="4"/><text class="lab-node-label" x="-28" y="60">DESIGN</text></g><g transform="translate(720 142)"><circle class="lab-node-ring" r="72"/><circle class="lab-node alt" r="8"/><text class="lab-node-label" x="-23" y="98">VERIFY</text></g></svg></div>
         </header>
         <section class="lab-access" aria-label="역할별 수업 입장">
@@ -1466,7 +1521,7 @@
       const ordered = (words || []).map((word, index) => ({ word, index }))
         .sort((a, b) => Number(changed.has(b.word.id)) - Number(changed.has(a.word.id)) || a.index - b.index)
         .map(item => item.word);
-      return ordered.length ? ordered.map(word => `<div class="simple-row ${changed.has(word.id)?'live-updated':''}" data-teacher-word-id="${attr(word.id)}"><div class="simple-word">${esc(word.word)}<small>${word.submissionCount}회 등록</small></div><select class="inline-select" aria-label="${attr(word.word)} 유형 변경" onchange="changeWordCategory('${attr(word.id)}',this)">${CATEGORIES.map(category=>`<option ${category===word.category?'selected':''}>${category}</option>`).join('')}</select><div class="row-actions actions"><button class="btn icon-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></div></div>`).join('') : '<div class="empty">학생이 표현을 입력하면 이곳에 나타납니다.</div>';
+      return ordered.length ? ordered.map(word => `<div class="simple-row word-source-row ${changed.has(word.id)?'live-updated':''}" data-teacher-word-id="${attr(word.id)}" data-source-row><button class="simple-word word-source-button" type="button" aria-expanded="false" onclick="toggleWordSources(this)"><strong>${esc(word.word)}</strong><small>${word.submissionCount}회 등록 · <span data-source-hint>출처 보기</span></small></button>${wordSourcePreviewHtml(word)}<select class="inline-select" aria-label="${attr(word.word)} 유형 변경" onchange="changeWordCategory('${attr(word.id)}',this)">${CATEGORIES.map(category=>`<option ${category===word.category?'selected':''}>${category}</option>`).join('')}</select><div class="row-actions actions"><button class="btn icon-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></div>${wordSourceDetailsHtml(word)}</div>`).join('') : '<div class="empty">학생이 표현을 입력하면 이곳에 나타납니다.</div>';
     }
 
     function linkedWordChipsHtml(words) {
@@ -1662,7 +1717,7 @@
         const opinionComplete=['submit','rate','context','wordmaking','dictionary'].includes(room.currentStage);
         const discoveryComplete=['context','wordmaking','dictionary'].includes(room.currentStage);
         const canBegin=room.currentStage==='waiting';
-        root.innerHTML=`<div class="lesson-one-flow"><section class="lesson-phase-card card ${opinionActive?'active':opinionComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>주제에 대한 찬성·반대 의견과 짧은 이유를 모읍니다.</p></div></div><span class="phase-status ${opinionActive?'live':''}">${opinionActive?'학생 참여 중':opinionComplete?'완료':canBegin?'시작 전':'대기'}</span></div>${opinionActive||opinionComplete?`<p class="opinion-topic-display">${esc(discussion.topic||room.discussionTopic)}</p>`:`<form class="opinion-topic-form" onsubmit="event.preventDefault();startOpinionSharing(this.querySelector('button'))"><label class="field-label" for="opinionTopic">생각 나누기 주제</label><textarea id="opinionTopic" maxlength="300" required placeholder="예: 수업 시간에 외래어 사용을 줄여야 할까요?">${esc(discussion.topic||room.discussionTopic||'')}</textarea><button class="btn btn-primary btn-lg" type="submit">① 생각 나누기 시작</button></form>`}${opinionActive?`<div class="opinion-teacher-actions"><button class="btn" onclick="openLessonQr('opinion')">참여 QR 다시 띄우기</button><button class="btn btn-primary" onclick="startClassStage('submit','',false)">② 발견으로 넘어가기 →</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}${(opinionActive||opinionComplete||discussion.responses.length)?opinionTeacherResultsHtml(discussion):''}</section><div class="phase-connector" aria-hidden="true">↓</div><section class="lesson-phase-card card ${discoveryActive?'active':discoveryComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견: 우리 반 언어 데이터 수집</h2><p>학생들이 실제로 쓰는 표현을 수집하고 빈도와 유형으로 관찰합니다.</p></div></div><span class="phase-status ${discoveryActive?'live':''}">${discoveryActive?'학생 참여 중':discoveryComplete?'완료':'다음 단계'}</span></div>${discoveryActive?`<div class="opinion-teacher-actions"><button class="btn btn-primary" onclick="openLessonQr('submit')">참여 QR 다시 띄우기</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}<div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">1차시 전체 결과</button></div></div><section class="simple-panel"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section></section></div>`;
+        root.innerHTML=`<div class="lesson-one-flow"><section class="lesson-phase-card card ${opinionActive?'active':opinionComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>주제에 대한 찬성·반대 의견과 짧은 이유를 모읍니다.</p></div></div><span class="phase-status ${opinionActive?'live':''}">${opinionActive?'학생 참여 중':opinionComplete?'완료':canBegin?'시작 전':'대기'}</span></div>${opinionActive||opinionComplete?`<p class="opinion-topic-display">${esc(discussion.topic||room.discussionTopic)}</p>`:`<form class="opinion-topic-form" onsubmit="event.preventDefault();startOpinionSharing(this.querySelector('button'))"><label class="field-label" for="opinionTopic">생각 나누기 주제</label><textarea id="opinionTopic" maxlength="300" required placeholder="예: 새로 생긴 말은 우리말을 더 풍부하게 만들까요?">${esc(discussion.topic||room.discussionTopic||'')}</textarea><button class="btn btn-primary btn-lg" type="submit">① 생각 나누기 시작</button></form>`}${opinionActive?`<div class="opinion-teacher-actions"><button class="btn" onclick="openLessonQr('opinion')">참여 QR 다시 띄우기</button><button class="btn btn-primary" onclick="startClassStage('submit','',false)">② 발견으로 넘어가기 →</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}${(opinionActive||opinionComplete||discussion.responses.length)?opinionTeacherResultsHtml(discussion):''}</section><div class="phase-connector" aria-hidden="true">↓</div><section class="lesson-phase-card card ${discoveryActive?'active':discoveryComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견: 우리 반 언어 데이터 수집</h2><p>학생들이 실제로 접한 유행어와 신조어를 출처와 함께 수집합니다.</p></div></div><span class="phase-status ${discoveryActive?'live':''}">${discoveryActive?'학생 참여 중':discoveryComplete?'완료':'다음 단계'}</span></div>${discoveryActive?`<div class="opinion-teacher-actions"><button class="btn btn-primary" onclick="openLessonQr('submit')">참여 QR 다시 띄우기</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}<div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">1차시 전체 결과</button></div></div><section class="simple-panel"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section></section></div>`;
         if(opinionActive)scheduleTeacherActivitySync('lesson1',version,()=>renderTeacherLessonOne(version,true));
       } catch(error) { if(!silent)showTeacherFeatureError('lesson1',version,error); }
     }
@@ -1811,7 +1866,7 @@
         const topWord = words[0];
         title = '1차시 · 발견';
         overview = resultStat('생각 나누기', `${discussion.responses.length}명`) + resultStat('찬성 / 반대', `${discussion.agreeCount} / ${discussion.disagreeCount}`) + resultStat('고유 표현', `${words.length}개`) + resultStat('전체 등록', `${submissions}회`);
-        content = `<section class="lesson-phase-card card"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>${esc(discussion.topic||'등록된 주제가 없습니다.')}</p></div></div>${opinionTeacherResultsHtml(discussion)}</section><section class="lesson-phase-card card" style="margin-top:14px"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견</h2><p>${topWord?'가장 많이 나온 말: '+esc(topWord.word):'우리 반 언어 데이터 수집'}</p></div></div><div class="simple-list" style="margin-top:14px">${words.length ? words.map((word, index) => `<div class="simple-row"><div class="simple-word"><span class="eyebrow">RANK ${String(index + 1).padStart(2, '0')}</span>${esc(word.word)}<small>${esc(word.category)}</small></div>${badge(word.category)}<span class="submission-count">${word.submissionCount}회</span></div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
+        content = `<section class="lesson-phase-card card"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>${esc(discussion.topic||'등록된 주제가 없습니다.')}</p></div></div>${opinionTeacherResultsHtml(discussion)}</section><section class="lesson-phase-card card" style="margin-top:14px"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견</h2><p>${topWord?'가장 많이 나온 말: '+esc(topWord.word):'우리 반 언어 데이터 수집'}</p></div></div><div class="simple-list" style="margin-top:14px">${words.length ? words.map((word, index) => `<div class="simple-row simple-row-ranked" data-source-row><span class="rank-label"><span>RANK</span><b>${String(index + 1).padStart(2, '0')}</b></span><button class="simple-word word-source-button" type="button" aria-expanded="false" onclick="toggleWordSources(this)"><strong>${esc(word.word)}</strong><small>${esc(word.category)} · <span data-source-hint>출처 보기</span></small></button>${wordSourcePreviewHtml(word)}<span class="submission-count">${word.submissionCount}회</span>${wordSourceDetailsHtml(word)}</div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
       } else if (step === 'lesson2') {
         const workspace = state.diagnosticWorkspace || { words:[], cards:[], capacity:0 };
         const complete = workspace.cards.filter(card => card.complete);
@@ -1956,7 +2011,7 @@
         <section class="hero card no-print"><h2>우리 반 언어 데이터 수집소</h2><p>학생들이 실제로 쓰는 표현과 등록 횟수를 확인합니다.</p>
           <div class="hero-actions">${entryActions}${refreshButton()}</div></section>
         <section class="stats-grid">
-          ${statCard('전체 수집 표현', stats.total)}${statCard('비속어', stats['비속어'])}${statCard('유행어', stats['유행어'])}${statCard('외래어', stats['외래어'])}
+          ${statCard('전체 수집 표현', stats.total)}${statCard('유행어', stats['유행어'])}${statCard('신조어', stats['신조어'])}
         </section>
         <div class="section-head"><div><h2>수집된 표현</h2><p>같게 정규화된 표현은 한 항목으로 묶어 표시합니다.</p></div></div>
         <section class="panel card">
@@ -1984,8 +2039,9 @@
       const root = document.getElementById('wordTable'); if (!root) return;
       const words = filteredWords();
       if (!words.length) { root.innerHTML = `<div class="empty">조건에 맞는 표현이 없습니다.</div>`; return; }
-      root.innerHTML = `<div class="table-wrap"><table><thead><tr><th>표현</th><th>유형</th><th>등록</th><th>관리</th></tr></thead><tbody>${words.map(word => `<tr>
-        <td><strong>${esc(word.word)}</strong><div class="help">${esc(word.normalizedWord)}</div></td>
+      root.innerHTML = `<div class="table-wrap"><table><thead><tr><th>표현</th><th>대표 출처</th><th>유형</th><th>등록</th><th>관리</th></tr></thead><tbody>${words.map(word => `<tr data-source-row>
+        <td><button class="word-source-button" type="button" aria-expanded="false" onclick="toggleWordSources(this)"><strong>${esc(word.word)}</strong><small>${esc(word.normalizedWord)} · <span data-source-hint>출처 보기</span></small></button>${wordSourceDetailsHtml(word)}</td>
+        <td>${wordSourcePreviewHtml(word)}</td>
         <td><select class="inline-select" aria-label="유형 변경" onchange="changeWordCategory('${attr(word.id)}',this)">${CATEGORIES.map(category => `<option ${category===word.category?'selected':''}>${category}</option>`).join('')}</select></td>
         <td>${word.submissionCount}회</td>
         <td><button class="btn btn-danger" onclick="confirmDeleteWord('${attr(word.id)}',${jsArg(word.word)})">삭제</button></td>
@@ -2148,18 +2204,18 @@
 
     /* ------------------------------ 1차시 ② 발견 ------------------------------ */
     async function renderSubmitView() {
-      setApp(studentHeader('발견', '우리 반이 실제로 쓰는 표현을 모아 봐요.'));
+      setApp(studentHeader('발견', '유행어와 신조어를 발견한 출처와 함께 모아 봐요.'));
       document.getElementById('studentContent').innerHTML = `<form id="submitWordForm" class="student-card card">
-        <div class="student-form-heading"><span class="student-hero-icon" aria-hidden="true">${lessonIcon('submit')}</span><div><h2>수집할 표현</h2><p>자주 쓰거나 들은 말을 적어 주세요.</p></div></div>
-        <label class="sr-only" for="studentWord">수집할 표현</label><input id="studentWord" type="text" maxlength="80" required autocomplete="off" enterkeyhint="done" placeholder="표현 입력"><label class="field-label" id="categoryLabel">유형 선택</label><div class="category-choices" role="group" aria-labelledby="categoryLabel">${CATEGORIES.map(category=>`<button class="category-choice" type="button" data-student-category="${attr(category)}" aria-pressed="false"><span class="category-choice-icon">${categoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div><button class="btn btn-primary btn-lg btn-block" type="submit">표현 등록</button>
+        <div class="student-form-heading"><span class="student-hero-icon" aria-hidden="true">${lessonIcon('submit')}</span><div><h2>수집할 표현</h2><p>자주 쓰거나 들은 말을 출처와 함께 적어 주세요.</p></div></div>
+        <label class="field-label" for="studentWord">표현</label><input id="studentWord" type="text" maxlength="80" required autocomplete="off" enterkeyhint="next" placeholder="수집한 표현을 입력하세요"><label class="field-label" id="categoryLabel">분류</label><div class="category-choices" role="group" aria-labelledby="categoryLabel">${CATEGORIES.map(category=>`<button class="category-choice" type="button" data-student-category="${attr(category)}" aria-pressed="false"><span class="category-choice-icon">${categoryIcon(category)}</span><span>${esc(category)}</span></button>`).join('')}</div><label class="field-label" for="collectionSource">수집 출처</label><input id="collectionSource" type="text" maxlength="200" required autocomplete="off" enterkeyhint="done" placeholder="예: 유튜브 쇼츠, 친구와의 대화, 온라인 게임"><p class="source-field-help">이 표현을 어디에서 보거나 들었는지 적어 주세요.</p><button class="btn btn-primary btn-lg btn-block" type="submit" style="margin-top:16px">표현 등록</button>
       </form><button id="showWordResults" class="btn btn-soft btn-lg btn-block student-list-toggle" type="button" aria-expanded="false" aria-controls="lessonOneStudentList"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg><span>수집 목록 보기</span></button><div id="lessonOneStudentList" class="hidden"></div>`;
       let selectedCategory='';
       document.querySelectorAll('[data-student-category]').forEach(button=>button.addEventListener('click',()=>{selectedCategory=button.dataset.studentCategory;document.querySelectorAll('[data-student-category]').forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active));});}));
       document.getElementById('submitWordForm').addEventListener('submit', async event => {
-        event.preventDefault(); const word = document.getElementById('studentWord');
-        if(!selectedCategory)return toast('표현 유형을 선택해 주세요.','error');
+        event.preventDefault(); const word = document.getElementById('studentWord'); const source = document.getElementById('collectionSource');
+        if(!selectedCategory)return toast('유행어 또는 신조어를 선택해 주세요.','error');
         const button = event.submitter; setButtonBusy(button, true, '저장 중...');
-        try { await api('submitWord', state.anonId, word.value, selectedCategory, state.classInfo.id); word.value = ''; word.focus(); toast('등록되었습니다.', 'success'); if(!document.getElementById('lessonOneStudentList').classList.contains('hidden'))await loadLessonOneStudentWords(); }
+        try { await api('submitWord', state.anonId, word.value, selectedCategory, source.value, state.classInfo.id); word.value = ''; source.value = ''; word.focus(); toast('출처와 함께 등록했습니다.', 'success'); if(!document.getElementById('lessonOneStudentList').classList.contains('hidden'))await loadLessonOneStudentWords(); }
         catch (error) { friendlyError(error); } finally { setButtonBusy(button, false); }
       });
       document.getElementById('showWordResults').addEventListener('click',async event=>{const root=document.getElementById('lessonOneStudentList');root.classList.toggle('hidden');const expanded=!root.classList.contains('hidden');event.currentTarget.setAttribute('aria-expanded',String(expanded));document.querySelector('#showWordResults span').textContent=expanded?'목록 접기':'수집 목록 보기';if(expanded)await loadLessonOneStudentWords();});
@@ -2174,7 +2230,7 @@
       } catch (error) { root.innerHTML = `<div class="empty">${esc(friendlyError(error))}</div>`; }
     }
 
-    function renderStudentWordResults(){const root=document.getElementById('lessonOneStudentList');if(!root)return;const filter=state.studentWordFilter||'전체';const words=(state.studentWordResults||[]).filter(word=>filter==='전체'||word.category===filter);root.innerHTML=`<div class="lesson-tools"><div><h3>수집 목록 · ${words.length}</h3><p>등록 횟수가 많은 순서입니다.</p></div><button class="btn" onclick="loadLessonOneStudentWords()" aria-label="목록 새로고침">↻ 새로고침</button></div>${filterButtons('student-word',filter)}<section class="simple-panel card" style="margin-top:8px">${words.length?words.map(word=>`<div class="result-row"><div><strong>${esc(word.word)}</strong><small>${esc(word.category)}</small></div><span class="submission-count">${word.submissionCount}회</span></div>`).join(''):'<div class="empty">표현이 아직 없습니다.</div>'}</section>`;root.querySelectorAll('[data-student-word-filter]').forEach(button=>button.addEventListener('click',()=>{state.studentWordFilter=button.dataset.studentWordFilter;renderStudentWordResults();}));}
+    function renderStudentWordResults(){const root=document.getElementById('lessonOneStudentList');if(!root)return;const filter=state.studentWordFilter||'전체';const words=(state.studentWordResults||[]).filter(word=>filter==='전체'||word.category===filter);root.innerHTML=`<div class="lesson-tools"><div><h3>수집 목록 · ${words.length}</h3><p>등록 횟수가 많은 순서입니다.</p></div><button class="btn" onclick="loadLessonOneStudentWords()" aria-label="목록 새로고침">↻ 새로고침</button></div>${filterButtons('student-word',filter)}<section class="simple-panel card" style="margin-top:8px">${words.length?words.map(word=>`<div class="result-row result-row-source" data-source-row><button class="word-source-button" type="button" aria-expanded="false" onclick="toggleWordSources(this)"><strong>${esc(word.word)}</strong><small>${esc(word.category)} · <span data-source-hint>출처 보기</span></small></button>${wordSourcePreviewHtml(word)}<span class="submission-count">${word.submissionCount}회</span>${wordSourceDetailsHtml(word)}</div>`).join(''):'<div class="empty">표현이 아직 없습니다.</div>'}</section>`;root.querySelectorAll('[data-student-word-filter]').forEach(button=>button.addEventListener('click',()=>{state.studentWordFilter=button.dataset.studentWordFilter;renderStudentWordResults();}));}
 
     function renderRateView() { return renderSubmitView(); }
 

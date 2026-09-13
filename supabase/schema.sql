@@ -69,10 +69,19 @@ create table if not exists public.words (
   owner_id uuid not null,
   word text not null check (char_length(word) between 1 and 80),
   normalized_word text not null check (char_length(normalized_word) between 1 and 80),
-  category text not null check (category in ('비속어', '유행어', '외래어')),
+  category text not null check (category in ('유행어', '신조어')),
   submit_count integer not null default 1 check (submit_count > 0),
   created_at timestamptz not null default now(),
   approved boolean not null default false
+);
+
+create table if not exists public.word_sources (
+  id uuid primary key default gen_random_uuid(),
+  word_id uuid not null references public.words(id) on delete cascade,
+  class_id uuid not null references public.classes(id) on delete cascade,
+  owner_id uuid not null,
+  source text not null check (char_length(source) between 1 and 200),
+  created_at timestamptz not null default now()
 );
 
 create table if not exists public.word_ratings (
@@ -91,7 +100,7 @@ create table if not exists public.context_tasks (
   context_title text not null default '공통 맥락' check (char_length(context_title) between 1 and 120),
   word_id uuid not null references public.words(id) on delete cascade,
   word text not null check (char_length(word) between 1 and 80),
-  category text not null check (category in ('비속어', '유행어', '외래어')),
+  category text not null check (category in ('유행어', '신조어')),
   situation text not null check (char_length(situation) between 1 and 500),
   target text not null check (char_length(target) between 1 and 200),
   context text not null check (char_length(context) between 1 and 500),
@@ -133,7 +142,7 @@ create table if not exists public.word_suggestions (
   word_id uuid not null references public.words(id) on delete cascade,
   owner_id uuid not null,
   original_word text not null check (char_length(original_word) between 1 and 120),
-  category text not null check (category in ('비속어', '유행어', '외래어')),
+  category text not null check (category in ('유행어', '신조어')),
   suggestion_type text not null check (suggestion_type in ('기존 표현으로 바꾸기', '새로운 말 만들기')),
   meaning text not null default '의미 미입력' check (char_length(meaning) between 1 and 600),
   suggested_word text not null check (char_length(suggested_word) between 1 and 120),
@@ -171,7 +180,7 @@ create table if not exists public.dictionary (
   word_id uuid not null unique references public.words(id) on delete cascade,
   suggestion_id uuid references public.word_suggestions(id) on delete set null,
   original_word text not null check (char_length(original_word) between 1 and 120),
-  category text not null check (category in ('비속어', '유행어', '외래어')),
+  category text not null check (category in ('유행어', '신조어')),
   final_word text not null default '' check (char_length(final_word) <= 160),
   meaning text not null default '' check (char_length(meaning) <= 1200),
   caution text not null default '' check (char_length(caution) <= 1200),
@@ -226,6 +235,8 @@ alter table public.classes
 create index if not exists words_normalized_word_idx on public.words(normalized_word);
 create index if not exists words_class_id_idx on public.words(class_id);
 create index if not exists words_approved_idx on public.words(approved);
+create index if not exists word_sources_word_id_idx on public.word_sources(word_id);
+create index if not exists word_sources_class_id_idx on public.word_sources(class_id);
 create index if not exists word_ratings_word_id_idx on public.word_ratings(word_id);
 create index if not exists context_tasks_active_idx on public.context_tasks(active);
 create index if not exists context_tasks_class_id_idx on public.context_tasks(class_id);
@@ -420,11 +431,13 @@ end;
 $$;
 
 -- 학생은 words 행을 직접 수정하지 않고 이 함수로만 표현을 등록합니다.
--- 같은 반의 완전히 동일한 정규화 표현은 한 행의 submit_count로 합칩니다.
+-- 같은 반의 동일한 표현은 submit_count로 합치고 제출별 수집 출처는 따로 보존합니다.
+drop function if exists public.submit_word(uuid, text, text);
 create or replace function public.submit_word(
   p_class_id uuid,
   p_word text,
-  p_category text
+  p_category text,
+  p_source text
 )
 returns table (id uuid, submit_count integer, duplicate boolean)
 language plpgsql
@@ -433,9 +446,11 @@ set search_path = public, pg_temp
 as $$
 declare
   clean_word text := trim(coalesce(p_word, ''));
+  clean_source text := trim(coalesce(p_source, ''));
   normalized text := public.normalize_korean_class_word(p_word);
   found_id uuid;
   next_count integer;
+  was_duplicate boolean := false;
 begin
   if (select auth.uid()) is null or not public.is_class_member(p_class_id) then
     raise exception '이 클래스에 참여한 학생만 표현을 등록할 수 있습니다.';
@@ -446,11 +461,14 @@ begin
   ) then
     raise exception '지금은 언어 수집 시간이 아닙니다.';
   end if;
-  if p_category not in ('비속어', '유행어', '외래어') then
+  if p_category not in ('유행어', '신조어') then
     raise exception '유형을 올바르게 선택해 주세요.';
   end if;
   if char_length(clean_word) not between 1 and 80 or normalized = '' then
     raise exception '표현을 입력해 주세요.';
+  end if;
+  if char_length(clean_source) not between 1 and 200 then
+    raise exception '수집 출처를 1~200자로 입력해 주세요.';
   end if;
 
   -- 같은 클래스·표현끼리 직렬화하여 동시에 눌러도 중복 행이 생기지 않게 합니다.
@@ -467,14 +485,17 @@ begin
     set submit_count = words.submit_count + 1
     where words.id = found_id
     returning words.submit_count into next_count;
-    return query select found_id, next_count, true;
-    return;
+    was_duplicate := true;
+  else
+    insert into public.words (class_id, owner_id, word, normalized_word, category, submit_count, approved)
+    values (p_class_id, (select auth.uid()), clean_word, normalized, p_category, 1, false)
+    returning words.id, words.submit_count into found_id, next_count;
   end if;
 
-  insert into public.words (class_id, owner_id, word, normalized_word, category, submit_count, approved)
-  values (p_class_id, (select auth.uid()), clean_word, normalized, p_category, 1, false)
-  returning words.id, words.submit_count into found_id, next_count;
-  return query select found_id, next_count, false;
+  insert into public.word_sources(word_id, class_id, owner_id, source)
+  values (found_id, p_class_id, (select auth.uid()), clean_source);
+
+  return query select found_id, next_count, was_duplicate;
 end;
 $$;
 
@@ -681,7 +702,7 @@ revoke all on function public.is_teacher() from public;
 revoke all on function public.can_manage_class(uuid) from public;
 revoke all on function public.is_class_member(uuid) from public;
 revoke all on function public.join_class(text) from public;
-revoke all on function public.submit_word(uuid, text, text) from public;
+revoke all on function public.submit_word(uuid, text, text, text) from public;
 revoke all on function public.claim_teacher_access(text) from public;
 revoke all on function public.create_class(text, text, text, text, text, text) from public;
 revoke all on function public.recover_class_code(text, text, text, text, text) from public;
@@ -691,7 +712,7 @@ grant execute on function public.is_teacher() to authenticated;
 grant execute on function public.can_manage_class(uuid) to authenticated;
 grant execute on function public.is_class_member(uuid) to authenticated;
 grant execute on function public.join_class(text) to authenticated;
-grant execute on function public.submit_word(uuid, text, text) to authenticated;
+grant execute on function public.submit_word(uuid, text, text, text) to authenticated;
 grant execute on function public.claim_teacher_access(text) to authenticated;
 grant execute on function public.create_class(text, text, text, text, text, text) to authenticated;
 grant execute on function public.recover_class_code(text, text, text, text, text) to authenticated;
@@ -706,6 +727,7 @@ alter table public.class_members enable row level security;
 alter table public.class_teachers enable row level security;
 alter table public.class_recovery enable row level security;
 alter table public.words enable row level security;
+alter table public.word_sources enable row level security;
 alter table public.word_ratings enable row level security;
 alter table public.context_tasks enable row level security;
 alter table public.usability_responses enable row level security;
@@ -786,6 +808,14 @@ drop policy if exists words_manager_delete on public.words;
 create policy words_manager_delete on public.words
 for delete to authenticated
 using (public.can_manage_class(class_id));
+
+drop policy if exists word_sources_read on public.word_sources;
+create policy word_sources_read on public.word_sources
+for select to authenticated
+using (
+  public.can_manage_class(class_id)
+  or public.is_class_member(class_id)
+);
 
 drop policy if exists word_ratings_read on public.word_ratings;
 create policy word_ratings_read on public.word_ratings
@@ -1295,6 +1325,7 @@ revoke all on table public.class_members from anon, authenticated;
 revoke all on table public.class_teachers from anon, authenticated;
 revoke all on table public.class_recovery from anon, authenticated;
 revoke all on table public.words from anon, authenticated;
+revoke all on table public.word_sources from anon, authenticated;
 revoke all on table public.word_ratings from anon, authenticated;
 revoke all on table public.context_tasks from anon, authenticated;
 revoke all on table public.usability_responses from anon, authenticated;
@@ -1312,6 +1343,7 @@ grant select, update, delete on table public.classes to authenticated;
 grant select on table public.class_members to authenticated;
 grant select on table public.class_teachers to authenticated;
 grant select, insert, update, delete on table public.words to authenticated;
+grant select on table public.word_sources to authenticated;
 grant select, insert, update, delete on table public.word_ratings to authenticated;
 grant select, insert, update, delete on table public.context_tasks to authenticated;
 grant select, insert, delete on table public.usability_responses to authenticated;

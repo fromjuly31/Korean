@@ -14,7 +14,7 @@ const SHEETS = Object.freeze({
   WordSuggestions: ['id', 'wordId', 'originalWord', 'category', 'anonId', 'suggestionType', 'suggestedWord', 'reason', 'exampleSentence', 'createdAt'],
   Dictionary: ['id', 'wordId', 'originalWord', 'category', 'finalWord', 'meaning', 'caution', 'exampleSentence', 'approved', 'updatedAt']
 });
-const CATEGORIES = Object.freeze(['비속어', '유행어', '외래어']);
+const CATEGORIES = Object.freeze(['유행어', '신조어']);
 const SUGGESTION_TYPES = Object.freeze(['기존 표현으로 바꾸기', '새로운 말 만들기']);
 const TEACHER_SESSION_SECONDS = 21600;
 let SPREADSHEET_CACHE_ = null;
@@ -678,7 +678,7 @@ function buildWordGroups_() {
 }
 
 function buildWordStats_(words) {
-  const stats = { total: words.length, '비속어': 0, '유행어': 0, '외래어': 0, ratingCount: 0 };
+  const stats = { total: words.length, '유행어': 0, '신조어': 0, ratingCount: 0 };
   words.forEach(function (word) {
     stats[word.category] = (stats[word.category] || 0) + 1;
     stats.ratingCount += word.ratingCount;
