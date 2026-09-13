@@ -656,18 +656,34 @@
     .opinion-topic-form textarea { min-height:96px; font-size:17px; line-height:1.55; }
     .opinion-topic-display { margin:0; padding:17px 19px; border-left:5px solid #55c7d6; border-radius:0 13px 13px 0; background:#eef8fa; font-size:20px; font-weight:850; line-height:1.55; overflow-wrap:anywhere; }
     .opinion-teacher-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:13px; }
-    .opinion-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; margin-top:17px; }
-    .opinion-summary-item { padding:13px 14px; border-radius:12px; background:#f2f6f4; }
-    .opinion-summary-item span { display:block; color:var(--muted); font-size:11px; font-weight:850; }
-    .opinion-summary-item strong { display:block; margin-top:3px; color:var(--primary); font-size:23px; }
-    .opinion-balance { display:flex; min-height:34px; overflow:hidden; margin-top:10px; border-radius:10px; background:#edf0ef; }
-    .opinion-balance span { display:grid; place-items:center; min-width:0; color:#fff; font-size:12px; font-weight:900; transition:width .25s ease; }
-    .opinion-balance .agree { background:#287c68; }.opinion-balance .disagree { background:#dc735b; }
-    .opinion-response-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:14px; }
-    .opinion-response { padding:13px 14px; border:1px solid #e0e6e4; border-radius:12px; background:#fff; }
-    .opinion-response b { display:inline-flex; margin-bottom:6px; padding:4px 8px; border-radius:99px; font-size:11px; }
-    .opinion-response.agree b { background:#dff4ed; color:#176650; }.opinion-response.disagree b { background:#ffebe6; color:#a44936; }
-    .opinion-response p { margin:0; font-size:14px; line-height:1.6; overflow-wrap:anywhere; }
+    .opinion-result-strip { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto; gap:10px; align-items:stretch; margin-top:17px; }
+    .opinion-percent { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:68px; padding:13px 17px; border:1px solid transparent; border-radius:13px; }
+    .opinion-percent span { font-size:13px; font-weight:760; }
+    .opinion-percent strong { font-family:var(--title-font); font-size:27px; font-weight:760; letter-spacing:-.03em; }
+    .opinion-percent.agree { border-color:#cae7de; background:#edf8f4; color:#176650; }
+    .opinion-percent.disagree { border-color:#f0d6cf; background:#fff3ef; color:#a44936; }
+    .opinion-result-strip > .btn { min-width:112px; }
+    .opinion-modal-topic { margin:0 0 18px; padding:19px 21px; border-left:5px solid #55c7d6; border-radius:0 14px 14px 0; background:#eef8fa; }
+    .opinion-modal-topic span { display:block; margin-bottom:5px; color:#4d727a; font-size:11px; font-weight:760; letter-spacing:.08em; }
+    .opinion-modal-topic strong { display:block; font-family:var(--title-font); font-size:clamp(19px,2.2vw,27px); font-weight:720; line-height:1.5; overflow-wrap:anywhere; }
+    .opinion-modal-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+    .opinion-modal-stat { padding:15px 17px; border:1px solid #e0e7e5; border-radius:13px; background:#fff; }
+    .opinion-modal-stat span { display:block; color:var(--muted); font-size:11px; font-weight:720; }
+    .opinion-modal-stat strong { display:block; margin-top:4px; color:var(--primary); font-family:var(--title-font); font-size:24px; font-weight:740; }
+    .opinion-columns { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; align-items:start; }
+    .opinion-column { overflow:hidden; border:1px solid #dfe7e4; border-radius:16px; background:#f8faf9; }
+    .opinion-column.agree { border-top:4px solid #287c68; }
+    .opinion-column.disagree { border-top:4px solid #dc735b; }
+    .opinion-column-head { display:flex; align-items:center; gap:9px; padding:16px 18px; border-bottom:1px solid #e3e9e7; background:#fff; }
+    .opinion-column-head h3 { margin:0; font-family:var(--title-font); font-size:19px; font-weight:730; }
+    .opinion-column-head strong { margin-left:auto; font-family:var(--title-font); font-size:22px; font-weight:750; }
+    .opinion-column-head small { color:var(--muted); font-size:12px; font-weight:680; }
+    .opinion-column.agree .opinion-column-head strong { color:#176650; }
+    .opinion-column.disagree .opinion-column-head strong { color:#a44936; }
+    .opinion-column-list { display:grid; gap:8px; padding:12px; }
+    .opinion-reason-card { display:grid; grid-template-columns:30px minmax(0,1fr); gap:10px; align-items:start; padding:13px 14px; border:1px solid #e1e7e5; border-radius:11px; background:#fff; }
+    .opinion-reason-card span { display:grid; place-items:center; width:28px; height:28px; border-radius:8px; background:#edf2f0; color:#71807c; font-size:10px; font-weight:760; }
+    .opinion-reason-card p { margin:2px 0 0; font-size:14px; line-height:1.65; overflow-wrap:anywhere; }
     .phase-connector { display:grid; place-items:center; height:18px; color:#55aebe; font-size:24px; font-weight:900; }
     .opinion-student-topic { padding:21px; margin-bottom:13px; border:1px solid #d9e8e8; border-radius:17px; background:#f2fbfc; }
     .opinion-student-topic .eyebrow { color:#147486; }
@@ -886,10 +902,14 @@
       .lesson-phase-head { flex-direction:column; align-items:flex-start; }
       .lesson-phase-title { gap:9px; }
       .lesson-phase-number { flex-basis:36px; width:36px; height:36px; font-size:16px; }
-      .opinion-summary { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-      .opinion-summary-item { padding:10px; }
-      .opinion-summary-item strong { font-size:19px; }
-      .opinion-response-list { grid-template-columns:1fr; }
+      .opinion-result-strip { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+      .opinion-result-strip > .btn { grid-column:1/-1; min-height:44px; }
+      .opinion-percent { min-height:58px; padding:11px 13px; }
+      .opinion-percent strong { font-size:22px; }
+      .opinion-modal-summary { gap:6px; }
+      .opinion-modal-stat { padding:11px; }
+      .opinion-modal-stat strong { font-size:19px; }
+      .opinion-columns { grid-template-columns:1fr; }
       .opinion-teacher-actions { display:grid; grid-template-columns:1fr; }
       .opinion-choice-grid { grid-template-columns:1fr 1fr; }
       .opinion-topic-display { padding:14px 15px; font-size:17px; }
@@ -1687,17 +1707,35 @@
       finally { hideLoading(); }
     }
 
-    function opinionResponseListHtml(responses) {
-      return responses.length ? responses.map(item=>`<article class="opinion-response ${item.choice}"><b>${item.choice==='agree'?'찬성':'반대'}</b><p>${esc(item.reason)}</p></article>`).join('') : '<div class="empty">학생 응답을 기다리고 있습니다.</div>';
+    function opinionPercentages(discussion) {
+      const responses=Array.isArray(discussion&&discussion.responses)?discussion.responses:[];
+      const total=responses.length;
+      const agreeCount=responses.filter(item=>item.choice==='agree').length;
+      const agreePercent=total?Math.round(agreeCount/total*100):0;
+      const disagreePercent=total?100-agreePercent:0;
+      return {total,agreePercent,disagreePercent};
     }
 
-    function opinionTeacherResultsHtml(discussion) {
-      const total=discussion.responses.length;
-      const agreePercent=total?Math.round(discussion.agreeCount/total*100):0;
-      const disagreePercent=total?100-agreePercent:0;
-      const agreeLabel=agreePercent>=18?`찬성 ${agreePercent}%`:'';
-      const disagreeLabel=disagreePercent>=18?`반대 ${disagreePercent}%`:'';
-      return `<div class="opinion-summary"><div class="opinion-summary-item"><span>전체 응답</span><strong>${total}명</strong></div><div class="opinion-summary-item"><span>찬성</span><strong>${discussion.agreeCount}명</strong></div><div class="opinion-summary-item"><span>반대</span><strong>${discussion.disagreeCount}명</strong></div></div>${total?`<div class="opinion-balance" aria-label="찬성 ${agreePercent}%, 반대 ${disagreePercent}%"><span class="agree" style="width:${agreePercent}%" title="찬성 ${agreePercent}%">${agreeLabel}</span><span class="disagree" style="width:${disagreePercent}%" title="반대 ${disagreePercent}%">${disagreeLabel}</span></div>`:''}<div class="opinion-response-list" aria-live="polite">${opinionResponseListHtml(discussion.responses)}</div>`;
+    function opinionTeacherSummaryHtml(discussion) {
+      const {total,agreePercent,disagreePercent}=opinionPercentages(discussion);
+      return `<div class="opinion-result-strip" aria-live="polite"><div class="opinion-percent agree"><span>찬성</span><strong>${agreePercent}%</strong></div><div class="opinion-percent disagree"><span>반대</span><strong>${disagreePercent}%</strong></div><button class="btn btn-results" type="button" onclick="openOpinionResults()" ${total?'':'disabled'}>결과 보기</button></div>`;
+    }
+
+    function opinionColumnHtml(discussion,choice,label,percent) {
+      const responses=(discussion.responses||[]).filter(item=>item.choice===choice);
+      return `<section class="opinion-column ${choice}"><header class="opinion-column-head"><h3>${label} 의견</h3><strong>${percent}%</strong><small>${responses.length}명</small></header><div class="opinion-column-list">${responses.length?responses.map((item,index)=>`<article class="opinion-reason-card"><span>${String(index+1).padStart(2,'0')}</span><p>${esc(item.reason)}</p></article>`).join(''):'<div class="empty">등록된 의견이 없습니다.</div>'}</div></section>`;
+    }
+
+    function opinionDetailedResultsHtml(discussion) {
+      const {total,agreePercent,disagreePercent}=opinionPercentages(discussion);
+      return `<div class="opinion-modal-summary"><div class="opinion-modal-stat"><span>전체 응답</span><strong>${total}명</strong></div><div class="opinion-modal-stat"><span>찬성</span><strong>${agreePercent}%</strong></div><div class="opinion-modal-stat"><span>반대</span><strong>${disagreePercent}%</strong></div></div><div class="opinion-columns">${opinionColumnHtml(discussion,'agree','찬성',agreePercent)}${opinionColumnHtml(discussion,'disagree','반대',disagreePercent)}</div>`;
+    }
+
+    function openOpinionResults() {
+      const room=state.activeClass;if(!room)return;
+      const discussion=state.dashboard&&state.dashboard.discussion||{topic:room.discussionTopic||'',responses:[],agreeCount:0,disagreeCount:0};
+      const body=`<div class="opinion-results-modal"><div class="opinion-modal-topic"><span>생각 나누기 주제</span><strong>${esc(discussion.topic||room.discussionTopic||'등록된 주제가 없습니다.')}</strong></div>${opinionDetailedResultsHtml(discussion)}</div>`;
+      openModal(`${room.grade} ${room.className} · 생각 나누기 결과`,body,'<button class="btn btn-primary" onclick="closeModal()">결과 화면 닫기</button>','fullscreen');
     }
 
     async function renderTeacherLessonOne(version, silent) {
@@ -1717,7 +1755,7 @@
         const opinionComplete=['submit','rate','context','wordmaking','dictionary'].includes(room.currentStage);
         const discoveryComplete=['context','wordmaking','dictionary'].includes(room.currentStage);
         const canBegin=room.currentStage==='waiting';
-        root.innerHTML=`<div class="lesson-one-flow"><section class="lesson-phase-card card ${opinionActive?'active':opinionComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>주제에 대한 찬성·반대 의견과 짧은 이유를 모읍니다.</p></div></div><span class="phase-status ${opinionActive?'live':''}">${opinionActive?'학생 참여 중':opinionComplete?'완료':canBegin?'시작 전':'대기'}</span></div>${opinionActive||opinionComplete?`<p class="opinion-topic-display">${esc(discussion.topic||room.discussionTopic)}</p>`:`<form class="opinion-topic-form" onsubmit="event.preventDefault();startOpinionSharing(this.querySelector('button'))"><label class="field-label" for="opinionTopic">생각 나누기 주제</label><textarea id="opinionTopic" maxlength="300" required placeholder="예: 새로 생긴 말은 우리말을 더 풍부하게 만들까요?">${esc(discussion.topic||room.discussionTopic||'')}</textarea><button class="btn btn-primary btn-lg" type="submit">① 생각 나누기 시작</button></form>`}${opinionActive?`<div class="opinion-teacher-actions"><button class="btn" onclick="openLessonQr('opinion')">참여 QR 다시 띄우기</button><button class="btn btn-primary" onclick="startClassStage('submit','',false)">② 발견으로 넘어가기 →</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}${(opinionActive||opinionComplete||discussion.responses.length)?opinionTeacherResultsHtml(discussion):''}</section><div class="phase-connector" aria-hidden="true">↓</div><section class="lesson-phase-card card ${discoveryActive?'active':discoveryComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견: 우리 반 언어 데이터 수집</h2><p>학생들이 실제로 접한 유행어와 신조어를 출처와 함께 수집합니다.</p></div></div><span class="phase-status ${discoveryActive?'live':''}">${discoveryActive?'학생 참여 중':discoveryComplete?'완료':'다음 단계'}</span></div>${discoveryActive?`<div class="opinion-teacher-actions"><button class="btn btn-primary" onclick="openLessonQr('submit')">참여 QR 다시 띄우기</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}<div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">1차시 전체 결과</button></div></div><section class="simple-panel"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section></section></div>`;
+        root.innerHTML=`<div class="lesson-one-flow"><section class="lesson-phase-card card ${opinionActive?'active':opinionComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>주제에 대한 찬성·반대 의견과 짧은 이유를 모읍니다.</p></div></div><span class="phase-status ${opinionActive?'live':''}">${opinionActive?'학생 참여 중':opinionComplete?'완료':canBegin?'시작 전':'대기'}</span></div>${opinionActive||opinionComplete?`<p class="opinion-topic-display">${esc(discussion.topic||room.discussionTopic)}</p>`:`<form class="opinion-topic-form" onsubmit="event.preventDefault();startOpinionSharing(this.querySelector('button'))"><label class="field-label" for="opinionTopic">생각 나누기 주제</label><textarea id="opinionTopic" maxlength="300" required placeholder="예: 새로 생긴 말은 우리말을 더 풍부하게 만들까요?">${esc(discussion.topic||room.discussionTopic||'')}</textarea><button class="btn btn-primary btn-lg" type="submit">① 생각 나누기 시작</button></form>`}${opinionActive?`<div class="opinion-teacher-actions"><button class="btn" onclick="openLessonQr('opinion')">참여 QR 다시 띄우기</button><button class="btn btn-primary" onclick="startClassStage('submit','',false)">② 발견으로 넘어가기 →</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}${(opinionActive||opinionComplete||discussion.responses.length)?opinionTeacherSummaryHtml(discussion):''}</section><div class="phase-connector" aria-hidden="true">↓</div><section class="lesson-phase-card card ${discoveryActive?'active':discoveryComplete?'complete':''}"><div class="lesson-phase-head"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견: 우리 반 언어 데이터 수집</h2><p>학생들이 실제로 접한 유행어와 신조어를 출처와 함께 수집합니다.</p></div></div><span class="phase-status ${discoveryActive?'live':''}">${discoveryActive?'학생 참여 중':discoveryComplete?'완료':'다음 단계'}</span></div>${discoveryActive?`<div class="opinion-teacher-actions"><button class="btn btn-primary" onclick="openLessonQr('submit')">참여 QR 다시 띄우기</button><button class="btn" onclick="startClassStage('waiting')">학생 화면 닫기</button></div>`:''}<div class="lesson-tools"><div><h3>수집된 언어</h3><p class="live-sync">학생 등록 자동 연동</p></div><div class="actions"><span id="teacherWordCount" class="count" aria-live="polite">${words.length}개 표현</span><button class="btn btn-results" onclick="openStudentResults('lesson1')">1차시 전체 결과</button></div></div><section class="simple-panel"><div id="teacherWordList" class="simple-list" aria-live="polite">${teacherWordRowsHtml(words)}</div></section></section></div>`;
         if(opinionActive)scheduleTeacherActivitySync('lesson1',version,()=>renderTeacherLessonOne(version,true));
       } catch(error) { if(!silent)showTeacherFeatureError('lesson1',version,error); }
     }
@@ -1866,7 +1904,7 @@
         const topWord = words[0];
         title = '1차시 · 발견';
         overview = resultStat('생각 나누기', `${discussion.responses.length}명`) + resultStat('찬성 / 반대', `${discussion.agreeCount} / ${discussion.disagreeCount}`) + resultStat('고유 표현', `${words.length}개`) + resultStat('전체 등록', `${submissions}회`);
-        content = `<section class="lesson-phase-card card"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>${esc(discussion.topic||'등록된 주제가 없습니다.')}</p></div></div>${opinionTeacherResultsHtml(discussion)}</section><section class="lesson-phase-card card" style="margin-top:14px"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견</h2><p>${topWord?'가장 많이 나온 말: '+esc(topWord.word):'우리 반 언어 데이터 수집'}</p></div></div><div class="simple-list" style="margin-top:14px">${words.length ? words.map((word, index) => `<div class="simple-row simple-row-ranked" data-source-row><span class="rank-label"><span>RANK</span><b>${String(index + 1).padStart(2, '0')}</b></span><button class="simple-word word-source-button" type="button" aria-expanded="false" onclick="toggleWordSources(this)"><strong>${esc(word.word)}</strong><small>${esc(word.category)} · <span data-source-hint>출처 보기</span></small></button>${wordSourcePreviewHtml(word)}<span class="submission-count">${word.submissionCount}회</span>${wordSourceDetailsHtml(word)}</div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
+        content = `<section class="lesson-phase-card card"><div class="lesson-phase-title"><span class="lesson-phase-number">①</span><div><h2>생각 나누기</h2><p>${esc(discussion.topic||'등록된 주제가 없습니다.')}</p></div></div><div style="margin-top:16px">${opinionDetailedResultsHtml(discussion)}</div></section><section class="lesson-phase-card card" style="margin-top:14px"><div class="lesson-phase-title"><span class="lesson-phase-number">②</span><div><h2>발견</h2><p>${topWord?'가장 많이 나온 말: '+esc(topWord.word):'우리 반 언어 데이터 수집'}</p></div></div><div class="simple-list" style="margin-top:14px">${words.length ? words.map((word, index) => `<div class="simple-row simple-row-ranked" data-source-row><span class="rank-label"><span>RANK</span><b>${String(index + 1).padStart(2, '0')}</b></span><button class="simple-word word-source-button" type="button" aria-expanded="false" onclick="toggleWordSources(this)"><strong>${esc(word.word)}</strong><small>${esc(word.category)} · <span data-source-hint>출처 보기</span></small></button>${wordSourcePreviewHtml(word)}<span class="submission-count">${word.submissionCount}회</span>${wordSourceDetailsHtml(word)}</div>`).join('') : '<div class="empty">아직 수집된 학생 응답이 없습니다.</div>'}</div></section>`;
       } else if (step === 'lesson2') {
         const workspace = state.diagnosticWorkspace || { words:[], cards:[], capacity:0 };
         const complete = workspace.cards.filter(card => card.complete);
