@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f4ee">
+  <title>우리말 사전 · 디자인 미리보기</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23355d4e'/%3E%3Cpath d='M20 8v24M8 20h24M11.5 11.5l17 17M28.5 11.5l-17 17' stroke='%23f7f6f0' stroke-width='2'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="themes.css">
+  <script type="module" src="theme.js"></script>
+</head>
+<body>
+  <a class="skip" href="#classrooms">우리 반 찾기</a>
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="우리말 사전 처음으로"><span class="brand-symbol" aria-hidden="true">✳</span>우리말<span class="brand-dot">.</span></a>
+    <nav aria-label="주요 메뉴"><a href="#classrooms">우리 반 찾기</a><button type="button" data-dictionary>사전 둘러보기</button></nav>
+    <span class="edition">CLASS DICTIONARY / 2026</span>
+    <button class="header-button" type="button" data-create>사전 만들기 <span aria-hidden="true">↗</span></button>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="hero-copy"><span class="eyebrow"><span></span>우리 반의 작은 언어 세계</span><h1 id="heroTitle"></h1><div class="hero-actions"><a class="cta" href="#classrooms">우리 반 입장 <span aria-hidden="true">↗</span></a><button class="secondary" type="button" data-create aria-label="새 사전 만들기"><span aria-hidden="true">＋</span> 새 사전 만들기</button></div></div>
+      <div class="artwork" role="img" aria-label="우리말과 책을 표현한 입체 조형물"><div class="art-halo"></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="canvas-mount" id="scene"></div><span class="art-spark spark-one" aria-hidden="true">✧</span><span class="art-spark spark-two" aria-hidden="true">✳</span><span class="art-note">MADE OF OUR WORDS</span></div>
+      <div class="hero-bottom"><span class="theme-caption"></span><div class="word-pills" aria-hidden="true"><span>말</span><span>마음</span><span>우리</span></div><a href="#classrooms" class="scroll-cue" aria-label="아래에서 우리 반 찾기">↓</a></div>
+      <button class="motion-control" type="button" aria-label="3D 움직임 멈추기" aria-pressed="false">Ⅱ</button>
+    </section>
+    <section class="classrooms" id="classrooms" aria-labelledby="classroomTitle"><div class="section-top"><div><span class="section-number">01 — OUR CLASS</span><h2 id="classroomTitle">우리 반을 찾아요<span>.</span></h2></div><form class="search"><label class="sr-only" for="classSearch">학교·학급 검색</label><input id="classSearch" type="search" placeholder="학교·학급 검색"><button type="submit" aria-label="검색">⌕</button></form></div><div class="class-grid" id="classGrid"></div></section>
+  </main>
+  <footer><a class="brand" href="#"><span class="brand-symbol" aria-hidden="true">✳</span>우리말.</a><span>디자인 미리보기 · 예시 학급</span><span>OUR WORDS, OUR WORLD.</span></footer>
+  <dialog id="dialog" aria-labelledby="dialogTitle"><form id="dialogForm"><div class="dialog-head"><h2 id="dialogTitle"></h2><button type="button" class="dialog-close" aria-label="닫기">×</button></div><div id="dialogBody"></div></form></dialog>
+  <div class="toast" role="status" hidden></div>
+</body>
+</html>
