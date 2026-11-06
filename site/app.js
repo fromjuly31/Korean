@@ -61,7 +61,7 @@ function renderHome() {
   $('#enterClassButton').onclick=openClassPicker;$('#createClassButton').onclick=openCreateClass;
   const version=++state.homeVersion,mount=$('#scene');
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!navigator.connection?.saveData){
-    Promise.all([document.fonts.ready,import('./concepts/theme-studio/scene.js')]).then(([,module])=>{
+    Promise.all([document.fonts.ready,import('./concepts/theme-studio/scene.js?v=atelier-20261107')]).then(([,module])=>{
       if(version!==state.homeVersion||!mount.isConnected)return;
       try{disposeScene=module.startScene('atelier');mount.classList.add('scene-ready');$('.motion-control').hidden=false;}catch{mount.querySelector('canvas')?.remove();}
     }).catch(()=>{});
