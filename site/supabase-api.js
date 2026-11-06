@@ -8,6 +8,7 @@
     const text = error?.message || String(error || '요청을 처리하지 못했습니다.');
     if (/anonymous sign-ins are disabled/i.test(text)) return '익명 참여 설정이 꺼져 있습니다. 관리자에게 문의해 주세요.';
     if (/failed to fetch|networkerror|timeout|load failed/i.test(text)) return '저장소에 연결하지 못했습니다. 입력 내용은 유지됩니다. 잠시 후 다시 시도해 주세요.';
+    if (/rate.limit|too many requests/i.test(text) || error?.status === 429) return '접속 요청이 몰렸어요. 잠시 후 다시 시도해 주세요. 작성 내용은 유지됩니다.';
     if (/schema cache|could not find the function|does not exist/i.test(text)) return '사전 데이터베이스 설정이 아직 완료되지 않았습니다.';
     if (/read.only|disk.full|quota|payment required/i.test(text) || error?.status === 402) return '무료 사용량 제한으로 저장할 수 없습니다. 관리자에게 문의해 주세요.';
     if (/check constraint/i.test(text)) return '필수 내용을 확인해 주세요. 별점은 1~5점, 표현은 80자, 설명은 600자까지 입력할 수 있습니다.';

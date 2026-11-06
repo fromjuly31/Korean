@@ -133,23 +133,29 @@ export function startScene(theme) {
     const tiny=tile('쉼','#e2d8ea',.6,'#796585');float(tiny,[1.0,-1.0,1.0],[-.10,-.1,.20],.65,.07);
   }
   let width=0,height=0;
-  const resize=()=>{width=mount.clientWidth;height=mount.clientHeight;if(!width||!height)return;renderer.setSize(width,height,false);camera.aspect=width/height;camera.updateProjectionMatrix();};
+  const baseCamera=camera.position.clone(),cameraTarget=new THREE.Vector3(0,theme==='atelier'?.2:theme==='orbit'?.12:.45,0);
+  const resize=()=>{width=mount.clientWidth;height=mount.clientHeight;if(!width||!height)return;renderer.setSize(width,height,false);camera.aspect=width/height;camera.position.copy(baseCamera).sub(cameraTarget).multiplyScalar(Math.max(1,.9/camera.aspect)).add(cameraTarget);camera.lookAt(cameraTarget);camera.updateProjectionMatrix();};
   const observer=new ResizeObserver(resize);observer.observe(mount);resize();
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');let paused=reduced.matches,visible=true,elapsed=0,last=performance.now();
   const control=document.querySelector('.motion-control');
   function updateControl(){control.textContent=paused?'▷':'Ⅱ';control.setAttribute('aria-label',paused?'3D 움직임 재생':'3D 움직임 멈추기');control.setAttribute('aria-pressed',String(paused));}
   updateControl();control.onclick=()=>{paused=!paused;updateControl();};
-  reduced.addEventListener('change',event=>{paused=event.matches;updateControl();});
+  const onReduced=event=>{paused=event.matches;updateControl();};
+  reduced.addEventListener('change',onReduced);
   const pointer={x:0,y:0};mount.addEventListener('pointermove',event=>{const r=mount.getBoundingClientRect();pointer.x=(event.clientX-r.left)/r.width-.5;pointer.y=(event.clientY-r.top)/r.height-.5;},{passive:true});
   mount.addEventListener('pointerleave',()=>{pointer.x=0;pointer.y=0;});
   const visibility=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;},{threshold:0});visibility.observe(mount);
-  window.addEventListener('message',event=>{if(event.origin!==location.origin)return;if(event.data?.type==='preview-motion'){paused=Boolean(event.data.paused);updateControl();}});
-  document.addEventListener('visibilitychange',()=>{last=performance.now();});
-  function animate(now){requestAnimationFrame(animate);const delta=Math.min((now-last)/1000,.06);last=now;if(document.hidden||!visible)return;if(!paused)elapsed+=delta;
+  const onMessage=event=>{if(event.origin!==location.origin)return;if(event.data?.type==='preview-motion'){paused=Boolean(event.data.paused);updateControl();}};
+  const onVisibility=()=>{last=performance.now();};
+  window.addEventListener('message',onMessage);document.addEventListener('visibilitychange',onVisibility);
+  let frame,disposed=false;
+  function animate(now){if(disposed)return;frame=requestAnimationFrame(animate);const delta=Math.min((now-last)/1000,.06);last=now;if(document.hidden||!visible)return;if(!paused)elapsed+=delta;
     for(const item of moving){const t=elapsed*item.speed+item.phase;item.object.position.y=item.position.y+Math.sin(t)*item.amplitude;item.object.rotation.y=item.rotation.y+Math.sin(t*.6)*.10;item.object.rotation.z=item.rotation.z+Math.sin(t*.7)*.035;}
     if(!paused){world.rotation.y+=(pointer.x*.14-world.rotation.y)*.035;world.rotation.x+=(-pointer.y*.07-world.rotation.x)*.035;}
     renderer.render(scene,camera);
   }
-  renderer.render(scene,camera);document.body.dataset.scene='ready';requestAnimationFrame(animate);
-  window.addEventListener('pagehide',()=>{observer.disconnect();visibility.disconnect();renderer.dispose();},{once:true});
+  renderer.render(scene,camera);document.body.dataset.scene='ready';frame=requestAnimationFrame(animate);
+  const dispose=()=>{if(disposed)return;disposed=true;cancelAnimationFrame(frame);observer.disconnect();visibility.disconnect();reduced.removeEventListener('change',onReduced);window.removeEventListener('message',onMessage);document.removeEventListener('visibilitychange',onVisibility);window.removeEventListener('pagehide',dispose);scene.traverse(object=>{object.geometry?.dispose();const materials=Array.isArray(object.material)?object.material:[object.material];for(const item of materials){item?.map?.dispose();item?.dispose();}});renderer.dispose();renderer.domElement.remove();};
+  window.addEventListener('pagehide',dispose,{once:true});
+  return dispose;
 }

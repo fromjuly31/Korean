@@ -31,6 +31,10 @@ jobs:
         run: npm run check
       - name: Verify dictionary flow and database permissions
         run: npm test
+      - name: Install Chromium for browser checks
+        run: npx playwright install --with-deps chromium
+      - name: Verify responsive UI and student-to-teacher flow
+        run: npm run test:browser
   deploy:
     needs: test
     environment:
