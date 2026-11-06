@@ -1,14 +1,25 @@
-# 우리말 리디자인 프로젝트
+# 우리말 바로쓰기 · 우리 반 순화어 사전
 
-GitHub Pages에서 실행되는 고등학교 국어 수업용 참여형 웹앱입니다. 학생은 클래스 코드로 익명 입장하고, 교사는 수업용 비밀번호 하나로 교사 공간에 들어갑니다. 생각 나누기 → 발견 → 진단 → 설계 → 검증의 데이터가 자동으로 이어집니다.
+코드·학생 비밀번호·가입 화면 없이 학급을 선택해 참여하는 공동 사전입니다.
 
-## Supabase 준비
+**표현 등록 → 원래 표현 상호 평가 → 순화어 제안·평가 → 교사 선택 → 최종 사전 편찬**
 
-1. Supabase에서 새 프로젝트를 만듭니다.
-2. 새 프로젝트라면 **SQL Editor**에서 [`supabase/schema.sql`](supabase/schema.sql) 전체를 실행합니다. 이미 스키마를 설치한 현재 프로젝트라면 [`supabase/permissions-update.sql`](supabase/permissions-update.sql) 전체를 실행해 최신 기능과 권한만 반영합니다.
-3. 이어서 **SQL Editor**에서 [`supabase/lesson-flow-update.sql`](supabase/lesson-flow-update.sql) 전체를 실행합니다. 이 파일은 기존 수집 자료를 지우지 않고 1차시 생각 나누기와 2~4차시 학생 주도 흐름을 추가하며, 기존 설치본에 빠진 대시보드 테이블과 수업 결과 초기화 함수도 복구합니다.
-4. **Authentication > Providers > Anonymous Sign-Ins**를 활성화합니다.
-5. [`site/config.js`](site/config.js)에 Project URL과 publishable 키를 입력합니다.
+- 학생: 학교·학년·반을 선택하거나 새 학급을 만들고 바로 참여합니다. 익명 접속 정보는 같은 브라우저에서 유지됩니다.
+- 원래 표현: 뜻과 순화가 필요한 이유를 등록하고, 다른 학생이 **순화 필요성**을 1~5점으로 평가합니다.
+- 순화어: 원래 표현의 평가가 1개 이상 모이면 새 표현·뜻·이유·예문을 제안합니다. 다른 학생이 뜻의 전달력과 자연스러움을 1~5점으로 평가합니다.
+- 최종 사전: **순화어 평균 4점 이상 + 1명 이상 평가 + 교사 선택**이 모두 필요합니다. 평점만으로 자동 편찬되지 않습니다. 이후 평점이 4점 미만이 되거나 교사가 선택을 취소하면 최종 사전에서 빠집니다.
+- 자기 표현은 평가할 수 없습니다. 같은 학생이 다시 평가하면 기존 별점 한 개가 갱신됩니다. 원래 표현 하나당 자신의 순화어는 한 개를 제안할 수 있습니다.
+- 교사·관리자 비밀번호: **`admin123`**. 데이터베이스에서 해시로 검증하며 인증은 8시간 유효합니다. 5회 실패하면 해당 접속은 15분 동안 다시 인증할 수 없습니다.
+- 관리자만 학급을 삭제할 수 있습니다. 삭제하면 **DB의 학급 → 원래 표현 → 원본 별점 → 순화어 → 순화어 별점·편찬 선택까지** 외래 키 `ON DELETE CASCADE`로 함께 삭제됩니다. 다른 학급 자료는 유지됩니다.
+
+## 집에서 Supabase 연결하기
+
+현재 배포본은 저장소 연결 대기 상태입니다. 화면의 예시 단어는 설명용이며 실제 저장 자료가 아닙니다.
+
+1. Supabase에서 **Free 요금제** 프로젝트를 만들거나 기존 무료 프로젝트를 엽니다. 현재 프로젝트가 일시 중지되어 있다면 대시보드에서 복구합니다. 유료 플랜으로 업그레이드하지 않습니다.
+2. 프로젝트의 **SQL Editor**에서 [`supabase/open-dictionary.sql`](supabase/open-dictionary.sql) **전체를 한 번 실행**합니다. 이 파일만으로 새 구조가 설치됩니다. 이전 수업 테이블은 삭제하지 않습니다. 이미 설치한 뒤 다시 실행해도 새 사전의 자료는 유지됩니다.
+3. **Authentication → Sign In / Providers → Anonymous Sign-Ins**를 켭니다. 학생에게 로그인 입력을 받는 기능이 아니라 서버가 작성자·평가자를 구분하기 위한 익명 접속입니다.
+4. 프로젝트의 **Connect / API 설정**에서 Project URL과 **publishable key**를 확인해 [`site/config.js`](site/config.js)에 넣습니다.
 
 ```js
 window.APP_CONFIG = Object.freeze({
@@ -17,86 +28,58 @@ window.APP_CONFIG = Object.freeze({
 });
 ```
 
-초기 교사 비밀번호는 `school`입니다. 실제 운영 전에는 SQL Editor에서 아래처럼 변경합니다.
+5. `site/config.js` 변경을 GitHub `main`에 commit/push합니다. **Actions → Deploy GitHub Pages**의 `test`와 `deploy`가 성공하면 연결 설정이 사이트에 반영됩니다.
+6. 사이트에서 테스트 학급을 만들고 학생 두 브라우저로 등록·상호 평가·순화어 평가를 진행합니다. 교사·관리자로 `admin123`을 입력해 고평점 순화어를 편찬한 뒤, 테스트 학급 삭제까지 확인합니다.
 
-```sql
-update public.teacher_access_codes
-set code_hash = extensions.crypt(lower('새 교사 비밀번호'), extensions.gen_salt('bf'))
-where label = '기본 교사 코드';
-```
+브라우저에 공개되는 파일에는 publishable 키만 사용합니다. `service_role`, secret 키, DB 비밀번호는 넣지 않습니다. 브라우저 데이터 삭제나 시크릿 창·다른 기기는 다른 익명 참여자로 인식합니다.
 
-`publishable` 키는 브라우저 앱용 공개 키입니다. `service_role` 또는 Supabase secret 키는 `site/`에 넣지 않습니다.
+## 무료 용량 보호
 
-## 수업 운영 흐름
+2026-11-06에 확인한 [Supabase Free 요금제](https://supabase.com/pricing)의 DB 한도는 500 MB, uncached egress는 5 GB, MAU는 50,000입니다. 이 앱은 텍스트 DB와 익명 인증만 사용하며 파일 저장소·Realtime·Edge Functions를 사용하지 않습니다.
 
-1. 교사는 첫 화면에서 수업용 교사 비밀번호만 입력합니다.
-2. **새 클래스 개설**에서 지역, 학교, 학년, 반, 사용할 클래스 코드와 코드 찾기 힌트를 입력하거나 **기존 클래스 입장**에서 기존 클래스 코드를 입력합니다.
-3. 클래스 코드는 교사가 영문·숫자 4~12자리로 정합니다. 이미 사용 중인 코드는 중복 안내가 표시됩니다.
-4. 학생은 첫 화면에서 클래스 코드를 입력해 익명으로 참여합니다.
-5. 학생은 대기 화면에 머물며, 교사가 시작한 현재 차시만 볼 수 있습니다.
-6. 교사가 차시를 바꾸면 학생 화면이 약 5초 안에 자동 전환됩니다.
+- 앱의 **DB 저장 보호 한도는 450,000,000바이트(450 MB)**입니다. 모든 학급·표현·별점·순화어 INSERT/UPDATE 앞에서 서버가 `pg_database_size()`로 실제 프로젝트 DB 크기와 여유 공간을 확인합니다.
+- 같은 트랜잭션 잠금으로 동시 쓰기를 직렬화합니다. 클라이언트 검사를 우회해도 테이블 트리거가 한도 도달 시 저장을 거절합니다. 일반 사용자는 테이블에 직접 쓰거나 제한 값을 변경할 권한이 없습니다.
+- 한도에 도달하면 학생의 새 저장·평점 변경·교사 편찬을 막고 안내합니다. **기존 자료 조회와 관리자 로그인·학급 삭제는 가능**합니다.
+- DB 전체 크기에는 이 앱 외의 테이블도 포함됩니다. 삭제한 행의 공간은 PostgreSQL이 재사용하므로, 삭제 직후 파일 크기가 줄어들지 않을 수 있습니다. 그런 경우 저장 차단이 유지될 수 있으며 관리자 유지보수가 필요합니다. [DB 크기 설명](https://supabase.com/docs/guides/platform/database-size)
+- 이 장치는 **DB 저장 용량**을 보호합니다. 프로젝트 전체 트래픽·MAU를 청구 시스템과 동일하게 실시간 측정하는 장치는 아닙니다. 다른 무료 항목은 Supabase Free 요금제 자체 제한을 따릅니다. 앱은 업그레이드나 유료 초과 사용을 활성화하지 않습니다.
+- 조회는 페이지 단위로 제한하며 주기적인 전체 목록 자동 조회를 하지 않습니다. Free 플랜을 유지하고 Supabase Usage에서 다른 항목도 확인하세요. [Egress 설명](https://supabase.com/docs/guides/platform/manage-your-usage/egress)
 
-교사 화면에서 차시 탭을 선택하고 **차시 시작**을 누르면 해당 차시가 시작되면서 클래스 코드와 STEP 번호가 포함된 전용 QR이 자동으로 열립니다. QR을 접은 뒤에는 차시 제어 영역의 **참여 QR 다시 띄우기**로 다시 열 수 있습니다. 학생은 코드를 따로 입력하지 않고 바로 입장합니다. 참여 중 다른 차시 탭이나 메인 화면으로 이동하면 확인창을 거쳐 QR과 학생 참여가 종료되며, 교사 화면을 새로고침하거나 닫을 때도 자동 종료됩니다. 수업이 다른 차시로 바뀐 뒤 예전 QR을 스캔하면 다른 활동을 열지 않고 해당 차시의 재시작을 기다립니다.
-
-클래스 코드를 잊으면 로그인한 교사 화면의 **클래스 코드 찾기**에서 지역, 학교명, 학년, 반, 개설할 때 정한 힌트를 입력합니다. 힌트 원문은 저장하지 않고 단방향 해시로 보관합니다.
-
-수업은 네 차시로 운영합니다.
-
-1. **1차시 발견 · 언어 데이터 수집**: 교사가 주제를 입력하고 생각 나누기를 시작하면 학생이 같은 1차시 QR에서 찬성·반대와 짧은 이유를 제출합니다. 이어지는 수집 단계에서는 `유행어·신조어` 중 하나를 고르고 그 표현을 접한 출처를 함께 입력합니다. 같은 표현은 한 항목으로 합치되 제출별 출처는 모두 보존합니다.
-2. **진단 · 맥락과 적절성**: 학생이 1차시 표현 하나를 선택합니다. 교사가 정한 표현별 최대 인원에 도달하면 해당 표현은 `마감` 처리됩니다. 학생은 대화 상대·장소·상황 중 두 가지 이상을 골라 적절한 경우와 그렇지 않은 경우의 맥락·예문·별점·평가 이유를 완성합니다.
-3. **설계 · 진단에서 새 표현으로**: 학생이 2차시 진단 카드 하나를 선택하고 내용을 확인한 뒤 새 표현·뜻·이유·예문을 작성합니다. 등록된 설계안은 4차시 1:1 비교 항목으로 자동 연결됩니다.
-4. **검증 · 기존 표현과 새 표현 1:1 비교**: 학생이 두 표현 중 맥락에 더 적합한 표현을 고르면 현재 학급 선택 결과가 사전에 즉시 반영됩니다. 교사 화면의 **우리 반 우리말 사전** 탭에서 표제어 형식으로 확인합니다.
-
-## 권한 구조
-
-- 학생: 가입 없이 클래스 입장, 현재 단계의 제출·평가만 가능
-- 교사: 수업용 비밀번호로 입장, 클래스 개설·입장, 자기 클래스 자료 관리와 수업 단계 운영
-- 시스템 관리자: 별도 Supabase 이메일 계정으로 모든 클래스와 다른 클래스의 자료 관리·삭제
-- RLS 정책이 클래스 소속과 현재 수업 단계를 데이터베이스에서 다시 검사합니다.
-
-## 데이터베이스 구조
-
-모든 수업 자료는 `classes`를 기준으로 연결합니다. 지역·학교·학년·반·클래스 코드는 한 클래스에 한 번만 저장하고, 하위 자료에서는 외래키를 사용해 중복을 피합니다.
+## 구조와 권한
 
 ```text
-classes (지역 → 학교 → 학년 → 반 → 클래스 코드)
-├─ class_members / class_teachers
-├─ opinion_responses (1차시 생각 나누기 찬반·이유)
-├─ words (학생 언어 자료와 submit_count)
-│  ├─ word_sources (제출별 수집 출처)
-│  ├─ word_suggestions (리디자인 제안)
-│  │  └─ ab_tests / ab_responses (기존·새 표현 1:1 검증)
-│  └─ dictionary (우리말 사전 결과)
-│     └─ dictionary_usage_logs (선택형 주간 실제 사용 기록)
-├─ diagnostic_cards (학생이 만든 맥락·예문·별점 진단 카드)
-└─ class_recovery (코드 찾기 힌트 해시, 직접 조회 불가)
+class_dictionaries
+└─ dictionary_words
+   ├─ dictionary_word_ratings
+   └─ dictionary_revisions (교사 선택 여부 포함)
+      └─ dictionary_revision_ratings
+
+dictionary_settings        # 비밀번호 해시, 저장 한도; 사용자 직접 접근 불가
+dictionary_admin_sessions  # 인증 만료·실패 제한; 사용자 직접 접근 불가
 ```
 
-클래스를 시스템 관리자가 삭제하면 외래키의 `on delete cascade`에 따라 해당 클래스의 하위 자료만 함께 삭제됩니다. 다른 클래스 자료에는 영향을 주지 않습니다.
+앱은 제한된 `dictionary_*` RPC로만 DB를 사용합니다. 각 함수가 익명 인증, 작성자, 별점 범위, 단계 조건, 관리자 권한을 검사합니다. 테이블은 RLS를 활성화하고 `anon`·`authenticated`의 직접 읽기·변경 권한을 회수했습니다. 학급 목록만 로그인 세션 없이 조회할 수 있으며, 참여 시 익명 세션을 자동 발급합니다.
 
-시스템 관리자가 필요하면 **Authentication > Users**에서 계정을 만든 뒤 아래 쿼리로 권한을 등록합니다.
+기존 `supabase/schema.sql`, `permissions-update.sql`, `lesson-flow-update.sql`은 이전 차시형 앱의 설치 자료로 보관합니다. **현재 버전은 `open-dictionary.sql`을 사용하세요.** 이전 버전의 수업 자료를 새 공개 학급 사전으로 자동 복사하지 않습니다.
 
-```sql
-insert into public.admins (user_id)
-select id from auth.users where email = 'admin@example.com'
-on conflict (user_id) do nothing;
+## GitHub와 배포
+
+- 저장소: https://github.com/fromjuly31/Korean
+- 사이트: https://fromjuly31.github.io/Korean/
+- 배포 대상: `site/`
+- 학급 링크: `/#class=학급_UUID` (GitHub Pages에서는 `/Korean/#class=...`)
+- [`pages.yml`](.github/workflows/pages.yml): `main` push → JavaScript 검사·DB 통합 테스트 → GitHub Pages 배포
+- DB 설정이나 SQL 변경은 GitHub Pages 배포만으로 Supabase에 적용되지 않습니다.
+
+## 로컬 검증
+
+```sh
+npm ci
+npm run check
+npm test
+npx playwright install chromium
+npm run test:browser
 ```
 
-## GitHub Pages 배포
+DB 테스트는 PGlite(PostgreSQL)에서 실제 SQL, 비밀번호 해시, 서버 권한, 용량 제한 트리거와 연쇄 삭제를 실행합니다. 브라우저 테스트는 학생 두 명과 관리자 한 명을 분리해 전체 편찬 흐름, 모바일, 저장 실패 재시도, 무료 용량 차단, 삭제를 확인합니다. 인증 세션 발급과 HTTP 전송만 테스트용으로 대체하며 **운영 Supabase 연결 성공을 뜻하지 않습니다.**
 
-저장소의 **Settings > Pages > Build and deployment > Source**를 **GitHub Actions**로 설정하고, Pages 워크플로의 `actions/upload-pages-artifact` 단계에서 배포 경로를 `site/`로 지정합니다. 이후 `main` 브랜치에 push하면 별도 빌드 없이 정적 파일이 배포됩니다.
-
-```text
-https://fromjuly31.github.io/Korean/
-```
-
-- 기본 화면: `/`
-- 학생 입장: `?view=student&code=클래스코드`
-- 교사 화면: `?view=teacher`
-- 시스템 관리자: `?view=admin`
-
-## 보안 메모
-
-- 학생 식별값은 `localStorage.student_uuid`에 저장하며 Supabase 익명 인증 UUID와 동기화합니다. 이름·학번·이메일은 받지 않습니다.
-- 교사 비밀번호는 `teacher_access_codes`에 단방향 해시로 저장하고, 관리자 비밀번호는 Supabase Auth가 관리합니다.
-- 공용 기기에서는 교사 또는 관리자 권한으로 접속하지 않는 것을 권장합니다.
+이미 설치된 Chromium은 `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` 환경 변수로 지정할 수 있습니다. `test-results/`에 검증 스크린샷을 저장합니다.

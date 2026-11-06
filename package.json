@@ -1,0 +1,14 @@
+{
+  "name": "our-class-korean-dictionary",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check site/app.js && node --check site/supabase-api.js",
+    "test": "node --test tests/student-dictionary.test.mjs",
+    "test:browser": "node tests/student-dictionary.browser.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
+    "playwright": "1.65.0"
+  }
+}
