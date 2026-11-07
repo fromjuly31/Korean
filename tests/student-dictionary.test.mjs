@@ -4,18 +4,62 @@ import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { createDatabase,createApi } from './support/database.mjs';
 
+test('자유 제목과 제안별 닉네임: 검증·재시도·동명 사전·편찬 연결·기존 자료 보존',async t=>{
+  const database=await createDatabase();t.after(()=>database.db.close());
+  const owner=await database.newUser(),reviewer=await database.newUser();
+  const api=await createApi(database,owner),peer=await createApi(database,reviewer);
+  const id=randomUUID();
+  for(const title of ['', '   ', '가'.repeat(81)])await assert.rejects(api('createClass',{title}),/1~80자/);
+  const room=await api('createClass',{id,title:'  1-7 파이팅  '});
+  assert.equal(room.title,'1-7 파이팅');
+  assert.equal((await api('createClass',{id,title:'1-7 파이팅'})).id,id);
+  assert.notEqual((await peer('createClass',{title:'1-7 파이팅'})).id,id);
+  await assert.rejects(peer('createClass',{id,title:'가로채기'}),/다른 작성자/);
+  const bare=(await database.db.query('select * from public.class_dictionaries where id=$1',[id])).rows[0];
+  assert.equal(bare.school,null);assert.equal(bare.grade,null);assert.equal(bare.class_name,null);
+  assert.equal((await peer('listClasses','1-7 파이팅')).total,2);
+  const free=await api('createClass',{title:'1학년 7반'});
+  assert.equal((await peer('getClass',free.id)).class.title,'1학년 7반');
+  assert.ok(!('school' in (await peer('getClass',id)).class));
+  await assert.rejects(database.asUser(null,'select public.dictionary_create($1)', ['새 사전'],'anon'),/permission denied/);
+  const proposal={id:randomUUID(),word:'마음쉼',meaning:'마음이 편히 쉬는 일',reason:'뜻이 잘 전해짐',example:'산책하며 마음쉼을 했어.',nickname:'  민트초코  '};
+  const words=[randomUUID(),randomUUID()];
+  for(let i=0;i<words.length;i++){
+    await api('addWord',id,{id:words[i],word:'힐링'+i,meaning:'편히 쉬는 일',reason:'쉬운 말로',category:'외래어'});
+    await peer('rateWord',words[i],5);
+  }
+  for(const nickname of [undefined,'','   ','가'.repeat(21)])await assert.rejects(api('addRevision',words[0],{...proposal,nickname}),/닉네임은 1~20자/);
+  await api('addRevision',words[0],proposal);
+  await api('addRevision',words[0],{...proposal,nickname:'재시도 이름'});
+  await api('addRevision',words[1],{...proposal,id:randomUUID(),nickname:'새벽별'});
+  await database.db.query('update auth.users set raw_app_meta_data=$1 where id=$2',[{dictionary_nickname:'다른이름'},owner]);
+  const saved=(await api('getClass',id)).words;
+  assert.equal(saved.find(w=>w.id===words[0]).revisions[0].author_name,'민트초코');
+  assert.equal(saved.find(w=>w.id===words[1]).revisions[0].author_name,'새벽별');
+  await peer('rateRevision',proposal.id,5);await peer('loginAdmin','admin123');await peer('selectRevision',proposal.id,true);
+  const update=await readFile(new URL('../supabase/dictionary-titles-update.sql',import.meta.url),'utf8');
+  await database.db.exec(update);await database.db.exec(update);
+  const published=(await api('getClass',id,'published')).published[0];
+  assert.equal(published.author_name,'민트초코');assert.equal(published.example,proposal.example);
+  const publicEntry=(await database.asUser(null,'select public.dictionary_browse() result',[],'anon')).rows[0].result.entries[0];
+  assert.equal(publicEntry.author_name,'민트초코');assert.equal(publicEntry.title,'1-7 파이팅');
+  assert.equal((await api('getClass',id)).wordCount,2);assert.equal((await api('getClass',id)).revisionCount,2);
+  assert.equal(Number(publicEntry.rating_count),1);
+});
+
 test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 편찬 → 서버 삭제',async t => {
   const database = await createDatabase(); t.after(() => database.db.close());
   const ids = await Promise.all([database.newUser(),database.newUser(),database.newUser()]);
   const [student,peer,teacher] = await Promise.all(ids.map(id => createApi(database,id)));
-  const room = await student('createClass',{school:'한빛중학교',grade:'2학년',className:'3반'});
-  const otherRoom = await peer('createClass',{school:'한빛중학교',grade:'2학년',className:'4반'});
+  const roomId=randomUUID();
+  const room = await student('createClass',{id:roomId,title:'우리말 탐험대'});
+  const otherRoom = await peer('createClass',{title:'함께 쓰는 말'});
   const word = {id:randomUUID(),word:'힐링',category:'외래어',meaning:'마음이 편안해지는 일',reason:'쉬운 우리말로 바꾸고 싶어요.'};
-  const revision = {id:randomUUID(),word:'마음쉼',meaning:'마음을 쉬게 하는 일',reason:'뜻이 쉽게 전해져요.',example:'산책하며 마음쉼을 했어.'};
+  const revision = {id:randomUUID(),nickname:'별사탕',word:'마음쉼',meaning:'마음을 쉬게 하는 일',reason:'뜻이 쉽게 전해져요.',example:'산책하며 마음쉼을 했어.'};
 
-  await t.test('코드·비밀번호 없이 학급 생성·목록 조회·입장, 중복 학급 재사용',async () => {
+  await t.test('자유 제목으로 생성·목록 조회·입장, 같은 요청 재시도 보호',async () => {
     assert.equal((await peer('listClasses')).classes.length,2);
-    assert.equal((await peer('createClass',{school:'한빛중학교',grade:'2학년',className:'3반'})).id,room.id);
+    assert.equal((await student('createClass',{id:roomId,title:'우리말 탐험대'})).id,room.id);
     assert.equal((await peer('getClass',room.id)).class.id,room.id);
     assert.equal(await student('isAdmin'),false);
     const anonymous = await database.asUser(null,"select public.dictionary_list_classes() as result",[],'anon');
@@ -83,7 +127,7 @@ test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 �
     assert.equal((await student('getUsage')).writeBlocked,true);
     await assert.rejects(student('addWord',room.id,{...word,id:randomUUID(),word:'테스트'}),/무료 저장/);
     await assert.rejects(peer('rateRevision',revision.id,4),/무료 저장/);
-    await assert.rejects(student('createClass',{school:'새학교',grade:'1학년',className:'1반'}),/무료 저장/);
+    await assert.rejects(student('createClass',{title:'새 사전'}),/무료 저장/);
     await teacher('logoutAdmin'); await teacher('loginAdmin','admin123');
     assert.equal((await student('getClass',room.id,'published')).published.length,1);
   });
@@ -113,7 +157,7 @@ test('같은 표현도 학생별 등록·평가·편찬이 독립적이며 기�
   const database = await createDatabase(); t.after(() => database.db.close());
   const ids = await Promise.all([database.newUser(),database.newUser(),database.newUser()]);
   const [first,second,teacher] = await Promise.all(ids.map(id => createApi(database,id)));
-  const room = await first('createClass',{school:'예시고등학교',grade:'1',className:'7'});
+  const room = await first('createClass',{title:'1-7 파이팅'});
   const original = {id:randomUUID(),word:'킹받네',category:'유행어',meaning:'장난 때문에 은근히 짜증 남',reason:'감정을 직접 말하고 싶다.'};
   await database.db.exec('drop index public.dictionary_words_owner_unique; create unique index dictionary_words_unique on public.dictionary_words(class_id,lower(trim(word)))');
   await first('addWord',room.id,original);
@@ -132,7 +176,7 @@ test('같은 표현도 학생별 등록·평가·편찬이 독립적이며 기�
   assert.equal(Number(words.find(w=>w.id===original.id).average_rating),5);
   assert.equal(words.find(w=>w.id===duplicate.id).mine,false);
   assert.equal(Number(words.find(w=>w.id===duplicate.id).average_rating),2);
-  const revision = {id:randomUUID(),word:'은근히 약 오르네',meaning:'계속 신경 쓰여 짜증이 남',reason:'감정을 설명한다.',example:'계속 놀리니까 은근히 약 오르네.'};
+  const revision = {id:randomUUID(),nickname:'별사탕',word:'은근히 약 오르네',meaning:'계속 신경 쓰여 짜증이 남',reason:'감정을 설명한다.',example:'계속 놀리니까 은근히 약 오르네.'};
   await first('addRevision',original.id,revision);
   await second('rateRevision',revision.id,5);
   await teacher('loginAdmin','admin123');
@@ -151,9 +195,9 @@ test('공개 사전은 최종 편찬어와 익명 닉네임을 검색·분리·�
   const writer=await database.newUser(),reviewer=await database.newUser();
   await database.db.query("update auth.users set raw_app_meta_data=$1,raw_user_meta_data=$2 where id=$3",[{display_name:'비공개 실명'},{display_name:'사용자가 입력한 실명'},writer]);
   const student=await createApi(database,writer);
-  const first=await student('createClass',{school:'가람고등학교',grade:'1',className:'7'});
-  const second=await student('createClass',{school:'나래고등학교',grade:'2학년',className:'3반'});
-  const unfinished=await student('createClass',{school:'미편찬고등학교',grade:'1',className:'1'});
+  const first=await student('createClass',{title:'1-7 파이팅'});
+  const second=await student('createClass',{title:'우리말 탐험대'});
+  const unfinished=await student('createClass',{title:'아직 편찬 전'});
   let droppedId,unselectedId;
   for(let i=0;i<29;i++) {
     const room=i===28?unfinished:i%2?second:first;
@@ -168,7 +212,7 @@ test('공개 사전은 최종 편찬어와 익명 닉네임을 검색·분리·�
   assert.equal(all.total,27);assert.equal(all.publishedCount,27);assert.equal(all.classCount,2);assert.equal(all.entries.length,24);
   assert.equal((await browse('words','',null,24)).entries.length,3);
   assert.equal(new Set([...all.entries,...(await browse('words','',null,24)).entries].map(r=>r.id)).size,27);
-  assert.ok(all.entries.every(r=>r.school&&r.grade&&r.class_name&&r.class_id));
+  assert.ok(all.entries.every(r=>r.title&&r.class_id&&!('school' in r)&&!('grade' in r)&&!('class_name' in r)));
   assert.ok(all.entries.every(r=>!('owner_id' in r)&&!('selected_by' in r)&&!('reason' in r)&&!('my_rating' in r)));
   const anonymousName=all.entries[0].author_name;
   assert.match(anonymousName,/^[가-힣]+[0-9]{3}$/);
@@ -184,8 +228,8 @@ test('공개 사전은 최종 편찬어와 익명 닉네임을 검색·분리·�
   assert.equal((await browse('words','공개 뜻 5')).total,1);
   assert.equal((await browse('words','비공개')).total,0);
   const classes=await browse('classes');assert.equal(classes.classes.length,2);assert.deepEqual(classes.entries,[]);
-  assert.equal((await browse('classes','1학년 7반')).classes[0].id,first.id);
-  assert.equal((await browse('classes','2학년 3반')).classes[0].id,second.id);
+  assert.equal((await browse('classes','1-7 파이팅')).classes[0].id,first.id);
+  assert.equal((await browse('classes','우리말 탐험대')).classes[0].id,second.id);
   const filtered=await browse('words','',second.id);assert.equal(filtered.class.id,second.id);assert.ok(filtered.entries.every(r=>r.class_id===second.id));
   assert.equal((await browse('words','',unfinished.id)).total,0);
   assert.equal((await browse('words','',randomUUID())).class,null);
@@ -209,7 +253,7 @@ test('기존 예시의 이름 표시만 정리하고 문장·평가·다른 학�
     await database.db.query('update auth.users set raw_app_meta_data=$1 where id=$2',[{seed_id:'wonju-1-7-grade10-demo-20261107',synthetic:true,participant_number:n},id]);
   }
   const classId='219df13a-738f-4bed-b2a6-1e5c6f7a3655',otherId=randomUUID(),wordId=randomUUID(),otherWordId=randomUUID(),revisionId=randomUUID();
-  for(const id of [classId,otherId])await database.db.query('insert into public.class_dictionaries(id,school,grade,class_name,created_by) values($1,$2,$3,$4,$5)',[id,id===classId?'원주여자고등학교':'다른학교','1','7',people[0]]);
+  for(const id of [classId,otherId])await database.db.query('insert into public.class_dictionaries(id,title,school,grade,class_name,created_by) values($1,$2,$2,$3,$4,$5)',[id,id===classId?'원주여자고등학교':'다른학교','1','7',people[0]]);
   for(const [id,room] of [[wordId,classId],[otherWordId,otherId]])await database.db.query('insert into public.dictionary_words(id,class_id,owner_id,word,category,meaning,reason) values($1,$2,$3,$4,$5,$6,$7)',[id,room,people[29],'딸깍','유행어','간단히 끝냄','원래 이유 [가상 학생 30 · 예시]']);
   await database.db.query('insert into public.dictionary_revisions(id,word_id,owner_id,word,meaning,reason,example,selected) values($1,$2,$3,$4,$5,$6,$7,true)',[revisionId,wordId,people[29],'간단히 처리하다','복잡한 절차 없이 일을 끝내다.','바꾼 이유 [가상 학생 30 · 예시]','표 정리는 도구로 간단히 처리했어. [가상 학생 30의 가상 예문]']);
   await database.db.query('insert into public.dictionary_revision_ratings(revision_id,owner_id,rating) values($1,$2,5)',[revisionId,people[0]]);

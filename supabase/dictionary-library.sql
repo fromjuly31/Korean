@@ -27,8 +27,8 @@ declare result jsonb; search_pattern text := '%'||left(coalesce(p_search,''),100
 begin
   if p_view not in ('words','classes') or p_view is null then raise exception '지원하지 않는 사전 보기입니다.'; end if;
   with published as materialized (
-    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,dictionary_reader.author_name(r.owner_id) as author_name,
-      round(r.average_rating,2) average_rating,r.rating_count,d.id class_id,d.school,d.grade,d.class_name
+    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,coalesce(r.author_nickname,dictionary_reader.author_name(r.owner_id)) as author_name,
+      round(r.average_rating,2) average_rating,r.rating_count,d.id class_id,d.title
     from public.dictionary_revision_summary r join public.class_dictionaries d on d.id=r.class_id
     where r.selected and r.average_rating>=4 and r.rating_count>0
   ), filtered_words as (
@@ -36,20 +36,20 @@ begin
     where (p_class_id is null or class_id=p_class_id)
       and concat_ws(' ',word,original_word,meaning) ilike search_pattern
   ), published_classes as (
-    select class_id id,school,grade,class_name,count(*)::integer published_count
-    from published group by class_id,school,grade,class_name
+    select class_id id,title,count(*)::integer published_count
+    from published group by class_id,title
   ), filtered_classes as (
     select * from published_classes
-    where concat_ws(' ',school,regexp_replace(grade,'\s*학년$','')||'학년',regexp_replace(class_name,'\s*반$','')||'반') ilike search_pattern
+    where title ilike search_pattern
   )
   select jsonb_build_object(
     'publishedCount',(select count(*) from published),'classCount',(select count(*) from published_classes),
     'class',(select to_jsonb(c) from published_classes c where c.id=p_class_id),
     'total',case when p_view='classes' then (select count(*) from filtered_classes) else (select count(*) from filtered_words) end,
-    'entries',case when p_view='words' then coalesce((select jsonb_agg(to_jsonb(w) order by lower(w.word),w.original_word,w.school,w.grade,w.class_name,w.id)
-      from (select * from filtered_words order by lower(word),original_word,school,grade,class_name,id limit 24 offset greatest(0,least(coalesce(p_offset,0),100000))) w),'[]'::jsonb) else '[]'::jsonb end,
-    'classes',case when p_view='classes' then coalesce((select jsonb_agg(to_jsonb(c) order by c.school,c.grade,c.class_name,c.id)
-      from (select * from filtered_classes order by school,grade,class_name,id limit 24 offset greatest(0,least(coalesce(p_offset,0),100000))) c),'[]'::jsonb) else '[]'::jsonb end
+    'entries',case when p_view='words' then coalesce((select jsonb_agg(to_jsonb(w) order by lower(w.word),w.original_word,w.title,w.id)
+      from (select * from filtered_words order by lower(word),original_word,title,id limit 24 offset greatest(0,least(coalesce(p_offset,0),100000))) w),'[]'::jsonb) else '[]'::jsonb end,
+    'classes',case when p_view='classes' then coalesce((select jsonb_agg(to_jsonb(c) order by c.title,c.id)
+      from (select * from filtered_classes order by title,id limit 24 offset greatest(0,least(coalesce(p_offset,0),100000))) c),'[]'::jsonb) else '[]'::jsonb end
   ) into result;
   return result;
 end; $$;

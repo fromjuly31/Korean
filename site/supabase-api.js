@@ -23,7 +23,7 @@
   }
   function setup() {
     if (client) return client;
-    if (!configured()) throw new Error('데이터 저장소 연결을 준비하고 있습니다. 연결이 완료되면 학급을 만들고 저장할 수 있어요.');
+    if (!configured()) throw new Error('데이터 저장소 연결을 준비하고 있습니다. 연결이 완료되면 사전을 만들고 저장할 수 있어요.');
     if (!global.supabase?.createClient) throw new Error('연결 기능을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.');
     client = global.supabase.createClient(global.APP_CONFIG.supabaseUrl, global.APP_CONFIG.supabasePublishableKey, {
       auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: global.localStorage },
@@ -54,16 +54,16 @@
       p_view: view, p_search: clean(search), p_class_id: classId || null, p_offset: offset
     }, true),
     listClasses: (search = '', offset = 0) => rpc('dictionary_list_classes', { p_search: clean(search), p_offset: offset }, true),
-    createClass: payload => rpc('dictionary_create_class', { p_school: clean(payload.school), p_grade: clean(payload.grade), p_class_name: clean(payload.className) }),
+    createClass: payload => rpc('dictionary_create', { p_title: clean(payload.title), ...(payload.id ? { p_id: payload.id } : {}) }),
     getClass: (classId, view = 'words', search = '', offset = 0) => rpc('dictionary_get_class', { p_class_id: classId, p_view: view, p_search: clean(search), p_offset: offset }),
     addWord: (classId, payload) => rpc('dictionary_add_word', {
       p_id: payload.id, p_class_id: classId, p_word: clean(payload.word), p_category: payload.category,
       p_meaning: clean(payload.meaning), p_reason: clean(payload.reason)
     }),
     rateWord: (id, score) => rpc('dictionary_rate_word', { p_word_id: id, p_rating: Number(score) }),
-    addRevision: (wordId, payload) => rpc('dictionary_add_revision', {
+    addRevision: (wordId, payload) => rpc('dictionary_propose_revision', {
       p_id: payload.id, p_word_id: wordId, p_word: clean(payload.word), p_meaning: clean(payload.meaning),
-      p_reason: clean(payload.reason), p_example: clean(payload.example)
+      p_reason: clean(payload.reason), p_example: clean(payload.example), p_nickname: clean(payload.nickname)
     }),
     rateRevision: (id, score) => rpc('dictionary_rate_revision', { p_revision_id: id, p_rating: Number(score) }),
     selectRevision: (id, selected) => rpc('dictionary_select_revision', { p_revision_id: id, p_selected: Boolean(selected) }),
