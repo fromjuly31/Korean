@@ -18,7 +18,7 @@ function openDictionaryRoute(params) {
   const page=Number(params.get('page')||1);
   libraryState.offset=Number.isInteger(page)?Math.max(0,Math.min(page-1,4166))*24:0;
   libraryState.data=null;libraryState.error='';
-  document.title='모두의 사전 · 우리말';
+  document.title='모두의 사전 · 우리말 사전 편찬';
   renderDictionary();loadDictionary();
 }
 async function loadDictionary() {
@@ -34,7 +34,7 @@ async function loadDictionary() {
       history.replaceState(null,'',libraryUrl(libraryState.tab,libraryState.classId,libraryState.search,libraryState.offset));
       return loadDictionary();
     }
-    libraryState.data=result;libraryState.error='';renderDictionary();
+    libraryState.data=result;libraryState.error='';renderDictionary();startLive();
   } catch(error) {
     if(request!==state.request)return;
     libraryState.error=error.message;renderDictionary();

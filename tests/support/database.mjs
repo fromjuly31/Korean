@@ -11,15 +11,19 @@ const identifier = value => {
 };
 // Auth session issuance and transport are simulated. PostgreSQL RPCs, permissions,
 // triggers, storage limits, password hashing and cascades are the real application SQL.
-export async function createDatabase() {
+export async function createDatabase(schemaOverride) {
   const db = new PGlite({ extensions: { pgcrypto } });
   await db.exec(`create role anon; create role authenticated; create schema auth;
     create table auth.users(id uuid primary key,raw_app_meta_data jsonb not null default '{}',raw_user_meta_data jsonb not null default '{}');
     create function auth.uid() returns uuid language sql stable as
     $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
     grant usage on schema public,auth to anon,authenticated;
-    grant execute on function auth.uid() to anon,authenticated;`);
-  const schema = await readFile(new URL('supabase/open-dictionary.sql',root),'utf8');
+    grant execute on function auth.uid() to anon,authenticated;
+    create schema realtime;
+    create table realtime.test_events(id bigint generated always as identity primary key,payload jsonb,event text,topic text,is_private boolean);
+    create function realtime.send(payload jsonb,event text,topic text,private boolean default true) returns void language sql as
+    $$insert into realtime.test_events(payload,event,topic,is_private) values(payload,event,topic,private)$$;`);
+  const schema = schemaOverride || await readFile(new URL('supabase/open-dictionary.sql',root),'utf8');
   await db.exec(schema);
   async function asUser(userId, sql, args = [], role = 'authenticated') {
     return db.transaction(async tx => {

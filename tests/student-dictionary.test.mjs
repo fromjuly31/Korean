@@ -4,6 +4,59 @@ import { randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { createDatabase,createApi } from './support/database.mjs';
 
+test('학생 링크·실시간 응답·비밀번호 없는 교사 승인과 관리자 수정·삭제 권한',async t=>{
+ const database=await createDatabase();t.after(()=>database.db.close());
+ const ids=await Promise.all(Array.from({length:3},()=>database.newUser()));
+ const [teacher,first,second]=await Promise.all(ids.map(id=>createApi(database,id)));
+ const room=await teacher('createClass',{title:'우리말 교실'}),other=await teacher('createClass',{title:'다른 교실'});
+ const link=await teacher('studentLink',room.id);assert.equal((await teacher('studentLink',room.id)).token,link.token);
+ await assert.rejects(first('joinStudent',room.id,randomUUID()),/학생 입장 링크/);
+ await assert.rejects(first('joinStudent',other.id,link.token),/학생 입장 링크/);
+ assert.equal((await first('enterStudent',room.id,link.token)).needsNickname,true);
+ assert.equal(Number((await database.db.query('select count(*) n from public.dictionary_student_sessions')).rows[0].n),0);
+ await assert.rejects(first('enterStudent',room.id,link.token,'   '),/닉네임/);
+ await first('enterStudent',room.id,link.token,'달빛책갈피');
+ assert.equal((await first('enterStudent',room.id,link.token,'다른 이름')).nickname,'달빛책갈피');
+ await second('enterStudent',room.id,link.token,'소다팝');
+ assert.equal(Number((await database.db.query('select count(*) n from public.dictionary_student_sessions')).rows[0].n),2);
+ await assert.rejects(first('studentLink',room.id),/교사 화면/);
+ await assert.rejects(first('createClass',{title:'학생의 사전'}),/교사 화면/);
+ const word={id:randomUUID(),word:'힐링',category:'외래어',meaning:'편히 쉬는 것',reason:'쉬운 말로'};
+ await assert.rejects(first('addWord',other.id,word),/학생 입장 링크/);
+ await first('addWord',room.id,word);await second('rateWord',word.id,5);
+ const revision={id:randomUUID(),word:'마음쉼',meaning:'마음이 쉬는 것',reason:'알기 쉬움',example:'마음쉼을 했어.',nickname:'달빛책갈피'};
+ await first('addRevision',word.id,{...revision,nickname:'임의의 다른 이름'});await second('rateRevision',revision.id,3);
+ assert.equal(await teacher('isAdmin'),false);assert.equal((await teacher('getClass',room.id,'approval_pending')).canApprove,true);
+ assert.equal((await first('getClass',room.id,'approval_pending')).approvalLocked,true);
+ await assert.rejects(first('selectRevision',revision.id,true),/학생 전용/);
+ await teacher('selectRevision',revision.id,true);
+ const data=await teacher('getClass',room.id);
+ assert.equal(data.publishedCount,1);assert.deepEqual(data.activity,{students:2,wordAuthors:1,revisionAuthors:1,wordRatings:1,revisionRatings:1,raters:1});
+ assert.equal(data.words[0].author_name,'달빛책갈피');assert.equal(data.words[0].revisions[0].author_name,'달빛책갈피');
+ const collect=await first('getClass',room.id,'student_collect');assert.deepEqual(collect.words,[]);assert.equal(collect.wordCount,1);
+ assert.deepEqual((await second('getClass',room.id,'rate')).words[0].revisions,[]);
+ for(const call of [()=>teacher('adminGetItem','word',word.id),()=>teacher('adminUpdateWord',word.id,word),()=>teacher('adminUpdateRevision',revision.id,revision),()=>teacher('adminDeleteItem','word',word.id),()=>teacher('deleteClass',room.id)])await assert.rejects(call(),/관리자/);
+ await teacher('loginAdmin','admin123');
+ await teacher('adminUpdateWord',word.id,{...word,meaning:'편안히 쉬는 시간'});
+ await teacher('adminUpdateRevision',revision.id,{...revision,word:'마음쉬기',example:'산책하며 마음쉬기를 했어.'});
+ const updated=(await teacher('getClass',room.id,'published')).published[0];assert.equal(updated.word,'마음쉬기');assert.equal(updated.author_name,'달빛책갈피');assert.equal(Number(updated.rating_count),1);
+ await assert.rejects(teacher('adminUpdateRevision',revision.id,{...revision,word:'힐링'}),/다른 순화어/);
+ const events=(await database.db.query('select * from realtime.test_events')).rows;
+ assert.ok(events.some(e=>e.topic==='dictionary:'+room.id&&e.payload.kind==='dictionary_word_ratings'));
+ assert.ok(events.some(e=>e.topic==='dictionary:public'&&e.payload.kind==='dictionary_revisions'));
+ assert.ok(events.every(e=>e.is_private===false&&Object.keys(e.payload).join(',')==='kind'),'broadcast never includes student content, nickname, token or user ID');
+ const migration=await readFile(new URL('../supabase/student-portal-update.sql',import.meta.url),'utf8'),realtime=await readFile(new URL('../supabase/realtime-update.sql',import.meta.url),'utf8');
+ await database.db.exec(migration);await database.db.exec(realtime);await database.db.exec(database.schema);
+ assert.equal((await teacher('getClass',room.id,'published')).published.length,1);
+ await teacher('adminDeleteItem','revision',revision.id);assert.equal((await teacher('getClass',room.id)).publishedCount,0);
+ await first('addRevision',word.id,{...revision,id:randomUUID()});
+ await teacher('adminDeleteItem','word',word.id);
+ for(const table of ['dictionary_words','dictionary_revisions','dictionary_word_ratings','dictionary_revision_ratings'])assert.equal(Number((await database.db.query('select count(*) n from public.'+table)).rows[0].n),0);
+ assert.equal((await teacher('getClass',other.id)).wordCount,0);
+ await teacher('deleteClass',room.id);assert.equal(Number((await database.db.query('select count(*) n from public.dictionary_student_sessions')).rows[0].n),0);
+ await teacher('logoutAdmin');assert.equal(await teacher('isAdmin'),false);assert.equal((await teacher('getClass',other.id)).canApprove,true);
+});
+
 test('중복 표현 묶음, 공동 최고 평점, 교사 승인 상태와 페이지 조회',async t=>{
   const database=await createDatabase();t.after(()=>database.db.close());
   const users=await Promise.all(Array.from({length:6},()=>database.newUser()));
@@ -31,8 +84,9 @@ test('중복 표현 묶음, 공동 최고 평점, 교사 승인 상태와 페이
   assert.equal(groups.words[0].revisions.find(r=>r.id===a.id).mine,true);
   assert.equal((await first('getClass',room.id,'words')).total,2);
   assert.equal((await first('getClass',room.id,'refine','얄밉다')).words[0].revisions.length,4,'search must not split a duplicate group');
+  const studentLink=await teacher('studentLink',room.id);await first('joinStudent',room.id,studentLink.token);
   const locked=await first('getClass',room.id,'approval_pending');assert.equal(locked.approvalLocked,true);assert.deepEqual(locked.words,[]);
-  await assert.rejects(first('selectRevision',a.id,true),/인증/);
+  await assert.rejects(first('selectRevision',a.id,true),/학생 전용/);
   await assert.rejects(database.asUser(users[0],"select dictionary_reader.word_groups($1,'approval_pending','',0)",[room.id]),/permission denied/);
   await teacher('loginAdmin','admin123');
   let queue=await teacher('getClass',room.id,'approval_pending');
@@ -133,6 +187,7 @@ test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 �
     assert.equal(anonymous.rows[0].result.total,2);
   });
   await t.test('표현 등록은 재시도해도 중복 생성되지 않으며 원본 평가 전 순화어 제안은 차단',async () => {
+    const link=await teacher('studentLink',room.id);await student('joinStudent',room.id,link.token);await peer('joinStudent',room.id,link.token);
     await student('addWord',room.id,word); await student('addWord',room.id,word);
     assert.equal((await peer('getClass',room.id)).wordCount,1);
     await assert.rejects(student('addWord',room.id,{...word,id:randomUUID()}),/이미 등록/);
@@ -155,7 +210,7 @@ test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 �
   await t.test('관리자 비밀번호 admin123은 서버에서 검증되고 직접 테이블 접근은 불가',async () => {
     await assert.rejects(teacher('loginAdmin','wrong'),/비밀번호/);
     await teacher('loginAdmin','admin123'); assert.equal(await teacher('isAdmin'),true);
-    await assert.rejects(student('selectRevision',revision.id,true),/인증/);
+    await assert.rejects(student('selectRevision',revision.id,true),/학생 전용/);
     await assert.rejects(database.asUser(ids[0],'select * from public.dictionary_settings'),/permission denied/);
     await assert.rejects(database.asUser(ids[0],"update public.dictionary_revisions set selected=true where id=$1",[revision.id]),/permission denied/);
     await assert.rejects(database.asUser(ids[0],"delete from public.class_dictionaries where id=$1",[room.id]),/permission denied/);
@@ -166,7 +221,7 @@ test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 �
     assert.equal((await student('getClass',room.id,'published')).published.length,0);
     await teacher('selectRevision',revision.id,true);
     assert.equal((await student('getClass',room.id,'published')).published[0].word,'마음쉼');
-    assert.equal((await student('getClass',otherRoom.id,'published')).published.length,0);
+    await assert.rejects(student('getClass',otherRoom.id,'published'),/학생 입장 링크/);
   });
   await t.test('승인 후 평점이 내려가도 유지하며 교사가 취소할 때만 최종 사전에서 제외',async () => {
     await peer('rateRevision',revision.id,2);
@@ -194,7 +249,7 @@ test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 �
     assert.equal((await student('getUsage')).writeBlocked,true);
     await assert.rejects(student('addWord',room.id,{...word,id:randomUUID(),word:'테스트'}),/무료 저장/);
     await assert.rejects(peer('rateRevision',revision.id,4),/무료 저장/);
-    await assert.rejects(student('createClass',{title:'새 사전'}),/무료 저장/);
+    await assert.rejects(teacher('createClass',{title:'새 사전'}),/무료 저장/);
     await teacher('logoutAdmin'); await teacher('loginAdmin','admin123');
     assert.equal((await student('getClass',room.id,'published')).published.length,1);
   });

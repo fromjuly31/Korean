@@ -5,20 +5,23 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="description" content="함께 만든 우리말 사전. 완성된 순화어를 단어별·사전별로 찾아보고 우리만의 제목과 닉네임으로 참여하세요.">
   <meta name="theme-color" content="#f7f6f0">
-  <title>우리말 · 함께 만든 우리말 사전</title>
+  <title>우리말 사전 편찬</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23355d4e'/%3E%3Cpath d='M20 8v24M8 20h24M11.5 11.5l17 17M28.5 11.5l-17 17' stroke='%23f7f6f0' stroke-width='2'/%3E%3C/svg%3E">
   <link rel="preload" href="./concepts/theme-studio/vendor/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="./style.css?v=original-word-20261107-v2">
-  <link rel="stylesheet" href="./library.css?v=approval-20261107">
+  <link rel="stylesheet" href="./style.css?v=student-20261107">
+  <link rel="stylesheet" href="./library.css?v=student-20261107">
   <script defer src="./assets/supabase-2.119.0.js"></script>
   <script defer src="./config.js"></script>
-  <script defer src="./supabase-api.js?v=approval-20261107"></script>
-  <script defer src="./library.js?v=approval-20261107"></script>
-  <script defer src="./app.js?v=approval-20261107"></script>
+  <script defer src="./supabase-api.js?v=student-20261107"></script>
+  <script defer src="./library.js?v=student-20261107"></script>
+  <script defer src="./assets/qrcode-generator-2.0.4.js"></script>
+  <script defer src="./classroom.js?v=student-20261107"></script>
+  <script defer src="./app.js?v=student-20261107"></script>
+  <link rel="stylesheet" href="./classroom.css?v=student-20261107">
 </head>
 <body>
   <a href="#app" class="skip-link">본문으로 이동</a>
-  <header class="site-header"><a class="brand" href="#" aria-label="우리말 처음으로"><span class="brand-symbol" aria-hidden="true">✳</span>우리말<span class="brand-dot">.</span></a><div class="header-actions"><button id="manualButton" class="header-button" type="button">사용 설명서</button><button id="adminButton" class="header-button teacher-button" type="button">교사·관리자</button></div></header>
+  <header class="site-header"><a class="brand" href="#" aria-label="우리말 사전 편찬 처음으로"><span class="brand-symbol" aria-hidden="true">✳</span><span class="brand-name">우리말 <span>사전 편찬</span></span></a><div class="header-actions"><button id="manualButton" class="header-button" type="button">사용 설명서</button><button id="adminButton" class="header-button teacher-button" type="button">관리자 로그인</button></div></header>
   <main id="app" class="shell" tabindex="-1"></main>
   <footer class="site-footer"><span>우리의 말로, 함께 만드는 사전.</span><span>OUR WORDS, OUR WORLD.</span></footer>
   <dialog id="dialog" aria-labelledby="dialogTitle"><div id="dialogContent"></div></dialog>

@@ -26,7 +26,7 @@
     if (!configured()) throw new Error('데이터 저장소 연결을 준비하고 있습니다. 연결이 완료되면 사전을 만들고 저장할 수 있어요.');
     if (!global.supabase?.createClient) throw new Error('연결 기능을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해 주세요.');
     client = global.supabase.createClient(global.APP_CONFIG.supabaseUrl, global.APP_CONFIG.supabasePublishableKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: global.localStorage },
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storage: global.localStorage, ...(global.document?.body?.dataset?.mode === 'student' ? { storageKey: 'dictionary-student-auth' } : {}) },
       global: { fetch: (url, options = {}) => global.fetch(url, { ...options, signal: options.signal || AbortSignal.timeout(12000) }) }
     });
     return client;
@@ -67,6 +67,13 @@
     }),
     rateRevision: (id, score) => rpc('dictionary_rate_revision', { p_revision_id: id, p_rating: Number(score) }),
     selectRevision: (id, selected) => rpc('dictionary_select_revision', { p_revision_id: id, p_selected: Boolean(selected) }),
+    studentLink: id => rpc('dictionary_student_link', { p_class_id: id }),
+    enterStudent: (id,token,nickname=null) => rpc('dictionary_enter_student', { p_class_id:id, p_token:token, p_nickname:nickname }),
+    joinStudent: (id, token) => rpc('dictionary_join_student', { p_class_id: id, p_token: token }),
+    adminGetItem: (kind,id) => rpc('dictionary_admin_get_item', { p_kind: kind, p_id: id }),
+    adminDeleteItem: (kind,id) => rpc('dictionary_admin_delete_item', { p_kind: kind, p_id: id }),
+    adminUpdateWord: (id,payload) => rpc('dictionary_admin_update_word', { p_id: id, p_word: clean(payload.word), p_category: payload.category, p_meaning: clean(payload.meaning), p_reason: clean(payload.reason) }),
+    adminUpdateRevision: (id,payload) => rpc('dictionary_admin_update_revision', { p_id: id, p_word: clean(payload.word), p_meaning: clean(payload.meaning), p_reason: clean(payload.reason), p_example: clean(payload.example), p_nickname: clean(payload.nickname) }),
     deleteClass: id => rpc('dictionary_delete_class', { p_class_id: id }),
     loginAdmin: async password => {
       const ok = await rpc('dictionary_admin_login', { p_password: password });
@@ -83,6 +90,12 @@
   };
   global.AppApi = Object.freeze({
     configured,
+    watch(classId,onChange,onStatus) {
+      setup();
+      if(typeof client.channel !== 'function'){onStatus('UNAVAILABLE');return null;}
+      const channel=client.channel('dictionary:'+(classId||'public'),{config:{private:false}}).on('broadcast',{event:'changed'},onChange).subscribe(onStatus);
+      return ()=>{client.removeChannel(channel);};
+    },
     async init() { setup(); },
     async call(name, ...args) {
       if (!Object.prototype.hasOwnProperty.call(methods, name)) throw new Error('지원하지 않는 요청입니다.');

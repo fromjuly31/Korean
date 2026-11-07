@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f6f0">
+  <meta name="robots" content="noindex">
+  <title>학생 참여 · 우리말 사전 편찬</title>
+  <link rel="preload" href="./concepts/theme-studio/vendor/PretendardVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./style.css?v=student-20261107">
+  <link rel="stylesheet" href="./library.css?v=student-20261107">
+  <link rel="stylesheet" href="./classroom.css?v=student-20261107">
+  <script defer src="./assets/supabase-2.119.0.js"></script>
+  <script defer src="./config.js"></script>
+  <script defer src="./supabase-api.js?v=student-20261107"></script>
+  <script defer src="./classroom.js?v=student-20261107"></script>
+  <script defer src="./app.js?v=student-20261107"></script>
+</head>
+<body data-mode="student">
+  <a href="#app" class="skip-link">본문으로 이동</a>
+  <header class="site-header student-header"><span class="brand"><span class="brand-symbol" aria-hidden="true">✳</span><span class="brand-name">우리말 <span>사전 편찬</span></span></span><span class="student-mode-label">학생 참여</span></header>
+  <main id="app" class="shell student-shell" tabindex="-1"></main>
+  <footer class="site-footer"><span>우리의 말로, 함께 만드는 사전.</span></footer>
+  <dialog id="dialog" aria-labelledby="dialogTitle"><div id="dialogContent"></div></dialog>
+  <div id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
