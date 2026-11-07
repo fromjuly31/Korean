@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check site/app.js && node --check site/supabase-api.js",
+    "check": "node --check site/app.js && node --check site/supabase-api.js && node --check site/library.js",
     "test": "node --test tests/student-dictionary.test.mjs",
-    "test:browser": "node tests/student-dictionary.browser.mjs"
+    "test:browser": "node tests/student-dictionary.browser.mjs && node tests/dictionary-library.browser.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.15",

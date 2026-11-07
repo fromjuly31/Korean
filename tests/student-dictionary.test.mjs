@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { createDatabase,createApi } from './support/database.mjs';
 
 test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 편찬 → 서버 삭제',async t => {
@@ -23,7 +24,7 @@ test('공개 학급: 등록 → 상호 평가 → 순화어 평가 → 교사 �
   await t.test('표현 등록은 재시도해도 중복 생성되지 않으며 원본 평가 전 순화어 제안은 차단',async () => {
     await student('addWord',room.id,word); await student('addWord',room.id,word);
     assert.equal((await peer('getClass',room.id)).wordCount,1);
-    await assert.rejects(peer('addWord',room.id,{...word,id:randomUUID()}),/이미 등록/);
+    await assert.rejects(student('addWord',room.id,{...word,id:randomUUID()}),/이미 등록/);
     await assert.rejects(student('addRevision',word.id,revision),/상호 평가/);
   });
   await t.test('원본 별점은 1~5점, 자기 평가 금지, 재평가는 한 표만 갱신',async () => {
@@ -106,4 +107,86 @@ test('관리자 비밀번호 실패 횟수 제한과 만료',async t => {
   await api('loginAdmin','admin123');
   await database.db.exec("update public.dictionary_admin_sessions set expires_at=now()-interval '1 second'");
   assert.equal(await api('isAdmin'),false);
+});
+
+test('같은 표현도 학생별 등록·평가·편찬이 독립적이며 기존 자료와 재시도 보호를 유지',async t => {
+  const database = await createDatabase(); t.after(() => database.db.close());
+  const ids = await Promise.all([database.newUser(),database.newUser(),database.newUser()]);
+  const [first,second,teacher] = await Promise.all(ids.map(id => createApi(database,id)));
+  const room = await first('createClass',{school:'예시고등학교',grade:'1',className:'7'});
+  const original = {id:randomUUID(),word:'킹받네',category:'유행어',meaning:'장난 때문에 은근히 짜증 남',reason:'감정을 직접 말하고 싶다.'};
+  await database.db.exec('drop index public.dictionary_words_owner_unique; create unique index dictionary_words_unique on public.dictionary_words(class_id,lower(trim(word)))');
+  await first('addWord',room.id,original);
+  const update = await readFile(new URL('../supabase/duplicate-words-update.sql',import.meta.url),'utf8');
+  await database.db.exec(update);
+  const duplicate = {...original,id:randomUUID(),word:' 킹받네 ',meaning:'웃기면서도 약 오름',reason:'친구가 싫어할 수도 있어서.'};
+  await second('addWord',room.id,duplicate);
+  await second('addWord',room.id,duplicate);
+  await assert.rejects(first('addWord',room.id,{...duplicate,id:randomUUID()}),/내가.*이미 등록/);
+  await second('rateWord',original.id,5);
+  await first('rateWord',duplicate.id,2);
+  const words = (await first('getClass',room.id,'words','킹받네')).words;
+  assert.equal(words.length,2);
+  assert.equal(words.find(w=>w.id===original.id).meaning,original.meaning);
+  assert.equal(words.find(w=>w.id===original.id).mine,true);
+  assert.equal(Number(words.find(w=>w.id===original.id).average_rating),5);
+  assert.equal(words.find(w=>w.id===duplicate.id).mine,false);
+  assert.equal(Number(words.find(w=>w.id===duplicate.id).average_rating),2);
+  const revision = {id:randomUUID(),word:'은근히 약 오르네',meaning:'계속 신경 쓰여 짜증이 남',reason:'감정을 설명한다.',example:'계속 놀리니까 은근히 약 오르네.'};
+  await first('addRevision',original.id,revision);
+  await second('rateRevision',revision.id,5);
+  await teacher('loginAdmin','admin123');
+  await teacher('selectRevision',revision.id,true);
+  assert.equal((await first('getClass',room.id,'published')).publishedCount,1);
+  await database.db.exec(update);
+  await database.db.exec(database.schema);
+  const after = await first('getClass',room.id);
+  assert.equal(after.wordCount,2);
+  assert.equal(after.words.find(w=>w.id===duplicate.id).revisions.length,0);
+  assert.equal(after.publishedCount,1);
+});
+
+test('공개 사전은 최종 편찬어만 학교·학급 정보와 함께 검색·분리·페이지 조회하며 작성자 정보는 감춘다',async t => {
+  const database=await createDatabase();t.after(()=>database.db.close());
+  const writer=await database.newUser(),reviewer=await database.newUser();
+  const student=await createApi(database,writer);
+  const first=await student('createClass',{school:'가람고등학교',grade:'1',className:'7'});
+  const second=await student('createClass',{school:'나래고등학교',grade:'2학년',className:'3반'});
+  const unfinished=await student('createClass',{school:'미편찬고등학교',grade:'1',className:'1'});
+  let droppedId,unselectedId;
+  for(let i=0;i<29;i++) {
+    const room=i===28?unfinished:i%2?second:first;
+    const wordId=randomUUID(),revisionId=randomUUID();
+    await database.db.query('insert into public.dictionary_words(id,class_id,owner_id,word,category,meaning,reason) values($1,$2,$3,$4,$5,$6,$7)',[wordId,room.id,writer,'표현'+i,'유행어','원래 뜻','비공개 원문 이유']);
+    await database.db.query('insert into public.dictionary_revisions(id,word_id,owner_id,word,meaning,reason,example,selected) values($1,$2,$3,$4,$5,$6,$7,$8)',[revisionId,wordId,writer,i<2?'마음쉼':'순화어'+String(i).padStart(2,'0'),'공개 뜻 '+i,'비공개 제안 이유','공개 예문 '+i,i!==27&&i!==28]);
+    await database.db.query('insert into public.dictionary_revision_ratings(revision_id,owner_id,rating) values($1,$2,$3)',[revisionId,reviewer,5]);
+    if(i===0)droppedId=revisionId;if(i===27)unselectedId=revisionId;
+  }
+  const browse=async(view='words',search='',classId=null,offset=0)=>(await database.asUser(null,'select public.dictionary_browse($1,$2,$3,$4) result',[view,search,classId,offset],'anon')).rows[0].result;
+  const all=await browse();
+  assert.equal(all.total,27);assert.equal(all.publishedCount,27);assert.equal(all.classCount,2);assert.equal(all.entries.length,24);
+  assert.equal((await browse('words','',null,24)).entries.length,3);
+  assert.equal(new Set([...all.entries,...(await browse('words','',null,24)).entries].map(r=>r.id)).size,27);
+  assert.ok(all.entries.every(r=>r.school&&r.grade&&r.class_name&&r.class_id));
+  assert.ok(all.entries.every(r=>!('owner_id' in r)&&!('selected_by' in r)&&!('reason' in r)&&!('my_rating' in r)));
+  assert.equal((await browse('words','마음쉼')).total,2);
+  assert.equal((await browse('words','표현0')).total,1);
+  assert.equal((await browse('words','공개 뜻 5')).total,1);
+  assert.equal((await browse('words','비공개')).total,0);
+  const classes=await browse('classes');assert.equal(classes.classes.length,2);assert.deepEqual(classes.entries,[]);
+  assert.equal((await browse('classes','1학년 7반')).classes[0].id,first.id);
+  assert.equal((await browse('classes','2학년 3반')).classes[0].id,second.id);
+  const filtered=await browse('words','',second.id);assert.equal(filtered.class.id,second.id);assert.ok(filtered.entries.every(r=>r.class_id===second.id));
+  assert.equal((await browse('words','',unfinished.id)).total,0);
+  assert.equal((await browse('words','',randomUUID())).class,null);
+  await database.db.query('update public.dictionary_revision_ratings set rating=3 where revision_id=$1',[droppedId]);
+  assert.equal((await browse('words','마음쉼')).total,1);
+  assert.ok(!(await browse()).entries.some(r=>r.id===unselectedId));
+  await assert.rejects(database.asUser(null,'select * from public.dictionary_revisions',[],'anon'),/permission denied/);
+  await assert.rejects(browse('invalid'),/지원하지/);
+  assert.equal((await browse('words','',null,-24)).entries.length,24);
+  await database.db.query('delete from public.class_dictionaries where id=$1',[second.id]);
+  assert.equal((await browse('classes')).classes.length,1);
+  await database.db.exec(await readFile(new URL('../supabase/dictionary-library.sql',import.meta.url),'utf8'));
+  assert.equal((await browse('classes')).classes.length,1);
 });

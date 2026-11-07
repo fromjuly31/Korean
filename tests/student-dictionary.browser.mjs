@@ -42,6 +42,8 @@ try{
    await owner.setViewportSize({width,height});await noOverflow(owner);
    assert.equal(await owner.evaluate(()=>document.documentElement.scrollHeight<=innerHeight),true,`home must fit ${width}x${height}`);
    for(const name of ['우리 반 입장','새 사전 만들기','사용 설명서'])assert.equal(await owner.getByRole('button',{name,exact:true}).isVisible(),true);
+   const entry=await owner.getByRole('link',{name:'사전 입장',exact:true}).boundingBox();
+   assert.ok(entry.y>=0&&entry.y+entry.height<=height,`main dictionary entry visible ${width}x${height}`);
  }
  await owner.setViewportSize({width:390,height:844});await screenshot(owner,'atelier-home-mobile');
  await owner.getByRole('button',{name:'사용 설명서',exact:true}).click();
@@ -55,6 +57,7 @@ try{
  await owner.getByLabel('학교',{exact:true}).fill('한빛중학교');await owner.getByLabel('학년',{exact:true}).fill('2학년');await owner.getByLabel('반',{exact:true}).fill('3반');
  await owner.getByRole('button',{name:'만들고 입장하기',exact:true}).click();await owner.getByRole('button',{name:'표현 등록',exact:true}).waitFor();
  const roomUrl=owner.url(),roomId=new URLSearchParams(new URL(roomUrl).hash.slice(1)).get('class');
+ assert.equal(await owner.getByRole('heading',{name:'2학년 3반의 우리말',exact:true}).count(),1);
  console.log('PASS: 11 viewport sizes fit without home scrolling; manual keyboard controls; mobile class creation');
 
  await owner.getByRole('button',{name:'표현 등록',exact:true}).click();

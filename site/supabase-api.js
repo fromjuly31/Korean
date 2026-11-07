@@ -50,6 +50,9 @@
     return result.data;
   }
   const methods = {
+    browseDictionary: (view = 'words', search = '', classId = null, offset = 0) => rpc('dictionary_browse', {
+      p_view: view, p_search: clean(search), p_class_id: classId || null, p_offset: offset
+    }, true),
     listClasses: (search = '', offset = 0) => rpc('dictionary_list_classes', { p_search: clean(search), p_offset: offset }, true),
     createClass: payload => rpc('dictionary_create_class', { p_school: clean(payload.school), p_grade: clean(payload.grade), p_class_name: clean(payload.className) }),
     getClass: (classId, view = 'words', search = '', offset = 0) => rpc('dictionary_get_class', { p_class_id: classId, p_view: view, p_search: clean(search), p_offset: offset }),

@@ -39,7 +39,10 @@ create table if not exists public.dictionary_words (
   reason text not null check(char_length(trim(reason)) between 1 and 600),
   created_at timestamptz not null default now()
 );
-create unique index if not exists dictionary_words_unique on public.dictionary_words(class_id, lower(trim(word)));
+-- 서로 다른 학생은 같은 표현을 각자의 뜻풀이로 등록할 수 있습니다.
+-- 같은 학생의 재등록과 저장 재시도만 중복으로 막습니다.
+drop index if exists public.dictionary_words_unique;
+create unique index if not exists dictionary_words_owner_unique on public.dictionary_words(class_id, owner_id, lower(trim(word)));
 create table if not exists public.dictionary_word_ratings (
   word_id uuid not null references public.dictionary_words(id) on delete cascade,
   owner_id uuid not null references auth.users(id),
@@ -216,7 +219,7 @@ begin
   insert into public.dictionary_words(id,class_id,owner_id,word,category,meaning,reason)
   values(p_id,p_class_id,auth.uid(),trim(p_word),p_category,trim(p_meaning),trim(p_reason));
   return p_id;
-exception when unique_violation then raise exception '이 학급에 이미 등록된 표현입니다. 기존 표현을 평가해 주세요.';
+exception when unique_violation then raise exception '내가 이 학급에 이미 등록한 표현입니다. 기존 내 표현을 확인해 주세요.';
 end; $$;
 
 create or replace function public.dictionary_rate_word(p_word_id uuid,p_rating integer) returns boolean
@@ -295,4 +298,54 @@ grant execute on function public.dictionary_is_admin(),public.dictionary_admin_l
  public.dictionary_add_revision(uuid,uuid,text,text,text,text),public.dictionary_rate_revision(uuid,integer),
  public.dictionary_select_revision(uuid,boolean),public.dictionary_delete_class(uuid) to authenticated;
 notify pgrst, 'reload schema';
+
+create schema if not exists dictionary_reader;
+revoke all on schema dictionary_reader from public;
+grant usage on schema dictionary_reader to anon,authenticated;
+
+-- Elevated reads stay outside the exposed API schema; only final dictionary fields are returned.
+create or replace function dictionary_reader.browse_published(
+  p_view text default 'words',p_search text default '',p_class_id uuid default null,p_offset integer default 0
+) returns jsonb language plpgsql stable security definer set search_path='' as $$
+declare result jsonb; search_pattern text := '%'||left(coalesce(p_search,''),100)||'%';
+begin
+  if p_view not in ('words','classes') or p_view is null then raise exception '지원하지 않는 사전 보기입니다.'; end if;
+  with published as materialized (
+    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,
+      round(r.average_rating,2) average_rating,r.rating_count,d.id class_id,d.school,d.grade,d.class_name
+    from public.dictionary_revision_summary r join public.class_dictionaries d on d.id=r.class_id
+    where r.selected and r.average_rating>=4 and r.rating_count>0
+  ), filtered_words as (
+    select * from published
+    where (p_class_id is null or class_id=p_class_id)
+      and concat_ws(' ',word,original_word,meaning) ilike search_pattern
+  ), published_classes as (
+    select class_id id,school,grade,class_name,count(*)::integer published_count
+    from published group by class_id,school,grade,class_name
+  ), filtered_classes as (
+    select * from published_classes
+    where concat_ws(' ',school,regexp_replace(grade,'\s*학년$','')||'학년',regexp_replace(class_name,'\s*반$','')||'반') ilike search_pattern
+  )
+  select jsonb_build_object(
+    'publishedCount',(select count(*) from published),'classCount',(select count(*) from published_classes),
+    'class',(select to_jsonb(c) from published_classes c where c.id=p_class_id),
+    'total',case when p_view='classes' then (select count(*) from filtered_classes) else (select count(*) from filtered_words) end,
+    'entries',case when p_view='words' then coalesce((select jsonb_agg(to_jsonb(w) order by lower(w.word),w.original_word,w.school,w.grade,w.class_name,w.id)
+      from (select * from filtered_words order by lower(word),original_word,school,grade,class_name,id limit 24 offset greatest(0,least(coalesce(p_offset,0),100000))) w),'[]'::jsonb) else '[]'::jsonb end,
+    'classes',case when p_view='classes' then coalesce((select jsonb_agg(to_jsonb(c) order by c.school,c.grade,c.class_name,c.id)
+      from (select * from filtered_classes order by school,grade,class_name,id limit 24 offset greatest(0,least(coalesce(p_offset,0),100000))) c),'[]'::jsonb) else '[]'::jsonb end
+  ) into result;
+  return result;
+end; $$;
+revoke all on function dictionary_reader.browse_published(text,text,uuid,integer) from public,anon,authenticated;
+grant execute on function dictionary_reader.browse_published(text,text,uuid,integer) to anon,authenticated;
+
+create or replace function public.dictionary_browse(p_view text default 'words',p_search text default '',p_class_id uuid default null,p_offset integer default 0)
+returns jsonb language sql stable security invoker set search_path='' as $$
+  select dictionary_reader.browse_published(p_view,p_search,p_class_id,p_offset);
+$$;
+revoke all on function public.dictionary_browse(text,text,uuid,integer) from public,anon,authenticated;
+grant execute on function public.dictionary_browse(text,text,uuid,integer) to anon,authenticated;
+notify pgrst, 'reload schema';
+
 commit;

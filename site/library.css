@@ -1,0 +1,62 @@
+/* The shared dictionary is the main destination; classroom tools sit underneath. */
+.home-hero h1{font-size:clamp(43px,4.8vw,68px)}
+.hero-copy{padding-bottom:34px}
+.hero-description{font-size:14px;line-height:1.8;color:var(--muted);margin-top:19px}
+.hero-actions{flex-direction:column;align-items:flex-start;gap:13px;margin-top:25px}
+.dictionary-enter{display:flex;align-items:center;gap:17px;width:390px;max-width:100%;padding:21px 23px;border-radius:20px;background:var(--green);color:#fffef7;box-shadow:0 9px 24px #365e4c20;transition:background .15s,transform .15s}
+.dictionary-enter:hover{background:#274d3b;transform:translateY(-2px)}
+.dictionary-enter-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:#ffffff15;flex:none}
+.dictionary-enter-icon svg{width:29px;height:29px}
+.dictionary-enter>span:nth-child(2){min-width:0;flex:1}
+.dictionary-enter strong,.dictionary-enter small{display:block}
+.dictionary-enter strong{font-size:23px;font-weight:720;letter-spacing:-.04em}
+.dictionary-enter small{font-size:11px;color:#e0e8d7;margin-top:5px;line-height:1.5;word-break:keep-all}
+.dictionary-enter>svg{width:22px;height:22px;margin-left:auto}
+.classroom-actions{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.classroom-actions .button{background:transparent;border-color:transparent;font-size:12px;padding-left:4px}
+.classroom-actions .button:hover{background:var(--mint)}
+.classroom-actions .text-button{color:var(--muted)}
+.library-participate{margin-left:auto}
+.library-heading{display:flex;align-items:center;gap:24px;padding:26px 0 34px}
+.library-emblem{display:grid;place-items:center;flex:none;width:78px;height:88px;color:var(--green);background:#e6edd9;border-radius:16px 23px 23px 16px;border-left:5px solid #afc28a;transform:rotate(-6deg);box-shadow:3px 4px 0 #d6dfc8}
+.library-emblem svg{width:40px;height:40px}
+.library-heading .eyebrow{font-size:8px;margin-bottom:12px;letter-spacing:.12em}
+.library-heading h1{font-size:43px;line-height:1.3;letter-spacing:-.055em;font-weight:730}
+.library-description{font-size:13px;line-height:1.8;color:var(--muted);margin-top:10px}
+.library-stats{margin-left:auto;display:flex;gap:22px;flex:none;color:var(--muted);font-size:11px}
+.library-stats b{display:block;font-size:29px;font-weight:650;letter-spacing:-.04em;color:var(--green);margin-bottom:5px}
+.library-tabs{display:flex;gap:8px;padding:5px;background:#e8ecdf;border:1px solid var(--line);border-radius:17px;margin-bottom:30px;scroll-margin-top:15px}
+.library-tabs button{display:flex;align-items:center;justify-content:center;gap:10px;flex:1;min-height:52px;border:0;border-radius:12px;background:transparent;color:var(--muted);font-size:14px;font-weight:650}
+.library-tabs button[aria-selected=true]{background:var(--green);color:#fffef7;box-shadow:0 3px 8px #27493214}
+.library-tabs button:hover:not([aria-selected=true]){background:#f6f7ee}
+.library-section-title{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.library-section-title h2{font-size:22px;letter-spacing:-.04em;line-height:1.6;font-weight:670}
+.library-section-title>.help{font-size:11px;flex:none}
+.library-section-title .school{margin-bottom:3px}
+.library-toolbar{margin:17px 0 10px}
+.library-toolbar .search-form{max-width:none}
+.library-toolbar #refreshLibrary{margin-left:auto}
+.library-status{color:var(--muted);font-size:11px;line-height:1.6;min-height:18px;margin:0 0 18px}
+.entry-class{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding-top:17px;margin-top:23px;font-size:12px}
+.entry-class-icon{display:grid;place-items:center;width:33px;height:37px;background:var(--mint);color:var(--green);border-radius:7px;flex:none}
+.entry-class>span:nth-child(2){min-width:0;flex:1}
+.entry-class small,.entry-class strong{display:block;line-height:1.6;overflow-wrap:anywhere;word-break:keep-all}
+.entry-class small{color:var(--muted);font-size:10px}
+.entry-class strong{font-weight:600;margin-top:2px}
+.entry-class>svg{margin-left:auto;width:16px}
+.entry-class:hover strong{text-decoration:underline;text-underline-offset:4px}
+.library-class-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.library-class{display:flex;align-items:center;gap:18px;padding:25px;border:1px solid var(--line);border-radius:19px;background:#fffef9;transition:border-color .15s,background .15s;min-width:0}
+.library-class:hover{border-color:#a4b98a;background:#f5f7ee}
+.library-class>div{min-width:0;flex:1}
+.library-class h2{font-size:23px;font-weight:650;letter-spacing:-.04em;margin:5px 0 9px}
+.library-class .help{font-size:11px}
+.library-class-arrow{margin-left:auto;color:var(--green)}
+.library-back{margin:-7px 0 20px;font-size:11px}
+@media(max-width:1000px){.library-stats{gap:14px}.library-heading{gap:20px}.library-description{max-width:330px}.home-hero h1{font-size:clamp(36px,4.7vw,52px)}.dictionary-enter{padding:19px;gap:12px}.dictionary-enter strong{font-size:21px}}
+@media(max-width:700px){.hero-copy{padding:24px 0 0}.home-hero h1{font-size:clamp(31px,8.8vw,52px)}.hero-description{font-size:12px;line-height:1.7;margin-top:14px}.hero-actions{margin-top:20px;gap:8px;align-items:stretch;max-width:410px}.dictionary-enter{width:100%;padding:17px 20px;border-radius:17px;gap:16px}.dictionary-enter-icon{width:43px;height:43px}.dictionary-enter-icon svg{width:27px;height:27px}.dictionary-enter strong{font-size:21px}.dictionary-enter small{font-size:10px}.classroom-actions{justify-content:center;gap:22px}.classroom-actions .button,.classroom-actions .text-button{font-size:11px}.home-meta{gap:8px}.home-meta>span{max-width:150px}.library-heading{padding:16px 0 25px;flex-wrap:wrap;gap:18px}.library-emblem{width:53px;height:63px;border-radius:10px 17px 17px 10px}.library-emblem svg{width:30px;height:30px}.library-heading>div:nth-child(2){flex:1;min-width:0}.library-heading h1{font-size:33px}.library-heading .eyebrow{font-size:6px;margin-bottom:8px}.library-description{font-size:11px;margin-top:8px;max-width:none}.library-stats{width:100%;margin:0;gap:19px;padding-top:5px}.library-stats b{display:inline;font-size:16px;margin:0 5px 0 0}.library-tabs{margin-bottom:24px}.library-tabs button{min-height:47px;font-size:13px;gap:8px}.library-tabs svg{width:17px}.library-section-title h2{font-size:20px}.library-section-title>.help{font-size:10px}.library-class-grid{grid-template-columns:1fr}.library-class{padding:21px;gap:17px}.library-class h2{font-size:22px}.library-participate{font-size:10px}.library-status{margin-bottom:16px}}
+@media(max-width:380px){.hero-copy{padding-top:17px}.home-hero h1{font-size:clamp(29px,9.5vw,36px)}.hero-description{font-size:11px}.dictionary-enter{padding:16px;gap:12px}.dictionary-enter-icon{width:39px;height:39px}.dictionary-enter strong{font-size:20px}.dictionary-enter small{font-size:9px}.word-pills{display:none}.library-emblem{width:43px;height:53px}.library-heading{gap:13px}.library-heading h1{font-size:30px}.library-heading .eyebrow{font-size:5.5px}.library-section-title{gap:9px}.library-section-title h2{font-size:18px}.library-tabs button{font-size:12px}.classroom-actions{gap:18px}}
+@media(max-height:600px){.hero-description{display:none}.hero-actions{margin-top:15px}.dictionary-enter{padding:13px 18px}.dictionary-enter strong{font-size:20px}.dictionary-enter-icon{width:39px;height:39px}.hero-copy{padding-bottom:0}.home-meta>span{font-size:7px}}
+@media(max-height:540px) and (min-width:640px){.hero-copy{padding-bottom:30px}.home-hero h1{font-size:clamp(28px,4.3vw,44px)}.hero-actions{gap:4px;max-width:330px}.dictionary-enter{padding:12px 15px;gap:13px}.dictionary-enter small{font-size:9px}.classroom-actions{gap:15px}.classroom-actions .button,.classroom-actions .text-button{font-size:10px;min-height:37px}.dictionary-enter-icon{width:36px;height:36px}.dictionary-enter-icon svg{width:24px;height:24px}}
+@media(max-height:420px) and (max-width:639px){.hero-copy{padding-top:5px;max-width:330px}.home-hero h1{font-size:27px}.hero-actions{margin-top:9px;gap:2px}.dictionary-enter{padding:10px 15px}.dictionary-enter small{display:none}.dictionary-enter-icon{width:32px;height:32px}.dictionary-enter-icon svg{width:23px;height:23px}.dictionary-enter strong{font-size:18px}.classroom-actions{gap:20px}.classroom-actions .button,.classroom-actions .text-button{min-height:36px;font-size:10px}.home-art{position:absolute;right:0;top:20px;width:42%;height:80%;z-index:-1}}
+@media print{.library-tabs,.library-emblem,.library-back,.library-section-title>.help,.library-status,.entry-class>svg{display:none!important}.library-heading{padding:0 0 20px}.library-entry{break-inside:avoid}.library-heading h1{font-size:28px}.entry-class{margin-top:12px;padding-top:9px}}
