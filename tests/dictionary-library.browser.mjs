@@ -9,6 +9,7 @@ import {createDatabase,createApi,root} from './support/database.mjs';
 
 const database=await createDatabase();
 const writer=await database.newUser(),reviewer=await database.newUser();
+await database.db.query('update auth.users set raw_app_meta_data=$1 where id=$2',[{dictionary_nickname:'민트초코'},writer]);
 const api=await createApi(database,writer);
 const first=await api('createClass',{school:'가람고등학교',grade:'1',className:'7'});
 const second=await api('createClass',{school:'나래고등학교',grade:'2학년',className:'4반'});
@@ -77,6 +78,8 @@ try {
   await page.getByRole('tab',{name:'단어별 보기'}).click();await settled();
   await page.getByRole('searchbox',{name:'사전 단어 검색'}).fill('킹받네');await page.getByRole('button',{name:'사전 검색 실행'}).click();await settled();
   assert.equal(await page.locator('.library-entry').count(),2);
+  assert.ok((await page.locator('.entry-author').allTextContents()).every(name=>name.includes('민트초코')));
+  assert.ok((await page.locator('.library-entry .definitions').allTextContents()).every(text=>!text.includes('민트초코')));
   assert.match(await page.locator('#libraryResults').innerText(),/1학년 7반/);assert.match(await page.locator('#libraryResults').innerText(),/2학년 4반/);
   assert.equal(await page.evaluate(()=>Boolean(window.__unsafe)),false);
   for(const width of [320,390,768,1024,1440]) {

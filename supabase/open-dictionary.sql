@@ -1,6 +1,21 @@
 -- 공개 학급 우리말 순화어 사전: 새/기존 Supabase SQL Editor에서 이 파일 전체 실행.
 -- 기존 수업 테이블은 변경하거나 삭제하지 않습니다. 재실행해도 자료를 보존합니다.
 begin;
+create schema if not exists dictionary_reader;
+-- Nicknames are safe display data, never authorization claims. No email or real display name is read.
+-- The invoker helper is called only by the existing restricted reader RPCs.
+create or replace function dictionary_reader.author_name(p_user_id uuid) returns text
+language sql stable security invoker set search_path='' as $$
+  select coalesce(nullif(u.raw_app_meta_data->>'dictionary_nickname',''),
+    (array['다정한','느긋한','반짝이는','씩씩한','포근한','명랑한','수줍은','산뜻한','꿈꾸는','행복한'])
+      [1+(('x'||substr(md5(p_user_id::text),1,4))::bit(16)::integer%10)] ||
+    (array['수달','고양이','고래','토끼','고슴도치','다람쥐','나무','구름','별','연필','책갈피','해바라기'])
+      [1+(('x'||substr(md5(p_user_id::text),5,4))::bit(16)::integer%12)] ||
+    lpad(((('x'||substr(md5(p_user_id::text),9,4))::bit(16)::integer%1000)::text),3,'0'))
+  from auth.users u where u.id=p_user_id;
+$$;
+revoke all on function dictionary_reader.author_name(uuid) from public,anon,authenticated;
+
 create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
 
@@ -192,11 +207,11 @@ begin
     'total',case when p_view='published' then (select count(*) from public.dictionary_revision_summary where class_id=p_class_id and selected and average_rating>=4 and rating_count>0 and concat_ws(' ',word,original_word,meaning) ilike '%'||left(p_search,100)||'%')
       else (select count(*) from public.dictionary_words where class_id=p_class_id and concat_ws(' ',word,meaning) ilike '%'||left(p_search,100)||'%') end,
     'words',case when p_view='published' then '[]'::jsonb else coalesce((select jsonb_agg(to_jsonb(item)) from (
-      select w.id,w.word,w.category,w.meaning,w.reason,(w.owner_id=auth.uid()) as mine,
+      select w.id,w.word,w.category,w.meaning,w.reason,dictionary_reader.author_name(w.owner_id) as author_name,(w.owner_id=auth.uid()) as mine,
         coalesce((select avg(rating)::numeric(3,2) from public.dictionary_word_ratings where word_id=w.id),0) as average_rating,
         (select count(*) from public.dictionary_word_ratings where word_id=w.id) as rating_count,
         (select rating from public.dictionary_word_ratings where word_id=w.id and owner_id=auth.uid()) as my_rating,
-        coalesce((select jsonb_agg(jsonb_build_object('id',r.id,'word',r.word,'meaning',r.meaning,'reason',r.reason,'example',r.example,
+        coalesce((select jsonb_agg(jsonb_build_object('id',r.id,'word',r.word,'meaning',r.meaning,'reason',r.reason,'example',r.example,'author_name',dictionary_reader.author_name(r.owner_id),
           'mine',r.owner_id=auth.uid(),'average_rating',r.average_rating,'rating_count',r.rating_count,'my_rating',r.my_rating,
           'selected',r.selected,'published',r.selected and r.average_rating>=4 and r.rating_count>0) order by r.average_rating desc,r.created_at)
           from public.dictionary_revision_summary r where r.word_id=w.id),'[]'::jsonb) as revisions
@@ -204,7 +219,7 @@ begin
       order by w.created_at desc,w.id limit 25 offset greatest(0,least(p_offset,100000))
     ) item),'[]'::jsonb) end,
     'published',case when p_view<>'published' then '[]'::jsonb else coalesce((select jsonb_agg(to_jsonb(item)) from (
-      select id,word,original_word,category,meaning,example,average_rating,rating_count from public.dictionary_revision_summary
+      select id,word,original_word,category,meaning,example,average_rating,rating_count,dictionary_reader.author_name(owner_id) as author_name from public.dictionary_revision_summary
       where class_id=p_class_id and selected and average_rating>=4 and rating_count>0 and concat_ws(' ',word,original_word,meaning) ilike '%'||left(p_search,100)||'%'
       order by word,id limit 25 offset greatest(0,least(p_offset,100000))
     ) item),'[]'::jsonb) end) into result;
@@ -311,7 +326,7 @@ declare result jsonb; search_pattern text := '%'||left(coalesce(p_search,''),100
 begin
   if p_view not in ('words','classes') or p_view is null then raise exception '지원하지 않는 사전 보기입니다.'; end if;
   with published as materialized (
-    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,
+    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,dictionary_reader.author_name(r.owner_id) as author_name,
       round(r.average_rating,2) average_rating,r.rating_count,d.id class_id,d.school,d.grade,d.class_name
     from public.dictionary_revision_summary r join public.class_dictionaries d on d.id=r.class_id
     where r.selected and r.average_rating>=4 and r.rating_count>0

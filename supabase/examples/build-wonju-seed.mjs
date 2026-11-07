@@ -1,18 +1,19 @@
+import {nicknames} from './nicknames.mjs';
 import assert from 'node:assert/strict';
 import {mkdir, writeFile} from 'node:fs/promises';
 import {classId, seedTag, existingWordId, entries, existingRevisions, sources} from './wonju-1-7.mjs';
 
 const id = (kind,n) => `d170000${kind}-1107-4000-8000-${String(n).padStart(12,'0')}`;
-const label = n => `가상 학생 ${String(n).padStart(2,'0')}`;
+const label = n => nicknames[n-1];
 const quote = value => "'" + String(value).replaceAll("'","''") + "'";
 assert.equal(entries.length,30);
 const users = Array.from({length:31},(_,i)=>({
   id:id(1,i+1), metadata:{synthetic:true,seed_id:seedTag,participant_number:i<30?i+1:null,
-    display_name:i<30?label(i+1):'가상 편찬 담당',purpose:'고1 30명 참여 수업 예시'}
+    dictionary_nickname:i<30?label(i+1):'편찬도우미',display_name:i<30?label(i+1):'편찬도우미',purpose:'고1 30명 참여 수업 예시'}
 }));
 const words = entries.map(([word,category,meaning,reason],i)=>({
   id:id(2,i+1),owner_id:users[i].id,word,category,meaning,
-  reason:reason+` [${label(i+1)} · 예시]`
+  reason
 }));
 const allWords = [...words,{id:existingWordId,word:'야르',category:'유행어',owner_id:null}];
 const wordRatings=[],revisions=[],revisionRatings=[];
@@ -29,8 +30,8 @@ for (let i=0;i<allWords.length;i++) {
   candidates.forEach(([word,meaning,reason,example],variant)=>{
     const author=(i+(variant?17:7))%30;
     const revision={id:id(3,i*2+variant+1),word_id:original.id,owner_id:users[author].id,
-      word,meaning,reason:reason+` [${label(author+1)} · 예시]`,
-      example:example+` [${label(author+1)}의 가상 예문]`,selected:variant===0};
+      word,meaning,reason,
+      example,selected:variant===0};
     revisions.push(revision);
     const scores=variant===0?[5,4,5,4,5,3,5]:i%4===0?[4,5,4,4,5,4]:[3,4,2,4,3,5,3];
     for(let j=0;j<8+(i+variant*3)%9;j++) {

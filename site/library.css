@@ -45,6 +45,8 @@
 .entry-class strong{font-weight:600;margin-top:2px}
 .entry-class>svg{margin-left:auto;width:16px}
 .entry-class:hover strong{text-decoration:underline;text-underline-offset:4px}
+.entry-author{display:inline-block;color:#63735e;font-size:11px;font-weight:500}
+.contributor{font-size:11px;line-height:1.6;color:var(--muted);margin-top:15px}
 .library-class-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
 .library-class{display:flex;align-items:center;gap:18px;padding:25px;border:1px solid var(--line);border-radius:19px;background:#fffef9;transition:border-color .15s,background .15s;min-width:0}
 .library-class:hover{border-color:#a4b98a;background:#f5f7ee}

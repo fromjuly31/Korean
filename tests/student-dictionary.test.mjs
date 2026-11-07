@@ -146,9 +146,10 @@ test('같은 표현도 학생별 등록·평가·편찬이 독립적이며 기�
   assert.equal(after.publishedCount,1);
 });
 
-test('공개 사전은 최종 편찬어만 학교·학급 정보와 함께 검색·분리·페이지 조회하며 작성자 정보는 감춘다',async t => {
+test('공개 사전은 최종 편찬어와 익명 닉네임을 검색·분리·페이지 조회하며 개인 식별 정보는 감춘다',async t => {
   const database=await createDatabase();t.after(()=>database.db.close());
   const writer=await database.newUser(),reviewer=await database.newUser();
+  await database.db.query("update auth.users set raw_app_meta_data=$1,raw_user_meta_data=$2 where id=$3",[{display_name:'비공개 실명'},{display_name:'사용자가 입력한 실명'},writer]);
   const student=await createApi(database,writer);
   const first=await student('createClass',{school:'가람고등학교',grade:'1',className:'7'});
   const second=await student('createClass',{school:'나래고등학교',grade:'2학년',className:'3반'});
@@ -169,6 +170,15 @@ test('공개 사전은 최종 편찬어만 학교·학급 정보와 함께 검�
   assert.equal(new Set([...all.entries,...(await browse('words','',null,24)).entries].map(r=>r.id)).size,27);
   assert.ok(all.entries.every(r=>r.school&&r.grade&&r.class_name&&r.class_id));
   assert.ok(all.entries.every(r=>!('owner_id' in r)&&!('selected_by' in r)&&!('reason' in r)&&!('my_rating' in r)));
+  const anonymousName=all.entries[0].author_name;
+  assert.match(anonymousName,/^[가-힣]+[0-9]{3}$/);
+  assert.ok(all.entries.every(r=>r.author_name===anonymousName));
+  assert.ok(!JSON.stringify(all).includes('실명'));
+  assert.equal((await student('getClass',first.id)).words[0].author_name,anonymousName);
+  await database.db.query("update auth.users set raw_app_meta_data=raw_app_meta_data||$1::jsonb where id=$2",[{dictionary_nickname:'별사탕'},writer]);
+  assert.ok((await browse()).entries.every(r=>r.author_name==='별사탕'));
+  assert.equal((await student('getClass',first.id,'published')).published[0].author_name,'별사탕');
+  await assert.rejects(database.asUser(null,'select dictionary_reader.author_name($1)',[writer],'anon'),/permission denied/);
   assert.equal((await browse('words','마음쉼')).total,2);
   assert.equal((await browse('words','표현0')).total,1);
   assert.equal((await browse('words','공개 뜻 5')).total,1);
@@ -189,4 +199,28 @@ test('공개 사전은 최종 편찬어만 학교·학급 정보와 함께 검�
   assert.equal((await browse('classes')).classes.length,1);
   await database.db.exec(await readFile(new URL('../supabase/dictionary-library.sql',import.meta.url),'utf8'));
   assert.equal((await browse('classes')).classes.length,1);
+});
+
+test('기존 예시의 이름 표시만 정리하고 문장·평가·다른 학급 자료를 보존한다',async t=>{
+  const database=await createDatabase();t.after(()=>database.db.close());
+  const people=[];
+  for(let n=1;n<=30;n++){
+    const id=await database.newUser();people.push(id);
+    await database.db.query('update auth.users set raw_app_meta_data=$1 where id=$2',[{seed_id:'wonju-1-7-grade10-demo-20261107',synthetic:true,participant_number:n},id]);
+  }
+  const classId='219df13a-738f-4bed-b2a6-1e5c6f7a3655',otherId=randomUUID(),wordId=randomUUID(),otherWordId=randomUUID(),revisionId=randomUUID();
+  for(const id of [classId,otherId])await database.db.query('insert into public.class_dictionaries(id,school,grade,class_name,created_by) values($1,$2,$3,$4,$5)',[id,id===classId?'원주여자고등학교':'다른학교','1','7',people[0]]);
+  for(const [id,room] of [[wordId,classId],[otherWordId,otherId]])await database.db.query('insert into public.dictionary_words(id,class_id,owner_id,word,category,meaning,reason) values($1,$2,$3,$4,$5,$6,$7)',[id,room,people[29],'딸깍','유행어','간단히 끝냄','원래 이유 [가상 학생 30 · 예시]']);
+  await database.db.query('insert into public.dictionary_revisions(id,word_id,owner_id,word,meaning,reason,example,selected) values($1,$2,$3,$4,$5,$6,$7,true)',[revisionId,wordId,people[29],'간단히 처리하다','복잡한 절차 없이 일을 끝내다.','바꾼 이유 [가상 학생 30 · 예시]','표 정리는 도구로 간단히 처리했어. [가상 학생 30의 가상 예문]']);
+  await database.db.query('insert into public.dictionary_revision_ratings(revision_id,owner_id,rating) values($1,$2,5)',[revisionId,people[0]]);
+  const update=await readFile(new URL('../supabase/examples/wonju-nicknames-update.sql',import.meta.url),'utf8');
+  await database.db.exec(update);await database.db.exec(update);
+  const row=(await database.db.query('select * from public.dictionary_revisions where id=$1',[revisionId])).rows[0];
+  assert.equal(row.reason,'바꾼 이유');assert.equal(row.example,'표 정리는 도구로 간단히 처리했어.');assert.equal(row.selected,true);
+  assert.equal((await database.db.query('select reason from public.dictionary_words where id=$1',[otherWordId])).rows[0].reason,'원래 이유 [가상 학생 30 · 예시]');
+  assert.equal((await database.db.query('select dictionary_reader.author_name($1) name',[people[29]])).rows[0].name,'소다팝');
+  const user=(await database.db.query('select raw_app_meta_data from auth.users where id=$1',[people[29]])).rows[0].raw_app_meta_data;
+  assert.equal(user.synthetic,true);assert.equal(user.seed_id,'wonju-1-7-grade10-demo-20261107');
+  const published=(await database.asUser(null,'select public.dictionary_browse() data',[],'anon')).rows[0].data;
+  assert.equal(published.total,1);assert.equal(published.entries[0].author_name,'소다팝');assert.equal(Number(published.entries[0].average_rating),5);
 });

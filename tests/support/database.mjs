@@ -14,7 +14,7 @@ const identifier = value => {
 export async function createDatabase() {
   const db = new PGlite({ extensions: { pgcrypto } });
   await db.exec(`create role anon; create role authenticated; create schema auth;
-    create table auth.users(id uuid primary key);
+    create table auth.users(id uuid primary key,raw_app_meta_data jsonb not null default '{}',raw_user_meta_data jsonb not null default '{}');
     create function auth.uid() returns uuid language sql stable as
     $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
     grant usage on schema public,auth to anon,authenticated;

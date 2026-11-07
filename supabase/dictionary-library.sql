@@ -1,6 +1,21 @@
 -- 모든 학급의 최종 편찬어만 조회합니다. 작성자 ID와 미편찬 자료는 반환하지 않습니다.
 begin;
 create schema if not exists dictionary_reader;
+-- Nicknames are safe display data, never authorization claims. No email or real display name is read.
+-- The invoker helper is called only by the existing restricted reader RPCs.
+create or replace function dictionary_reader.author_name(p_user_id uuid) returns text
+language sql stable security invoker set search_path='' as $$
+  select coalesce(nullif(u.raw_app_meta_data->>'dictionary_nickname',''),
+    (array['다정한','느긋한','반짝이는','씩씩한','포근한','명랑한','수줍은','산뜻한','꿈꾸는','행복한'])
+      [1+(('x'||substr(md5(p_user_id::text),1,4))::bit(16)::integer%10)] ||
+    (array['수달','고양이','고래','토끼','고슴도치','다람쥐','나무','구름','별','연필','책갈피','해바라기'])
+      [1+(('x'||substr(md5(p_user_id::text),5,4))::bit(16)::integer%12)] ||
+    lpad(((('x'||substr(md5(p_user_id::text),9,4))::bit(16)::integer%1000)::text),3,'0'))
+  from auth.users u where u.id=p_user_id;
+$$;
+revoke all on function dictionary_reader.author_name(uuid) from public,anon,authenticated;
+
+create schema if not exists dictionary_reader;
 revoke all on schema dictionary_reader from public;
 grant usage on schema dictionary_reader to anon,authenticated;
 
@@ -12,7 +27,7 @@ declare result jsonb; search_pattern text := '%'||left(coalesce(p_search,''),100
 begin
   if p_view not in ('words','classes') or p_view is null then raise exception '지원하지 않는 사전 보기입니다.'; end if;
   with published as materialized (
-    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,
+    select r.id,r.word,r.original_word,r.category,r.meaning,r.example,dictionary_reader.author_name(r.owner_id) as author_name,
       round(r.average_rating,2) average_rating,r.rating_count,d.id class_id,d.school,d.grade,d.class_name
     from public.dictionary_revision_summary r join public.class_dictionaries d on d.id=r.class_id
     where r.selected and r.average_rating>=4 and r.rating_count>0
