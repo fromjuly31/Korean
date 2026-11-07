@@ -47,6 +47,17 @@
 .entry-class:hover strong{text-decoration:underline;text-underline-offset:4px}
 .entry-author{display:inline-block;color:#63735e;font-size:11px;font-weight:500}
 .contributor{font-size:11px;line-height:1.6;color:var(--muted);margin-top:15px}
+.original-submissions{margin-top:18px;font-size:12px;color:var(--muted)}
+.original-submissions summary{cursor:pointer;line-height:1.8;padding:6px 0;color:var(--green)}
+.original-submission{border-top:1px solid var(--line);margin-top:12px;padding:1px 0 8px}
+.original-submission .definitions{margin-top:12px}
+.approval-tabs{display:flex;gap:8px;margin:22px 0 8px;flex-wrap:wrap}
+.approval-tabs button{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--muted);font-size:13px;padding:12px 17px;min-height:46px}
+.approval-tabs button[aria-selected=true]{background:var(--green);border-color:var(--green);color:#fffef7;font-weight:650}
+.approval-tabs span{font-size:11px;min-width:21px;text-align:center;background:#81967922;padding:2px 6px;border-radius:8px}
+.approval-tabs button[aria-selected=true] span{background:#ffffff20}
+.approval-locked .button{margin-top:14px}
+@media(max-width:700px){.tabs .tab{gap:4px;font-size:11px;padding:9px 3px}.tabs .tab>span{display:none}.approval-tabs button{font-size:12px;padding:11px 13px}.word-group>.card-head>.help{font-size:10px}}
 .library-class-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
 .library-class{display:flex;align-items:center;gap:18px;padding:25px;border:1px solid var(--line);border-radius:19px;background:#fffef9;transition:border-color .15s,background .15s;min-width:0}
 .library-class:hover{border-color:#a4b98a;background:#f5f7ee}

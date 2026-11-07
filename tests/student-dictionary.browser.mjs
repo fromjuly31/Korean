@@ -76,7 +76,7 @@ try{
  await owner.setViewportSize({width:390,height:844});
  console.log('PASS: draft restore, keyboard-safe submit, lost-response retry without duplicate, no self rating');
 
- const {page:peer}=await newStudent();await peer.goto(origin);await peer.getByRole('button',{name:'사전 참여',exact:true}).click();
+ const {page:peer,userId:peerId}=await newStudent();await peer.goto(origin);await peer.getByRole('button',{name:'사전 참여',exact:true}).click();
  await peer.getByLabel('사전 제목 검색').fill('탐험대');await peer.getByRole('button',{name:'사전 검색',exact:true}).click();await peer.getByRole('button',{name:/우리말 탐험대.*입장/}).click();
  await peer.locator('[data-tab=rate]').click();await peer.getByRole('button',{name:'힐링 5점',exact:true}).click();await peer.getByText('내 평가 5점',{exact:true}).waitFor();
  await owner.locator('[data-tab=refine]').click();await owner.getByRole('button',{name:'순화어 제안',exact:true}).click();
@@ -86,7 +86,7 @@ try{
  assert.equal(await owner.getByLabel('닉네임',{exact:true}).inputValue(),'달빛책갈피');await owner.getByLabel('닉네임',{exact:true}).scrollIntoViewIfNeeded();await screenshot(owner,'proposal-nickname-mobile');
  await owner.getByRole('button',{name:'순화어 등록',exact:true}).click();await owner.getByRole('heading',{name:'마음쉼',exact:true}).waitFor();
  await peer.locator('[data-tab=refine]').click();await peer.getByRole('button',{name:'마음쉼 3점',exact:true}).click();await peer.getByText('내 평가 3점',{exact:true}).waitFor();
- await peer.locator('[data-tab=published]').click();await peer.getByText('평균 4점 이상인 순화어를 교사가 선택하면 이곳에 편찬됩니다.',{exact:true}).waitFor();
+ await peer.locator('[data-tab=published]').click();await peer.getByText('교사가 승인한 순화어가 이곳에 편찬됩니다.',{exact:true}).waitFor();
  await peer.reload();await peer.locator('[data-tab=published][aria-current=step]').waitFor();
  const stageUrl=peer.url();await peer.locator('.skip-link').focus();await peer.keyboard.press('Enter');assert.equal(peer.url(),stageUrl);assert.equal(await peer.locator('#app').evaluate(e=>e===document.activeElement),true);
  console.log('PASS: student word rating, revision submission and rating; published stage survives reload');
@@ -94,10 +94,15 @@ try{
  const {page:teacher}=await newStudent();await teacher.goto(roomUrl);await teacher.getByRole('button',{name:'교사·관리자',exact:true}).click();
  await teacher.getByLabel('관리자 비밀번호').fill('wrong');await teacher.getByRole('button',{name:'관리자로 입장',exact:true}).click();await teacher.locator('#modalError').filter({hasText:'비밀번호가 다르거나'}).waitFor();
  await teacher.getByLabel('관리자 비밀번호').fill('admin123');await teacher.getByRole('button',{name:'관리자로 입장',exact:true}).click();await teacher.getByText('교사·관리자 모드',{exact:true}).waitFor();
- await teacher.locator('[data-tab=refine]').click();assert.equal(await teacher.getByRole('button',{name:'사전 편찬',exact:true}).isDisabled(),true);
- await peer.locator('[data-tab=refine]').click();await peer.getByRole('button',{name:'마음쉼 5점',exact:true}).click();await peer.getByText('내 평가 5점',{exact:true}).waitFor();
- await teacher.getByRole('button',{name:'새로고침',exact:true}).click();await teacher.getByRole('button',{name:'사전 편찬',exact:true}).click();await teacher.getByText('편찬 완료',{exact:true}).waitFor();
- await peer.locator('[data-tab=published]').click();await peer.getByRole('heading',{name:'마음쉼',exact:true}).waitFor();await screenshot(peer,'atelier-dictionary-desktop');
+ await teacher.locator('[data-tab=approval]').click();await teacher.getByRole('button',{name:'승인',exact:true}).waitFor();
+ assert.match(await teacher.locator('.revision .score').innerText(),/3.0/);
+ assert.equal(await teacher.locator('[data-rating]').count(),0);
+ await teacher.getByRole('button',{name:'승인',exact:true}).click();await teacher.getByText('승인했습니다. 편찬 완료로 변경했어요.',{exact:true}).waitFor();
+ await teacher.getByRole('tab',{name:/승인 완료/}).click();await teacher.getByText('편찬 완료',{exact:true}).waitFor();
+ await teacher.reload();await teacher.getByRole('button',{name:'승인 취소',exact:true}).waitFor();
+ assert.equal(await teacher.getByRole('tab',{name:/승인 완료/}).getAttribute('aria-selected'),'true');
+ await screenshot(teacher,'approval-completed-desktop');
+ await peer.locator('[data-tab=published]').click();await peer.getByRole('button',{name:'새로고침',exact:true}).click();await peer.getByRole('heading',{name:'마음쉼',exact:true}).waitFor();await screenshot(peer,'atelier-dictionary-desktop');
  assert.match(await peer.locator('.entry-class').innerText(),/우리말 탐험대.*달빛책갈피/s);
  assert.equal(await peer.locator('.published-card .definitions').innerText().then(text=>text.includes('달빛책갈피')),false);
  for(const width of [320,390,768,1024]){await peer.setViewportSize({width,height:844});await noOverflow(peer);}
@@ -106,15 +111,34 @@ try{
  await peer.getByLabel('표현 검색',{exact:true}).fill('마음');await peer.getByRole('button',{name:'표현 검색 실행'}).click();await peer.getByRole('heading',{name:'마음쉼',exact:true}).waitFor();
  failRead=true;await peer.getByRole('button',{name:'새로고침',exact:true}).click();await peer.locator('#classNotice').getByRole('alert').waitFor();assert.equal(await peer.getByRole('heading',{name:'마음쉼',exact:true}).count(),1);
  await peer.getByRole('button',{name:'새로고침',exact:true}).click();await settled(peer);assert.equal(await peer.locator('#classNotice').getByRole('alert').count(),0);
- await peer.locator('[data-tab=refine]').click();await peer.getByRole('button',{name:'마음쉼 3점',exact:true}).click();await peer.getByText('내 평가 3점',{exact:true}).waitFor();await peer.locator('[data-tab=published]').click();await peer.getByText('평균 4점 이상인 순화어를 교사가 선택하면 이곳에 편찬됩니다.',{exact:true}).waitFor();
- console.log('PASS: teacher publication guard and publication; responsive dictionary, search, read failure recovery, rating drop removes entry');
+ await peer.locator('[data-tab=refine]').click();await peer.getByRole('button',{name:'마음쉼 2점',exact:true}).click();await peer.getByText('내 평가 2점',{exact:true}).waitFor();await peer.locator('[data-tab=published]').click();await peer.getByRole('heading',{name:'마음쉼',exact:true}).waitFor();
+ await teacher.getByRole('button',{name:'승인 취소',exact:true}).click();await teacher.getByText('아직 승인 완료된 순화어가 없습니다.',{exact:true}).waitFor();
+ await peer.getByRole('button',{name:'새로고침',exact:true}).click();await peer.getByText('교사가 승인한 순화어가 이곳에 편찬됩니다.',{exact:true}).waitFor();
+ await peer.locator('[data-tab=approval]').click();await peer.getByRole('button',{name:'교사·관리자 인증',exact:true}).waitFor();assert.equal(await peer.locator('[data-select-revision]').count(),0);
+ await peer.locator('[data-tab=published]').click();await settled(peer);
+ console.log('PASS: teacher publication guard and publication; responsive dictionary, search, read failure recovery, rating changes preserve approval, teacher cancellation removes entry');
 
  // Long student content, safe escaping, paging, and late responses use the real SQL.
+ await database.asUser(peerId,'select public.dictionary_add_word($1,$2,$3,$4,$5,$6)',[randomUUID(),roomId,'힐링','외래어','친구와 즐겁게 쉬는 것','함께 이해하는 말로']);
+ await peer.locator('[data-tab=refine]').click();await peer.getByRole('button',{name:'순화어 제안',exact:true}).click();
+ await peer.getByLabel('새로 제안하는 순화어').fill('마음놓기');await peer.getByLabel('순화어의 뜻').fill('편히 쉬는 시간');await peer.getByLabel('바꾼 이유',{exact:true}).fill('알기 쉬운 말');await peer.getByLabel('순화어를 사용한 예문').fill('친구와 마음놓기를 했어.');await peer.getByLabel('닉네임',{exact:true}).fill('소다팝');
+ await peer.getByRole('button',{name:'순화어 등록',exact:true}).click();await peer.getByRole('heading',{name:'마음놓기',exact:true}).waitFor();
+ assert.equal(await peer.locator('.word-group').count(),1);assert.equal(await peer.locator('.revision').count(),2);
+ await peer.locator('.original-submissions summary').click();assert.equal(await peer.locator('.original-submission').count(),2);
+ await owner.getByRole('button',{name:'새로고침',exact:true}).click();await owner.getByRole('button',{name:'마음놓기 3점',exact:true}).click();await owner.getByText('내 평가 3점',{exact:true}).waitFor();
+ await peer.getByRole('button',{name:'마음쉼 3점',exact:true}).click();await peer.getByText('내 평가 3점',{exact:true}).waitFor();
+ await teacher.getByRole('tab',{name:/승인 완료/}).focus();await teacher.keyboard.press('ArrowLeft');await teacher.getByRole('heading',{name:'마음놓기',exact:true}).waitFor();
+ assert.equal(await teacher.getByRole('tab',{name:/승인 대기중/}).evaluate(el=>el===document.activeElement),true);
+ assert.equal(await teacher.locator('.word-group').count(),1);assert.equal(await teacher.getByRole('button',{name:'승인',exact:true}).count(),2);
+ for(const width of [320,390,768,1440]){await teacher.setViewportSize({width,height:900});await noOverflow(teacher);}
+ await screenshot(teacher,'approval-pending-desktop');await teacher.setViewportSize({width:390,height:844});await screenshot(teacher,'approval-pending-mobile');
+ assert.ok((await teacher.locator('.revision .contributor').allTextContents()).some(text=>text.includes('소다팝')));
+ console.log('PASS: duplicate originals share one proposal list, independent candidate stars, tied leaders below 4 points, teacher-only responsive approval tabs');
  const longWord=('아주 긴 표현 ').repeat(7).trim();
  for(let i=0;i<27;i++)await database.asUser(ownerId,'select public.dictionary_add_word($1,$2,$3,$4,$5,$6)',[randomUUID(),roomId,i===0?longWord:'추가표현'+String(i).padStart(2,'0'),'기타',('친구와 함께 이해할 수 있는 뜻입니다. ').repeat(12),i===0?'<script>window.__unsafe=true</script>':'순화할 이유']);
  await owner.locator('[data-tab=collect]').click();await settled(owner);assert.equal(await owner.locator('.word-card').count(),25);
- await owner.getByRole('button',{name:'다음',exact:true}).click();await settled(owner);assert.equal(await owner.locator('.word-card').count(),3);
- await owner.reload();await settled(owner);assert.equal(await owner.locator('.word-card').count(),3,'page survives reload');
+ await owner.getByRole('button',{name:'다음',exact:true}).click();await settled(owner);assert.equal(await owner.locator('.word-card').count(),4);
+ await owner.reload();await settled(owner);assert.equal(await owner.locator('.word-card').count(),4,'page survives reload');
  await owner.getByRole('button',{name:'이전',exact:true}).click();await settled(owner);
  await owner.getByLabel('표현 검색',{exact:true}).fill('아주 긴');await owner.getByRole('button',{name:'표현 검색 실행'}).click();await owner.getByRole('heading',{name:longWord,exact:true}).waitFor();
  for(const width of [320,390,768,1024,1440]){await owner.setViewportSize({width,height:844});await noOverflow(owner);const overflowing=await owner.locator('.word-card').evaluateAll(cards=>cards.filter(c=>c.scrollWidth>c.clientWidth+1).length);assert.equal(overflowing,0);}

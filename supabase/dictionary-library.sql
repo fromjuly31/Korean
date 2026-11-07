@@ -30,7 +30,7 @@ begin
     select r.id,r.word,r.original_word,r.category,r.meaning,r.example,coalesce(r.author_nickname,dictionary_reader.author_name(r.owner_id)) as author_name,
       round(r.average_rating,2) average_rating,r.rating_count,d.id class_id,d.title
     from public.dictionary_revision_summary r join public.class_dictionaries d on d.id=r.class_id
-    where r.selected and r.average_rating>=4 and r.rating_count>0
+    where r.selected
   ), filtered_words as (
     select * from published
     where (p_class_id is null or class_id=p_class_id)
